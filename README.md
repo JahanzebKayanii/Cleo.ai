@@ -190,7 +190,7 @@ Cleo will answer, transcribe your speech with Deepgram, search the knowledge bas
 
 ## Known Limitations
 
-- **Response latency (~10 seconds):** The current architecture records the caller's speech, uploads to Twilio, downloads, then sends to Deepgram. The fix is real-time WebSocket streaming (Phase 2).
+- **Response latency (~6 seconds):** The current architecture records the caller's speech, uploads to Twilio, downloads, then sends to Deepgram. The fix is real-time WebSocket streaming (Phase 2).
 - **ElevenLabs TTS:** Requires a paid ElevenLabs plan. Currently using Twilio's built-in Alice voice. ElevenLabs integration is built and ready — just needs a valid API key.
 - **No live calendar:** Appointment availability is based on database slots, not a real calendar integration.
 
