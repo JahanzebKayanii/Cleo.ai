@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.appointments import router as appointments_router
 from app.api.call import router as call_router
+from app.api.calls import router as calls_router
 from app.api.conversation import router as conversation_router
 from app.api.customers import router as customers_router
 from app.api.documents import router as documents_router
@@ -40,3 +41,4 @@ app.include_router(conversation_router)
 app.include_router(appointments_router)
 app.include_router(customers_router)
 app.include_router(call_router)
+app.include_router(calls_router)
