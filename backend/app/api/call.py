@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Form, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.services.call_service import append_transcript, end_call, start_call
+from app.services.call_service import append_transcript, end_call, generate_and_save_summary, start_call
 from app.services.conversation_service import clear_session, get_response
 from app.services.stt_service import transcribe_twilio_recording
 
@@ -88,7 +88,11 @@ async def call_status(
     CallStatus: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    if CallStatus in ("completed", "failed", "busy", "no-answer"):
+    if CallStatus == "completed":
+        await end_call(db, CallSid)
+        await generate_and_save_summary(db, CallSid)
+        clear_session(CallSid)
+    elif CallStatus in ("failed", "busy", "no-answer"):
         await end_call(db, CallSid)
         clear_session(CallSid)
     return Response(status_code=204)
