@@ -2,6 +2,7 @@ import asyncio
 import base64
 import html
 import json
+import time
 
 from deepgram import DeepgramClient, LiveOptions, LiveTranscriptionEvents
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -9,6 +10,7 @@ from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db_context
+from app.core.state import pending_responses
 from app.services.call_service import append_transcript
 from app.services.conversation_service import get_response
 
@@ -33,6 +35,14 @@ def _twiml_say_stream(text: str) -> str:
 async def _update_twilio_call(call_sid: str, twiml: str) -> None:
     client = TwilioClient(settings.twilio_account_sid, settings.twilio_auth_token)
     await asyncio.to_thread(client.calls(call_sid).update, twiml=twiml)
+
+
+async def _generate_and_store(call_sid: str, transcript: str) -> None:
+    reply = await get_response(call_sid, transcript)
+    async with get_db_context() as db:
+        await append_transcript(db, call_sid, transcript, reply)
+    pending_responses[call_sid] = reply
+    print(f"[LLM] Ready for {call_sid}: {reply}", flush=True)
 
 
 @router.websocket("/call/stream")
@@ -87,19 +97,28 @@ async def media_stream(websocket: WebSocket):
                 await dg.send(audio)
 
                 if transcript_event.is_set():
+                    t0 = time.time()
                     transcript = final_transcript[0]
                     transcript_event.clear()
-                    print(f"[STT] Live: {transcript}", flush=True)
+                    print(f"[STT] Transcript: {transcript}", flush=True)
 
                     await dg.finish()
 
-                    reply = await get_response(call_sid, transcript)
-                    print(f"[LLM] Cleo: {reply}", flush=True)
+                    # Mark slot as pending and kick off Claude in background
+                    pending_responses[call_sid] = None
+                    asyncio.create_task(_generate_and_store(call_sid, transcript))
 
-                    async with get_db_context() as db:
-                        await append_transcript(db, call_sid, transcript, reply)
-
-                    await _update_twilio_call(call_sid, _twiml_say_stream(reply))
+                    # Immediately tell caller to wait, then redirect to response endpoint
+                    redirect_url = settings.base_url + "/call/response"
+                    hold_twiml = (
+                        '<?xml version="1.0" encoding="UTF-8"?>'
+                        "<Response>"
+                        '<Say voice="alice">One moment please.</Say>'
+                        f"<Redirect>{redirect_url}</Redirect>"
+                        "</Response>"
+                    )
+                    await _update_twilio_call(call_sid, hold_twiml)
+                    print(f"[STREAM] Hold TwiML sent in {time.time()-t0:.2f}s", flush=True)
                     break
 
             elif event == "stop":
