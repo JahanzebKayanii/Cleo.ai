@@ -37,7 +37,9 @@ async def _update_twilio_call(call_sid: str, twiml: str) -> None:
 
 @router.websocket("/call/stream")
 async def media_stream(websocket: WebSocket):
+    print("[STREAM] WebSocket connection received", flush=True)
     await websocket.accept()
+    print("[STREAM] WebSocket accepted", flush=True)
 
     call_sid: str | None = None
     transcript_event = asyncio.Event()
@@ -63,8 +65,13 @@ async def media_stream(websocket: WebSocket):
         interim_results=True,
     )
 
-    await dg.start(options)
-    print("[STREAM] Deepgram live session started", flush=True)
+    try:
+        started = await dg.start(options)
+        print(f"[STREAM] Deepgram live session started: {started}", flush=True)
+    except Exception as e:
+        print(f"[STREAM] ERROR starting Deepgram: {e}", flush=True)
+        await websocket.close()
+        return
 
     try:
         async for raw in websocket.iter_text():
@@ -100,7 +107,9 @@ async def media_stream(websocket: WebSocket):
                 break
 
     except WebSocketDisconnect:
-        pass
+        print("[STREAM] WebSocket disconnected", flush=True)
+    except Exception as e:
+        print(f"[STREAM] ERROR in stream loop: {e}", flush=True)
     finally:
         await dg.finish()
         print("[STREAM] Deepgram session closed", flush=True)

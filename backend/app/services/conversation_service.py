@@ -14,7 +14,8 @@ Rules:
 - Only use information from the context provided. Never invent prices, services, or policies.
 - If something is not in the context, say you will have a human team member follow up.
 - Keep responses to 2-3 sentences max. Phone callers do not want to hear an essay.
-- Do not say "based on the context" or mention the knowledge base. Just answer naturally."""
+- Do not say "based on the context" or mention the knowledge base. Just answer naturally.
+- Never use markdown formatting. No asterisks, no bold, no bullet points. Plain spoken English only."""
 
 _sessions: dict[str, list[dict]] = {}
 

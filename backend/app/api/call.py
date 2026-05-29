@@ -34,10 +34,10 @@ async def incoming_call(
     From: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
+    print(f"[CALL] Incoming call: {CallSid} from {From}", flush=True)
     await start_call(db, CallSid, From)
     return twiml_greet_stream(
-        "Thank you for calling Apex Home Services. "
-        "This is Cleo, your AI receptionist. How can I help you today?"
+        "Apex Home Services, this is Cleo. How can I help you?"
     )
 
 
