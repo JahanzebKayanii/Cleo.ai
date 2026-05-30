@@ -29,7 +29,12 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
         return results[0]["id"]
 
     # Create new contact
-    props = {"phone": data.customer_phone}
+    props = {
+        "phone": data.customer_phone,
+        "hs_lead_status": "NEW",
+        "hs_analytics_source": "OTHER_CAMPAIGNS",
+        "hs_analytics_source_data_1": "Cleo AI Voice",
+    }
     if data.customer_name:
         parts = data.customer_name.strip().split(" ", 1)
         props["firstname"] = parts[0]
@@ -49,11 +54,19 @@ async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, co
             appt += f" {data.appointment_time}"
         deal_name += f" | {appt}"
 
+    description = ""
+    if data.issue_description:
+        description += f"Issue: {data.issue_description}\n"
+    if data.call_summary:
+        description += f"\nCall summary: {data.call_summary}"
+
     props = {
         "dealname": deal_name,
         "dealstage": stage,
         "pipeline": "default",
-        "description": data.issue_description or "",
+        "description": description.strip(),
+        "hs_analytics_source": "OTHER_CAMPAIGNS",
+        "hs_analytics_source_data_1": "Cleo AI Voice",
     }
     if data.booked and data.appointment_date:
         props["closedate"] = data.appointment_date
