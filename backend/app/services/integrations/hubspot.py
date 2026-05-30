@@ -66,27 +66,33 @@ async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, co
             appt += f" {data.appointment_time}"
         deal_name += f" | {appt}"
 
-    description = ""
+    notes_body = ""
     if data.issue_description:
-        description += f"Issue: {data.issue_description}\n"
+        notes_body += f"Issue: {data.issue_description}\n"
     if data.call_summary:
-        description += f"\nCall summary: {data.call_summary}"
+        notes_body += f"Summary: {data.call_summary}"
 
     props = {
         "dealname": deal_name,
         "dealstage": stage,
-        "pipeline": "default",
-        "description": description.strip(),
+        "hs_deal_stage_probability": "1" if data.booked else "0.5",
     }
     if data.booked and data.appointment_date:
-        props["closedate"] = data.appointment_date
+        from datetime import datetime
+        try:
+            ts = int(datetime.strptime(data.appointment_date, "%Y-%m-%d").timestamp() * 1000)
+            props["closedate"] = str(ts)
+        except Exception:
+            pass
 
     res = await client.post(
         f"{_BASE}/crm/v3/objects/deals",
         headers=_headers(token),
         json={"properties": props},
     )
-    deal_id = res.json()["id"]
+    resp = res.json()
+    print(f"[HubSpot] Deal create response ({res.status_code}): {resp}", flush=True)
+    deal_id = resp["id"]
     # Associate deal with contact
     await client.put(
         f"{_BASE}/crm/v3/objects/deals/{deal_id}/associations/contacts/{contact_id}/deal_to_contact",
