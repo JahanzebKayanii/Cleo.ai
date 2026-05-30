@@ -4,14 +4,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # Database
+    # Database — set DATABASE_URL directly (Supabase) or use individual vars (local)
+    database_url_override: str = ""
     postgres_user: str = "cleo"
     postgres_password: str = "cleo_pass"
     postgres_db: str = "cleo_db"
     postgres_host: str = "localhost"
     postgres_port: int = 5432
 
-    # Qdrant
+    # Qdrant — set QDRANT_URL + QDRANT_API_KEY for cloud, or use host/port for local
+    qdrant_url: str = ""
+    qdrant_api_key: str = ""
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
     qdrant_collection: str = "cleo_docs"
@@ -34,6 +37,14 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        if self.database_url_override:
+            url = self.database_url_override
+            # Supabase gives postgres:// — asyncpg needs postgresql+asyncpg://
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return url
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
