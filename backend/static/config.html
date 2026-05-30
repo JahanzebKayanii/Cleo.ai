@@ -124,21 +124,46 @@
           <h2 class="text-sm font-semibold text-white mb-1">Integrations</h2>
           <p class="text-xs text-[#444] mb-5">Paste your API key to activate. Leave blank to disable.</p>
           <div class="space-y-3">
-            ${[
-              ['jobber_api_key', 'J', '#16a34a', 'Jobber', 'Field service management — auto-create jobs after bookings'],
-              ['hubspot_token', 'HS', '#ea580c', 'HubSpot', 'CRM — auto-create contacts and deals after each call'],
-              ['housecall_pro_api_key', 'HP', '#2563eb', 'Housecall Pro', 'Field service management — alternative to Jobber'],
-              ['quickbooks_token', 'QB', '#0d9488', 'QuickBooks', 'Accounting — auto-generate invoices after completed jobs'],
-              ['servicetitan_token', 'ST', '#7c3aed', 'ServiceTitan', 'Enterprise field service — requires partner access'],
-            ].map(([id, initials, color, name, desc]) => `
             <div class="flex items-center gap-4 p-4 bg-[#111] rounded-lg border border-[#1e1e1e]">
-              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:${color}22;color:${color}">${initials}</div>
+              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#16a34a22;color:#16a34a">J</div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-white">${name}</p>
-                <p class="text-xs text-[#444] mt-0.5">${desc}</p>
+                <p class="text-sm font-medium text-white">Jobber</p>
+                <p class="text-xs text-[#444] mt-0.5">Field service management — auto-create jobs after bookings</p>
               </div>
-              <input id="${id}" type="password" placeholder="API key" class="w-48 border rounded-lg px-3 py-2 text-xs transition flex-shrink-0" />
-            </div>`).join('')}
+              <input id="jobber_api_key" type="password" placeholder="API key" class="w-48 border rounded-lg px-3 py-2 text-xs transition flex-shrink-0" />
+            </div>
+            <div class="flex items-center gap-4 p-4 bg-[#111] rounded-lg border border-[#1e1e1e]">
+              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#ea580c22;color:#ea580c">HS</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-white">HubSpot</p>
+                <p class="text-xs text-[#444] mt-0.5">CRM — auto-create contacts and deals after each call</p>
+              </div>
+              <input id="hubspot_token" type="password" placeholder="API key" class="w-48 border rounded-lg px-3 py-2 text-xs transition flex-shrink-0" />
+            </div>
+            <div class="flex items-center gap-4 p-4 bg-[#111] rounded-lg border border-[#1e1e1e]">
+              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#2563eb22;color:#2563eb">HP</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-white">Housecall Pro</p>
+                <p class="text-xs text-[#444] mt-0.5">Field service management — alternative to Jobber</p>
+              </div>
+              <input id="housecall_pro_api_key" type="password" placeholder="API key" class="w-48 border rounded-lg px-3 py-2 text-xs transition flex-shrink-0" />
+            </div>
+            <div class="flex items-center gap-4 p-4 bg-[#111] rounded-lg border border-[#1e1e1e]">
+              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#0d948822;color:#0d9488">QB</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-white">QuickBooks</p>
+                <p class="text-xs text-[#444] mt-0.5">Accounting — auto-generate invoices after completed jobs</p>
+              </div>
+              <input id="quickbooks_token" type="password" placeholder="API key" class="w-48 border rounded-lg px-3 py-2 text-xs transition flex-shrink-0" />
+            </div>
+            <div class="flex items-center gap-4 p-4 bg-[#111] rounded-lg border border-[#1e1e1e]">
+              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#7c3aed22;color:#7c3aed">ST</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-white">ServiceTitan</p>
+                <p class="text-xs text-[#444] mt-0.5">Enterprise field service — requires partner access</p>
+              </div>
+              <input id="servicetitan_token" type="password" placeholder="API key" class="w-48 border rounded-lg px-3 py-2 text-xs transition flex-shrink-0" />
+            </div>
           </div>
         </div>
 
