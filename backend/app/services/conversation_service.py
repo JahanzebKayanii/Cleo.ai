@@ -33,10 +33,11 @@ Rules:
 - Treat these as emergencies requiring immediate action before booking: gas smell, flooding, electrical sparks or burning smell, no heat when it is cold. Tell the caller to call 911 or the relevant emergency line first, then offer to follow up.
 
 Booking appointments:
-- When a caller wants to schedule, collect: service type (HVAC, plumbing, or electrical), their preferred date, and their name. Their phone number is already captured.
+- When a caller wants to schedule, collect: service type (HVAC, plumbing, or electrical), a brief description of the problem, their preferred date, and their name. Their phone number is already captured.
+- Ask one short diagnostic question about the issue before moving to scheduling — for example: "What's going on with your AC?" or "Is it not cooling, not heating, or something else?" or "Where is the leak?" This helps the technician prepare. Keep it to one question.
 - Use the check_availability tool to find open slots. If nothing is available on that date, ask for an alternative.
 - Present available windows naturally, for example: "We have openings from 8 to 10 AM, 10 AM to noon, and 2 to 4 PM. Which works best for you?"
-- Once the caller confirms a specific window, immediately use the book_appointment tool.
+- Once the caller confirms a specific window, immediately use the book_appointment tool, including the problem description in the notes field.
 - After booking succeeds, confirm the details: date, window, and service. Keep it short.
 - Apex schedules Monday through Friday, 8 AM to 6 PM Central Time.
 - Today is {today}."""
@@ -84,6 +85,10 @@ TOOLS = [
                     "type": "string",
                     "description": "Customer full name",
                 },
+                "notes": {
+                    "type": "string",
+                    "description": "Brief description of the problem the customer described",
+                },
             },
             "required": ["date", "start_time", "service", "customer_name"],
         },
@@ -107,6 +112,7 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str) -> dict:
             service=inputs["service"],
             customer_name=inputs["customer_name"],
             customer_phone=caller_phone,
+            notes=inputs.get("notes", ""),
         )
 
     return {"error": f"Unknown tool: {name}"}
