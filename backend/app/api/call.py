@@ -6,9 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.state import call_phone_map, pending_first, pending_rest
+from app.core.state import call_caller_info, call_phone_map, pending_first, pending_rest
 from app.services.call_service import end_call, generate_and_save_summary, start_call
 from app.services.conversation_service import clear_session
+from app.services.customer_service import get_caller_context
 
 router = APIRouter(prefix="/call", tags=["call"])
 
@@ -38,10 +39,19 @@ async def incoming_call(
 ):
     print(f"[CALL] Incoming call: {CallSid} from {From}", flush=True)
     call_phone_map[CallSid] = From
+
+    ctx = await get_caller_context(db, From)
+    call_caller_info[CallSid] = ctx
+
     await start_call(db, CallSid, From)
-    return twiml_greet_stream(
-        "Apex Home Services, this is Cleo, your virtual receptionist. How can I help you?"
-    )
+
+    if ctx.get("name"):
+        first_name = ctx["name"].split()[0]
+        greeting = f"Apex Home Services, this is Cleo. Welcome back, {first_name}! How can I help you today?"
+    else:
+        greeting = "Apex Home Services, this is Cleo, your virtual receptionist. How can I help you?"
+
+    return twiml_greet_stream(greeting)
 
 
 @router.post("/response")
@@ -148,4 +158,6 @@ async def call_status(
     elif CallStatus in ("failed", "busy", "no-answer"):
         await end_call(db, CallSid)
         clear_session(CallSid)
+    call_phone_map.pop(CallSid, None)
+    call_caller_info.pop(CallSid, None)
     return Response(status_code=204)

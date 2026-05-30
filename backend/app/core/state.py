@@ -7,3 +7,6 @@ pending_rest: dict[str, str | None] = {}   # remainder, None = still generating
 
 # Phone number lookup so the call handler can pass it to booking tools
 call_phone_map: dict[str, str] = {}  # call_sid -> caller E.164 phone number
+
+# Returning caller info: name + recent call summaries, populated on /incoming
+call_caller_info: dict[str, dict] = {}  # call_sid -> {name, summaries}

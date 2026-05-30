@@ -53,9 +53,19 @@ Booking appointments:
 - Today is {today}."""
 
 
-def _system_prompt() -> str:
+def _system_prompt(caller_info: dict | None = None) -> str:
     today = datetime.now(ZoneInfo("America/Chicago")).strftime("%A, %B %-d, %Y")
-    return _SYSTEM_PROMPT_TEMPLATE.format(today=today)
+    prompt = _SYSTEM_PROMPT_TEMPLATE.format(today=today)
+    if caller_info and caller_info.get("name"):
+        name = caller_info["name"]
+        summaries = caller_info.get("summaries", [])
+        context_lines = [f"Returning caller context: You already know this caller's name is {name}. Do not ask for their name again — you already have it."]
+        if summaries:
+            context_lines.append("Their recent call history:")
+            for s in summaries:
+                context_lines.append(f"- {s}")
+        prompt += "\n\n" + "\n".join(context_lines)
+    return prompt
 
 
 TOOLS = [
@@ -116,7 +126,7 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str) -> dict:
         return {"available": True, "slots": slots}
 
     if name == "book_appointment":
-        return await book_appointment(
+        result = await book_appointment(
             date_str=inputs["date"],
             start_time_24h=inputs["start_time"],
             service=inputs["service"],
@@ -124,6 +134,12 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str) -> dict:
             customer_phone=caller_phone,
             notes=inputs.get("notes", ""),
         )
+        if result.get("success") and caller_phone:
+            from app.core.database import get_db_context
+            from app.services.customer_service import update_customer_name
+            async with get_db_context() as db:
+                await update_customer_name(db, caller_phone, inputs["customer_name"])
+        return result
 
     return {"error": f"Unknown tool: {name}"}
 
@@ -141,7 +157,7 @@ def _get_client() -> AsyncAnthropic:
 
 
 async def stream_response_parts(
-    session_id: str, user_message: str, caller_phone: str = ""
+    session_id: str, user_message: str, caller_phone: str = "", caller_info: dict | None = None
 ):
     """Async generator: yields ('first', text) then ('rest', text).
 
@@ -163,7 +179,7 @@ async def stream_response_parts(
     async with client.messages.stream(
         model="claude-sonnet-4-6",
         max_tokens=500,
-        system=_system_prompt(),
+        system=_system_prompt(caller_info),
         messages=history_with_user,
         tools=TOOLS,
     ) as stream:
@@ -219,7 +235,7 @@ async def stream_response_parts(
         async with client.messages.stream(
             model="claude-sonnet-4-6",
             max_tokens=300,
-            system=_system_prompt(),
+            system=_system_prompt(caller_info),
             messages=msgs_with_tools,
         ) as stream2:
             async for text in stream2.text_stream:
@@ -265,7 +281,7 @@ async def stream_response_parts(
 
 
 async def get_response(
-    session_id: str, user_message: str, caller_phone: str = ""
+    session_id: str, user_message: str, caller_phone: str = "", caller_info: dict | None = None
 ) -> str:
     context_chunks = await search_documents(user_message, limit=3)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)
@@ -278,7 +294,7 @@ async def get_response(
     response = await client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=500,
-        system=_system_prompt(),
+        system=_system_prompt(caller_info),
         messages=history_with_user,
         tools=TOOLS,
     )
@@ -307,7 +323,7 @@ async def get_response(
         response2 = await client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=300,
-            system=_system_prompt(),
+            system=_system_prompt(caller_info),
             messages=msgs_with_tools,
         )
         reply = response2.content[0].text
