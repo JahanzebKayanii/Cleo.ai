@@ -9,6 +9,7 @@ router = APIRouter(prefix="/conversation", tags=["conversation"])
 class MessageRequest(BaseModel):
     session_id: str
     message: str
+    phone: str = ""
 
 
 class MessageResponse(BaseModel):
@@ -18,7 +19,7 @@ class MessageResponse(BaseModel):
 
 @router.post("/message", response_model=MessageResponse)
 async def message(body: MessageRequest):
-    reply = await get_response(body.session_id, body.message)
+    reply = await get_response(body.session_id, body.message, caller_phone=body.phone)
     return MessageResponse(session_id=body.session_id, response=reply)
 
 
