@@ -46,6 +46,10 @@ Booking appointments:
 - Once the caller confirms a specific window, immediately use the book_appointment tool, including the problem description in the notes field.
 - After booking succeeds, confirm the details: date, window, and service. Keep it short.
 - Apex schedules Monday through Friday, 8 AM to 6 PM Central Time.
+- If the caller gives a date in the past (before today), tell them that date has already passed and ask for a future date.
+- If the caller gives a Saturday or Sunday, let them know Apex only schedules Monday through Friday and ask for a weekday.
+- If the caller gives a vague date like "sometime next week" or "next Monday or Tuesday", ask them to pick one specific date before calling check_availability.
+- If check_availability returns no available slots, let the caller know that date is fully booked and ask them to try the next business day or suggest an alternative.
 - Today is {today}."""
 
 
