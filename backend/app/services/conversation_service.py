@@ -290,10 +290,12 @@ async def get_response(
             if block.type == "text":
                 assistant_content.append({"type": "text", "text": block.text})
             elif block.type == "tool_use":
+                print(f"[TOOL] {block.name} called with {json.dumps(block.input)}", flush=True)
                 assistant_content.append(
                     {"type": "tool_use", "id": block.id, "name": block.name, "input": block.input}
                 )
                 result = await _execute_tool(block.name, block.input, caller_phone)
+                print(f"[TOOL] {block.name} result: {json.dumps(result)}", flush=True)
                 tool_results.append(
                     {"type": "tool_result", "tool_use_id": block.id, "content": json.dumps(result)}
                 )
