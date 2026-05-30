@@ -32,8 +32,7 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
     props = {
         "phone": data.customer_phone,
         "hs_lead_status": "NEW",
-        "hs_analytics_source": "OTHER_CAMPAIGNS",
-        "hs_analytics_source_data_1": "Cleo AI Voice",
+        "lead_source": "Cleo AI Voice",
     }
     if data.customer_name:
         parts = data.customer_name.strip().split(" ", 1)
@@ -42,7 +41,14 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
             props["lastname"] = parts[1]
 
     res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": props})
-    return res.json()["id"]
+    data_json = res.json()
+    if "id" not in data_json:
+        # Retry without optional fields in case of property errors
+        props.pop("hs_lead_status", None)
+        props.pop("lead_source", None)
+        res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": props})
+        data_json = res.json()
+    return data_json["id"]
 
 
 async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, contact_id: str) -> str:
@@ -65,8 +71,6 @@ async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, co
         "dealstage": stage,
         "pipeline": "default",
         "description": description.strip(),
-        "hs_analytics_source": "OTHER_CAMPAIGNS",
-        "hs_analytics_source_data_1": "Cleo AI Voice",
     }
     if data.booked and data.appointment_date:
         props["closedate"] = data.appointment_date
