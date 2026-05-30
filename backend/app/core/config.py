@@ -1,3 +1,4 @@
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -5,7 +6,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Database — set DATABASE_URL directly (Supabase) or use individual vars (local)
-    database_url_override: str = ""
+    database_url_override: str = Field(
+        default="",
+        validation_alias=AliasChoices("DATABASE_URL_OVERRIDE", "DATABASE_URL"),
+    )
     postgres_user: str = "cleo"
     postgres_password: str = "cleo_pass"
     postgres_db: str = "cleo_db"
