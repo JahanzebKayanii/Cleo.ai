@@ -1,13 +1,17 @@
+import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from anthropic import AsyncAnthropic
 
 from app.core.config import settings
 from app.services.document_service import search_documents
 
-SYSTEM_PROMPT = """You are Cleo, the AI receptionist for Apex Home Services, a licensed HVAC, plumbing, and electrical company based in Austin, Texas.
+_SYSTEM_PROMPT_TEMPLATE = """You are Cleo, the AI receptionist for Apex Home Services, a licensed HVAC, plumbing, and electrical company based in Austin, Texas.
 
 Your job on this phone call:
 - Answer questions about Apex's services, pricing, availability, and policies
-- Help callers book appointments
+- Help callers book appointments by checking the calendar and confirming a slot
 - Be friendly, professional, and brief — this is a phone call, not a chat
 
 Rules:
@@ -26,7 +30,87 @@ Rules:
 - Ask only one question per response. Never stack multiple questions together.
 - Do not repeat back what the caller just said before answering. Get straight to the answer.
 - Keep answers concise — one clear idea per response. Do not over-explain or add unnecessary detail.
-- Treat these as emergencies requiring immediate action before booking: gas smell, flooding, electrical sparks or burning smell, no heat when it is cold. Tell the caller to call 911 or the relevant emergency line first, then offer to follow up."""
+- Treat these as emergencies requiring immediate action before booking: gas smell, flooding, electrical sparks or burning smell, no heat when it is cold. Tell the caller to call 911 or the relevant emergency line first, then offer to follow up.
+
+Booking appointments:
+- When a caller wants to schedule, collect: service type (HVAC, plumbing, or electrical), their preferred date, and their name. Their phone number is already captured.
+- Use the check_availability tool to find open slots. If nothing is available on that date, ask for an alternative.
+- Present available windows naturally, for example: "We have openings from 8 to 10 AM, 10 AM to noon, and 2 to 4 PM. Which works best for you?"
+- Once the caller confirms a specific window, immediately use the book_appointment tool.
+- After booking succeeds, confirm the details: date, window, and service. Keep it short.
+- Apex schedules Monday through Friday, 8 AM to 6 PM Central Time.
+- Today is {today}."""
+
+
+def _system_prompt() -> str:
+    today = datetime.now(ZoneInfo("America/Chicago")).strftime("%A, %B %-d, %Y")
+    return _SYSTEM_PROMPT_TEMPLATE.format(today=today)
+
+
+TOOLS = [
+    {
+        "name": "check_availability",
+        "description": "Check available 2-hour appointment slots for a given date. Use this when the caller wants to book and has provided a date.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "description": "Date in YYYY-MM-DD format (Austin TX timezone)",
+                }
+            },
+            "required": ["date"],
+        },
+    },
+    {
+        "name": "book_appointment",
+        "description": "Book a confirmed appointment on the calendar. Only call this after the caller has agreed to a specific time window.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "description": "Date in YYYY-MM-DD format",
+                },
+                "start_time": {
+                    "type": "string",
+                    "description": "Slot start time in HH:MM 24-hour format, e.g. '08:00' or '14:00'",
+                },
+                "service": {
+                    "type": "string",
+                    "description": "Service type: HVAC, plumbing, or electrical",
+                },
+                "customer_name": {
+                    "type": "string",
+                    "description": "Customer full name",
+                },
+            },
+            "required": ["date", "start_time", "service", "customer_name"],
+        },
+    },
+]
+
+
+async def _execute_tool(name: str, inputs: dict, caller_phone: str) -> dict:
+    from app.services.calendar_service import book_appointment, get_available_slots
+
+    if name == "check_availability":
+        slots = await get_available_slots(inputs["date"])
+        if not slots:
+            return {"available": False, "message": "No slots available on that date."}
+        return {"available": True, "slots": slots}
+
+    if name == "book_appointment":
+        return await book_appointment(
+            date_str=inputs["date"],
+            start_time_24h=inputs["start_time"],
+            service=inputs["service"],
+            customer_name=inputs["customer_name"],
+            customer_phone=caller_phone,
+        )
+
+    return {"error": f"Unknown tool: {name}"}
+
 
 _sessions: dict[str, list[dict]] = {}
 
@@ -40,12 +124,13 @@ def _get_client() -> AsyncAnthropic:
     return _client
 
 
-async def stream_response_parts(session_id: str, user_message: str):
-    """Async generator that yields ('first', text) then ('rest', text).
+async def stream_response_parts(
+    session_id: str, user_message: str, caller_phone: str = ""
+):
+    """Async generator: yields ('first', text) then ('rest', text).
 
-    'first' is the first complete sentence — yielded as soon as it arrives from Claude.
-    'rest' is everything after that — yielded when the full stream is done.
-    History is updated after 'rest' is yielded.
+    Handles Claude tool use transparently — calendar checks happen between
+    the first and rest yields so the caller hears a quick reply immediately.
     """
     context_chunks = await search_documents(user_message, limit=3)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)
@@ -56,14 +141,15 @@ async def stream_response_parts(session_id: str, user_message: str):
 
     client = _get_client()
     full_text = ""
-    first_sentence = ""
     first_yielded = False
+    first_sentence = ""
 
     async with client.messages.stream(
         model="claude-sonnet-4-6",
-        max_tokens=300,
-        system=SYSTEM_PROMPT,
+        max_tokens=500,
+        system=_system_prompt(),
         messages=history_with_user,
+        tools=TOOLS,
     ) as stream:
         async for text in stream.text_stream:
             full_text += text
@@ -76,24 +162,95 @@ async def stream_response_parts(session_id: str, user_message: str):
                         yield "first", first_sentence
                         break
 
-    reply = full_text.strip()
+        final_msg = await stream.get_final_message()
 
-    if not first_yielded:
-        # Response had no mid-sentence boundary — treat whole thing as first sentence
-        first_sentence = reply
-        yield "first", first_sentence
-        yield "rest", ""
+    if final_msg.stop_reason == "tool_use":
+        # Execute all tools Claude requested
+        tool_results = []
+        for block in final_msg.content:
+            if block.type == "tool_use":
+                result = await _execute_tool(block.name, block.input, caller_phone)
+                tool_results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": json.dumps(result),
+                    }
+                )
+
+        # Build assistant message with all content blocks as dicts
+        assistant_content = []
+        for block in final_msg.content:
+            if block.type == "text":
+                assistant_content.append({"type": "text", "text": block.text})
+            elif block.type == "tool_use":
+                assistant_content.append(
+                    {
+                        "type": "tool_use",
+                        "id": block.id,
+                        "name": block.name,
+                        "input": block.input,
+                    }
+                )
+
+        msgs_with_tools = history_with_user + [
+            {"role": "assistant", "content": assistant_content},
+            {"role": "user", "content": tool_results},
+        ]
+
+        # Second streaming call — Claude sees the tool results and responds
+        second_text = ""
+        async with client.messages.stream(
+            model="claude-sonnet-4-6",
+            max_tokens=300,
+            system=_system_prompt(),
+            messages=msgs_with_tools,
+        ) as stream2:
+            async for text in stream2.text_stream:
+                second_text += text
+                if not first_yielded:
+                    for marker in [". ", "? ", "! "]:
+                        idx = second_text.find(marker)
+                        if idx != -1:
+                            first_sentence = second_text[: idx + 1].strip()
+                            first_yielded = True
+                            yield "first", first_sentence
+                            break
+
+        if not first_yielded:
+            yield "first", second_text.strip()
+            yield "rest", ""
+        else:
+            # Determine where the rest begins
+            if first_sentence and first_sentence in second_text:
+                rest = second_text[len(first_sentence) :].strip()
+            else:
+                # first_sentence came from pre-tool text; rest = all of second_text
+                rest = second_text.strip()
+            yield "rest", rest
+
+        reply = (full_text.strip() + " " + second_text.strip()).strip()
+        _sessions[session_id] = msgs_with_tools + [
+            {"role": "assistant", "content": second_text.strip()}
+        ]
+
     else:
-        rest = reply[len(first_sentence) :].strip()
-        yield "rest", rest
-
-    _sessions[session_id] = history_with_user + [{"role": "assistant", "content": reply}]
+        # No tool use — normal path
+        reply = full_text.strip()
+        if not first_yielded:
+            yield "first", reply
+            yield "rest", ""
+        else:
+            rest = reply[len(first_sentence) :].strip()
+            yield "rest", rest
+        _sessions[session_id] = history_with_user + [
+            {"role": "assistant", "content": reply}
+        ]
 
 
 async def get_response(session_id: str, user_message: str) -> str:
     context_chunks = await search_documents(user_message, limit=3)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)
-
     augmented_message = f"Relevant Apex knowledge:\n{context}\n\nCaller said: {user_message}"
 
     history = _sessions.get(session_id, [])
@@ -103,14 +260,12 @@ async def get_response(session_id: str, user_message: str) -> str:
     response = await client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=300,
-        system=SYSTEM_PROMPT,
+        system=_system_prompt(),
         messages=history,
     )
 
     reply = response.content[0].text
-
     _sessions[session_id] = history + [{"role": "assistant", "content": reply}]
-
     return reply
 
 

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.state import pending_first, pending_rest
+from app.core.state import call_phone_map, pending_first, pending_rest
 from app.services.call_service import end_call, generate_and_save_summary, start_call
 from app.services.conversation_service import clear_session
 
@@ -37,6 +37,7 @@ async def incoming_call(
     db: AsyncSession = Depends(get_db),
 ):
     print(f"[CALL] Incoming call: {CallSid} from {From}", flush=True)
+    call_phone_map[CallSid] = From
     await start_call(db, CallSid, From)
     return twiml_greet_stream(
         "Apex Home Services, this is Cleo, your virtual receptionist. How can I help you?"

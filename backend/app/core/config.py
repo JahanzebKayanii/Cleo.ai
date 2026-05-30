@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
 
+    # Google Calendar
+    google_calendar_id: str = ""
+    google_service_account_b64: str = ""
+
     # App
     app_env: str = "development"
     base_url: str = "http://localhost:8000"
