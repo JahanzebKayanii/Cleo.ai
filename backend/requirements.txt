@@ -27,6 +27,9 @@ websockets==13.1
 google-api-python-client==2.155.0
 google-auth==2.38.0
 
+# Scheduler
+apscheduler==3.10.4
+
 # Utilities
 python-dotenv==1.0.1
 python-multipart==0.0.12

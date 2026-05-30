@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,12 +16,27 @@ from app.api.health import router as health_router
 from app.core.database import create_tables
 from app.core.qdrant import ensure_collection
 
+_scheduler = AsyncIOScheduler(timezone="America/Chicago")
+
+
+async def _run_morning_reminders() -> None:
+    from app.services.sms_service import send_morning_reminders
+    await send_morning_reminders()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_tables()
     await ensure_collection()
+    _scheduler.add_job(
+        _run_morning_reminders,
+        CronTrigger(hour=8, minute=0, timezone="America/Chicago"),
+        id="morning_reminders",
+        replace_existing=True,
+    )
+    _scheduler.start()
     yield
+    _scheduler.shutdown(wait=False)
 
 
 app = FastAPI(

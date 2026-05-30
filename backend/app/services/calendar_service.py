@@ -35,6 +35,54 @@ def _slot_display(start: datetime, end: datetime) -> str:
     return f"{_fmt_time(start)} to {_fmt_time(end)}"
 
 
+async def get_todays_appointments() -> list[dict]:
+    today = datetime.now(TIMEZONE)
+    time_min = today.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    time_max = today.replace(hour=23, minute=59, second=59, microsecond=0).isoformat()
+
+    def _list():
+        svc = _get_service()
+        return (
+            svc.events()
+            .list(
+                calendarId=settings.google_calendar_id,
+                timeMin=time_min,
+                timeMax=time_max,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
+
+    result = await asyncio.to_thread(_list)
+    appointments = []
+    for event in result.get("items", []):
+        desc = event.get("description", "")
+        phone = ""
+        service = ""
+        for line in desc.split("\n"):
+            if line.startswith("Phone:"):
+                phone = line.replace("Phone:", "").strip()
+            elif line.startswith("Service:"):
+                service = line.replace("Service:", "").strip()
+
+        summary = event.get("summary", "")
+        customer_name = summary.split("–", 1)[1].strip() if "–" in summary else ""
+
+        start_str = event.get("start", {}).get("dateTime", "")
+        end_str = event.get("end", {}).get("dateTime", "")
+        window = ""
+        if start_str and end_str:
+            s = datetime.fromisoformat(start_str).astimezone(TIMEZONE)
+            e = datetime.fromisoformat(end_str).astimezone(TIMEZONE)
+            window = _slot_display(s, e)
+
+        appointments.append(
+            {"phone": phone, "customer_name": customer_name, "service": service, "window": window}
+        )
+    return appointments
+
+
 async def get_available_slots(date_str: str) -> list[dict]:
     date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=TIMEZONE)
 
@@ -110,10 +158,17 @@ async def book_appointment(
 
     await asyncio.to_thread(_create)
 
+    date_display = date.strftime("%A, %B %-d")
+    window = _slot_display(start, end)
+
+    if customer_phone:
+        from app.services.sms_service import send_confirmation_sms
+        await send_confirmation_sms(customer_phone, customer_name, date_display, window, service)
+
     return {
         "success": True,
-        "date": date.strftime("%A, %B %-d"),
-        "window": _slot_display(start, end),
+        "date": date_display,
+        "window": window,
         "service": service,
         "customer_name": customer_name,
     }
