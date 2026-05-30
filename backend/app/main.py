@@ -1,9 +1,11 @@
+import os
 from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.appointments import router as appointments_router
 from app.api.business import router as business_router
@@ -63,3 +65,7 @@ app.include_router(customers_router)
 app.include_router(call_router)
 app.include_router(calls_router)
 app.include_router(stream_router)
+
+_static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.isdir(_static_dir):
+    app.mount("/dashboard", StaticFiles(directory=_static_dir, html=True), name="dashboard")

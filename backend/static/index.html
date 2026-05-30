@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cleo Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+
+  <!-- Nav -->
+  <nav class="border-b border-gray-800 bg-gray-900">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-white font-bold text-sm">C</div>
+        <span class="font-semibold text-white">Cleo</span>
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/dashboard/" class="text-violet-400 font-medium">Calls</a>
+        <a href="/dashboard/config.html" class="text-gray-400 hover:text-white transition">Config</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-white">Recent Calls</h1>
+      <p class="text-gray-400 mt-1 text-sm">All inbound calls handled by Cleo</p>
+    </div>
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-3 gap-4 mb-8" id="stats">
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Calls</p>
+        <p class="text-3xl font-bold text-white" id="stat-total">—</p>
+      </div>
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Completed</p>
+        <p class="text-3xl font-bold text-green-400" id="stat-completed">—</p>
+      </div>
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">In Progress</p>
+        <p class="text-3xl font-bold text-violet-400" id="stat-active">—</p>
+      </div>
+    </div>
+
+    <!-- Calls table -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wide">
+            <th class="text-left px-6 py-4">Caller</th>
+            <th class="text-left px-6 py-4">Phone</th>
+            <th class="text-left px-6 py-4">Status</th>
+            <th class="text-left px-6 py-4">Started</th>
+            <th class="text-left px-6 py-4">Summary</th>
+          </tr>
+        </thead>
+        <tbody id="calls-table">
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center text-gray-600">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API = window.location.origin;
+
+    function timeAgo(dateStr) {
+      const d = new Date(dateStr);
+      const diff = Math.floor((Date.now() - d) / 1000);
+      if (diff < 60) return `${diff}s ago`;
+      if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+      return d.toLocaleDateString();
+    }
+
+    function statusBadge(status) {
+      const map = {
+        completed: 'bg-green-900 text-green-300',
+        in_progress: 'bg-violet-900 text-violet-300',
+        failed: 'bg-red-900 text-red-300',
+      };
+      const cls = map[status] || 'bg-gray-800 text-gray-400';
+      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${cls}">${status.replace('_',' ')}</span>`;
+    }
+
+    async function load() {
+      try {
+        const res = await fetch(`${API}/calls/`);
+        const calls = await res.json();
+
+        const total = calls.length;
+        const completed = calls.filter(c => c.status === 'completed').length;
+        const active = calls.filter(c => c.status === 'in_progress').length;
+
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-completed').textContent = completed;
+        document.getElementById('stat-active').textContent = active;
+
+        const tbody = document.getElementById('calls-table');
+        if (!calls.length) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-gray-600">No calls yet</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = calls.map(c => `
+          <tr class="border-t border-gray-800 hover:bg-gray-800/50 transition cursor-pointer" onclick="openCall(${c.id})">
+            <td class="px-6 py-4 font-medium text-white">${c.customer_name || 'Unknown'}</td>
+            <td class="px-6 py-4 text-gray-400">${c.customer_phone || '—'}</td>
+            <td class="px-6 py-4">${statusBadge(c.status)}</td>
+            <td class="px-6 py-4 text-gray-400">${timeAgo(c.started_at)}</td>
+            <td class="px-6 py-4 text-gray-400 max-w-xs truncate">${c.summary || '—'}</td>
+          </tr>
+        `).join('');
+      } catch(e) {
+        document.getElementById('calls-table').innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500">Failed to load calls</td></tr>`;
+      }
+    }
+
+    function openCall(id) {
+      window.location.href = `/dashboard/call.html?id=${id}`;
+    }
+
+    load();
+    setInterval(load, 10000);
+  </script>
+</body>
+</html>

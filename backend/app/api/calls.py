@@ -15,7 +15,8 @@ async def list_calls(db: AsyncSession = Depends(get_db)):
     return [
         {
             "id": c.id,
-            "phone": c.customer.phone if c.customer else None,
+            "customer_name": c.customer.name if c.customer else None,
+            "customer_phone": c.customer.phone if c.customer else None,
             "status": c.status,
             "summary": c.summary,
             "started_at": c.started_at,
