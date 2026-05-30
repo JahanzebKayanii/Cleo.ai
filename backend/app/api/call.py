@@ -39,7 +39,7 @@ async def incoming_call(
     print(f"[CALL] Incoming call: {CallSid} from {From}", flush=True)
     await start_call(db, CallSid, From)
     return twiml_greet_stream(
-        "Apex Home Services, this is Cleo. How can I help you?"
+        "Apex Home Services, this is Cleo, your AI receptionist. How can I help you?"
     )
 
 
