@@ -45,8 +45,15 @@ def chunk_text(text: str) -> List[str]:
 
 async def embed_texts(texts: List[str]) -> List[List[float]]:
     client = _get_voyage()
-    result = await asyncio.to_thread(client.embed, texts, model="voyage-3")
-    return result.embeddings
+    for attempt in range(3):
+        try:
+            result = await asyncio.to_thread(client.embed, texts, model="voyage-3")
+            return result.embeddings
+        except voyageai.error.RateLimitError:
+            if attempt == 2:
+                raise
+            await asyncio.sleep(20)
+    raise RuntimeError("embed_texts: unreachable")
 
 
 async def ingest_document(document_id: int, filename: str, text: str) -> int:
