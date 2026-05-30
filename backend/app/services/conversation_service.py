@@ -248,24 +248,56 @@ async def stream_response_parts(
         ]
 
 
-async def get_response(session_id: str, user_message: str) -> str:
+async def get_response(
+    session_id: str, user_message: str, caller_phone: str = ""
+) -> str:
     context_chunks = await search_documents(user_message, limit=3)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)
     augmented_message = f"Relevant Apex knowledge:\n{context}\n\nCaller said: {user_message}"
 
     history = _sessions.get(session_id, [])
-    history = history + [{"role": "user", "content": augmented_message}]
+    history_with_user = history + [{"role": "user", "content": augmented_message}]
 
     client = _get_client()
     response = await client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=300,
+        max_tokens=500,
         system=_system_prompt(),
-        messages=history,
+        messages=history_with_user,
+        tools=TOOLS,
     )
 
-    reply = response.content[0].text
-    _sessions[session_id] = history + [{"role": "assistant", "content": reply}]
+    if response.stop_reason == "tool_use":
+        tool_results = []
+        assistant_content = []
+        for block in response.content:
+            if block.type == "text":
+                assistant_content.append({"type": "text", "text": block.text})
+            elif block.type == "tool_use":
+                assistant_content.append(
+                    {"type": "tool_use", "id": block.id, "name": block.name, "input": block.input}
+                )
+                result = await _execute_tool(block.name, block.input, caller_phone)
+                tool_results.append(
+                    {"type": "tool_result", "tool_use_id": block.id, "content": json.dumps(result)}
+                )
+
+        msgs_with_tools = history_with_user + [
+            {"role": "assistant", "content": assistant_content},
+            {"role": "user", "content": tool_results},
+        ]
+        response2 = await client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=300,
+            system=_system_prompt(),
+            messages=msgs_with_tools,
+        )
+        reply = response2.content[0].text
+        _sessions[session_id] = msgs_with_tools + [{"role": "assistant", "content": reply}]
+    else:
+        reply = response.content[0].text
+        _sessions[session_id] = history_with_user + [{"role": "assistant", "content": reply}]
+
     return reply
 
 
