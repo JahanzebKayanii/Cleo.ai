@@ -8,11 +8,22 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.state import call_caller_info, call_config, call_phone_map, pending_first, pending_rest
 from app.services.business_service import get_business
-from app.services.call_service import end_call, generate_and_save_summary, start_call
+from app.services.call_service import end_call, generate_and_save_summary, get_call_for_integrations, start_call
 from app.services.conversation_service import _is_business_hours, clear_session
 from app.services.customer_service import get_caller_context
 
 router = APIRouter(prefix="/call", tags=["call"])
+
+
+async def _run_integrations(call_info: dict, config: dict) -> None:
+    from app.services.integration_service import push_to_integrations
+    await push_to_integrations(
+        customer_name=call_info.get("customer_name"),
+        customer_phone=call_info.get("customer_phone", ""),
+        transcript=call_info.get("transcript", ""),
+        summary=call_info.get("summary", ""),
+        config=config,
+    )
 
 
 def _stream_url() -> str:
@@ -160,6 +171,10 @@ async def call_status(
     if CallStatus == "completed":
         await end_call(db, CallSid)
         await generate_and_save_summary(db, CallSid)
+        call_info = await get_call_for_integrations(db, CallSid)
+        if call_info:
+            config = await get_business(db)
+            asyncio.create_task(_run_integrations(call_info, config))
         clear_session(CallSid)
     elif CallStatus in ("failed", "busy", "no-answer"):
         await end_call(db, CallSid)

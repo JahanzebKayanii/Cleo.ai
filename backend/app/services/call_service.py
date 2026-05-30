@@ -56,6 +56,19 @@ async def end_call(db: AsyncSession, twilio_sid: str) -> None:
     call.ended_at = datetime.now(timezone.utc)
 
 
+async def get_call_for_integrations(db: AsyncSession, twilio_sid: str) -> dict | None:
+    result = await db.execute(select(Call).where(Call.twilio_call_sid == twilio_sid))
+    call = result.scalar_one_or_none()
+    if not call or not call.transcript:
+        return None
+    return {
+        "customer_name": call.customer.name if call.customer else None,
+        "customer_phone": call.customer.phone if call.customer else "",
+        "transcript": call.transcript or "",
+        "summary": call.summary or "",
+    }
+
+
 async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
     result = await db.execute(
         select(Call).where(Call.twilio_call_sid == twilio_sid)
