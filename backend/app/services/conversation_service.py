@@ -33,8 +33,14 @@ Rules:
 - Treat these as emergencies requiring immediate action before booking: gas smell, flooding, electrical sparks or burning smell, no heat when it is cold. Tell the caller to call 911 or the relevant emergency line first, then offer to follow up.
 
 Booking appointments:
-- When a caller wants to schedule, collect in this exact order: (1) problem description, (2) preferred date, (3) their name.
-- When someone says they want to book, your very next response must be ONLY a question about the problem — nothing else. For example: if they say "I want to book an HVAC appointment", respond with "What's going on with your HVAC — is it not cooling, not heating, or something else?" Never ask for a date or name before you have heard the problem description. This is a hard rule with no exceptions.
+- Booking flow — follow these steps in order, one at a time:
+  1. Ask about the problem: "What's going on with your [service]?" Get a description before anything else.
+  2. Ask for their preferred date.
+  3. Ask for their name.
+  4. Call check_availability with the date.
+  5. Present the available windows.
+  6. Once they pick a slot, call book_appointment.
+- Never skip step 1. Never ask for the date or name before you have a problem description.
 - Use the check_availability tool to find open slots. If nothing is available on that date, ask for an alternative.
 - Present available windows naturally, for example: "We have openings from 8 to 10 AM, 10 AM to noon, and 2 to 4 PM. Which works best for you?"
 - Once the caller confirms a specific window, immediately use the book_appointment tool, including the problem description in the notes field.
@@ -90,7 +96,7 @@ TOOLS = [
                     "description": "Brief description of the problem the customer described",
                 },
             },
-            "required": ["date", "start_time", "service", "customer_name"],
+            "required": ["date", "start_time", "service", "customer_name", "notes"],
         },
     },
 ]
