@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.state import pending_responses
+from app.core.state import pending_first, pending_rest
 from app.services.call_service import end_call, generate_and_save_summary, start_call
 from app.services.conversation_service import clear_session
 
@@ -46,27 +46,88 @@ async def incoming_call(
 @router.post("/response")
 async def pending_response(CallSid: str = Form(...)):
     stream_url = _stream_url()
-    # Poll until Claude is done (max 12 seconds)
-    for _ in range(120):
-        reply = pending_responses.get(CallSid)
-        if reply is not None:
-            pending_responses.pop(CallSid, None)
-            safe = html.escape(reply)
-            body = (
-                '<?xml version="1.0" encoding="UTF-8"?>'
-                "<Response>"
-                f'<Say voice="alice">{safe}</Say>'
-                f'<Connect><Stream url="{stream_url}"/></Connect>'
-                "</Response>"
-            )
+    continue_url = settings.base_url + "/call/continue"
+
+    # Poll until first sentence is ready (max 8 seconds)
+    for _ in range(80):
+        first = pending_first.get(CallSid)
+        if first is not None:
+            rest = pending_rest.get(CallSid)
+            if rest is not None:
+                # Full response already done — say everything and reconnect stream
+                pending_first.pop(CallSid, None)
+                pending_rest.pop(CallSid, None)
+                full = (first + " " + rest).strip() if rest else first
+                safe = html.escape(full)
+                body = (
+                    '<?xml version="1.0" encoding="UTF-8"?>'
+                    "<Response>"
+                    f'<Say voice="alice">{safe}</Say>'
+                    f'<Connect><Stream url="{stream_url}"/></Connect>'
+                    "</Response>"
+                )
+            else:
+                # Rest still generating — say first sentence, then redirect to continue
+                safe = html.escape(first)
+                body = (
+                    '<?xml version="1.0" encoding="UTF-8"?>'
+                    "<Response>"
+                    f'<Say voice="alice">{safe}</Say>'
+                    f"<Redirect>{continue_url}</Redirect>"
+                    "</Response>"
+                )
             return Response(content=body, media_type="application/xml")
         await asyncio.sleep(0.1)
 
     # Timeout fallback
+    pending_first.pop(CallSid, None)
+    pending_rest.pop(CallSid, None)
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
         '<Say voice="alice">Sorry, I had trouble with that. Could you repeat?</Say>'
+        f'<Connect><Stream url="{stream_url}"/></Connect>'
+        "</Response>"
+    )
+    return Response(content=body, media_type="application/xml")
+
+
+@router.post("/continue")
+async def continue_response(CallSid: str = Form(...)):
+    stream_url = _stream_url()
+
+    # Poll until rest of response is ready (max 6 seconds — should already be done)
+    for _ in range(60):
+        rest = pending_rest.get(CallSid)
+        if rest is not None:
+            pending_first.pop(CallSid, None)
+            pending_rest.pop(CallSid, None)
+            if rest:
+                safe = html.escape(rest)
+                body = (
+                    '<?xml version="1.0" encoding="UTF-8"?>'
+                    "<Response>"
+                    f'<Say voice="alice">{safe}</Say>'
+                    f'<Connect><Stream url="{stream_url}"/></Connect>'
+                    "</Response>"
+                )
+            else:
+                # No rest — just reconnect stream
+                body = (
+                    '<?xml version="1.0" encoding="UTF-8"?>'
+                    "<Response>"
+                    f'<Connect><Stream url="{stream_url}"/></Connect>'
+                    "</Response>"
+                )
+            return Response(content=body, media_type="application/xml")
+        await asyncio.sleep(0.1)
+
+    # Timeout fallback
+    pending_first.pop(CallSid, None)
+    pending_rest.pop(CallSid, None)
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        "<Response>"
         f'<Connect><Stream url="{stream_url}"/></Connect>'
         "</Response>"
     )

@@ -40,6 +40,56 @@ def _get_client() -> AsyncAnthropic:
     return _client
 
 
+async def stream_response_parts(session_id: str, user_message: str):
+    """Async generator that yields ('first', text) then ('rest', text).
+
+    'first' is the first complete sentence — yielded as soon as it arrives from Claude.
+    'rest' is everything after that — yielded when the full stream is done.
+    History is updated after 'rest' is yielded.
+    """
+    context_chunks = await search_documents(user_message, limit=3)
+    context = "\n\n".join(chunk["text"] for chunk in context_chunks)
+    augmented_message = f"Relevant Apex knowledge:\n{context}\n\nCaller said: {user_message}"
+
+    history = _sessions.get(session_id, [])
+    history_with_user = history + [{"role": "user", "content": augmented_message}]
+
+    client = _get_client()
+    full_text = ""
+    first_sentence = ""
+    first_yielded = False
+
+    async with client.messages.stream(
+        model="claude-sonnet-4-6",
+        max_tokens=300,
+        system=SYSTEM_PROMPT,
+        messages=history_with_user,
+    ) as stream:
+        async for text in stream.text_stream:
+            full_text += text
+            if not first_yielded:
+                for marker in [". ", "? ", "! "]:
+                    idx = full_text.find(marker)
+                    if idx != -1:
+                        first_sentence = full_text[: idx + 1].strip()
+                        first_yielded = True
+                        yield "first", first_sentence
+                        break
+
+    reply = full_text.strip()
+
+    if not first_yielded:
+        # Response had no mid-sentence boundary — treat whole thing as first sentence
+        first_sentence = reply
+        yield "first", first_sentence
+        yield "rest", ""
+    else:
+        rest = reply[len(first_sentence) :].strip()
+        yield "rest", rest
+
+    _sessions[session_id] = history_with_user + [{"role": "assistant", "content": reply}]
+
+
 async def get_response(session_id: str, user_message: str) -> str:
     context_chunks = await search_documents(user_message, limit=3)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)

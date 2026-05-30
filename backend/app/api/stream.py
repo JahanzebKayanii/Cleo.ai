@@ -10,9 +10,9 @@ from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db_context
-from app.core.state import pending_responses
+from app.core.state import pending_first, pending_rest
 from app.services.call_service import append_transcript
-from app.services.conversation_service import get_response
+from app.services.conversation_service import stream_response_parts
 
 router = APIRouter(tags=["stream"])
 
@@ -38,11 +38,20 @@ async def _update_twilio_call(call_sid: str, twiml: str) -> None:
 
 
 async def _generate_and_store(call_sid: str, transcript: str) -> None:
-    reply = await get_response(call_sid, transcript)
+    full_reply = ""
+    async for part, text in stream_response_parts(call_sid, transcript):
+        if part == "first":
+            pending_first[call_sid] = text
+            full_reply = text
+            print(f"[LLM] First sentence for {call_sid}: {text}", flush=True)
+        elif part == "rest":
+            pending_rest[call_sid] = text
+            if text:
+                full_reply = full_reply + " " + text
+            print(f"[LLM] Complete for {call_sid}: {full_reply[:80]}", flush=True)
+
     async with get_db_context() as db:
-        await append_transcript(db, call_sid, transcript, reply)
-    pending_responses[call_sid] = reply
-    print(f"[LLM] Ready for {call_sid}: {reply}", flush=True)
+        await append_transcript(db, call_sid, transcript, full_reply)
 
 
 @router.websocket("/call/stream")
@@ -104,21 +113,21 @@ async def media_stream(websocket: WebSocket):
 
                     await dg.finish()
 
-                    # Mark slot as pending and kick off Claude in background
-                    pending_responses[call_sid] = None
+                    # Mark slots as pending and kick off Claude streaming in background
+                    pending_first[call_sid] = None
+                    pending_rest[call_sid] = None
                     asyncio.create_task(_generate_and_store(call_sid, transcript))
 
-                    # Immediately tell caller to wait, then redirect to response endpoint
+                    # Redirect Twilio to poll for first sentence (no "one moment please")
                     redirect_url = settings.base_url + "/call/response"
                     hold_twiml = (
                         '<?xml version="1.0" encoding="UTF-8"?>'
                         "<Response>"
-                        '<Say voice="alice">One moment please.</Say>'
                         f"<Redirect>{redirect_url}</Redirect>"
                         "</Response>"
                     )
                     await _update_twilio_call(call_sid, hold_twiml)
-                    print(f"[STREAM] Hold TwiML sent in {time.time()-t0:.2f}s", flush=True)
+                    print(f"[STREAM] Redirect sent in {time.time()-t0:.2f}s", flush=True)
                     break
 
             elif event == "stop":
