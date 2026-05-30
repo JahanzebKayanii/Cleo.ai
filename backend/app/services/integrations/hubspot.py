@@ -42,12 +42,18 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
 
     res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": props})
     data_json = res.json()
+    print(f"[HubSpot] Contact create response ({res.status_code}): {data_json}", flush=True)
     if "id" not in data_json:
-        # Retry without optional fields in case of property errors
-        props.pop("hs_lead_status", None)
-        props.pop("lead_source", None)
-        res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": props})
+        # Retry with minimal fields only
+        minimal = {"phone": data.customer_phone}
+        if data.customer_name:
+            parts = data.customer_name.strip().split(" ", 1)
+            minimal["firstname"] = parts[0]
+            if len(parts) > 1:
+                minimal["lastname"] = parts[1]
+        res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": minimal})
         data_json = res.json()
+        print(f"[HubSpot] Contact retry response ({res.status_code}): {data_json}", flush=True)
     return data_json["id"]
 
 
