@@ -42,14 +42,26 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
 
 async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, contact_id: str) -> str:
     stage = "closedwon" if data.booked else "appointmentscheduled"
+    deal_name = f"{data.service_type} – {data.customer_name}"
+    if data.booked and data.appointment_date:
+        appt = data.appointment_date
+        if data.appointment_time:
+            appt += f" {data.appointment_time}"
+        deal_name += f" | {appt}"
+
+    props = {
+        "dealname": deal_name,
+        "dealstage": stage,
+        "pipeline": "default",
+        "description": data.issue_description or "",
+    }
+    if data.booked and data.appointment_date:
+        props["closedate"] = data.appointment_date
+
     res = await client.post(
         f"{_BASE}/crm/v3/objects/deals",
         headers=_headers(token),
-        json={"properties": {
-            "dealname": f"{data.service_type} – {data.customer_name}",
-            "dealstage": stage,
-            "pipeline": "default",
-        }},
+        json={"properties": props},
     )
     deal_id = res.json()["id"]
     # Associate deal with contact

@@ -25,13 +25,15 @@ class TestIntegrationRequest(BaseModel):
     service_type: str = "HVAC"
     issue: str = "AC not cooling"
     booked: bool = True
+    appointment_date: str = "2026-06-06"
+    appointment_time: str = "10 AM to noon"
 
 
 @router.post("/test-integrations")
 async def test_integrations(body: TestIntegrationRequest, db: AsyncSession = Depends(get_db)):
     config = await get_business(db)
     transcript = f"Caller: I need help with my {body.service_type}. {body.issue}\nCleo: I can help with that."
-    summary = f"Caller reported {body.issue}. {'Appointment booked.' if body.booked else 'No appointment booked.'}"
+    summary = f"Caller reported {body.issue}. {'Appointment booked for ' + body.appointment_date + ' ' + body.appointment_time + '.' if body.booked else 'No appointment booked.'}"
     await push_to_integrations(
         customer_name=body.customer_name,
         customer_phone=body.customer_phone,
