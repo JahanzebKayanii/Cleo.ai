@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from app.api.analytics import router as analytics_router
 from app.api.appointments import router as appointments_router
 from app.api.business import router as business_router
 from app.api.call import router as call_router
@@ -57,6 +58,7 @@ app.add_middleware(
 )
 
 app.include_router(health_router, tags=["health"])
+app.include_router(analytics_router)
 app.include_router(business_router)
 app.include_router(documents_router)
 app.include_router(conversation_router)

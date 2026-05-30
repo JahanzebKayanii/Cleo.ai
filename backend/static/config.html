@@ -6,208 +6,186 @@
   <title>Cleo — Config</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>body { font-family: 'Inter', sans-serif; }</style>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #0c0c0c; color: #e5e5e5; }
+    .sidebar { background: #111111; border-right: 1px solid #1f1f1f; }
+    .card { background: #161616; border: 1px solid #222222; }
+    input, select { background: #111 !important; border-color: #2a2a2a !important; color: #e5e5e5 !important; }
+    input:focus, select:focus { border-color: #7c3aed !important; outline: none; }
+    input::placeholder { color: #3a3a3a; }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #111; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen">
+<body class="flex h-screen overflow-hidden">
 
-  <!-- Nav -->
-  <nav class="border-b border-gray-800 bg-gray-900">
-    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-white font-bold text-sm">C</div>
-        <span class="font-semibold text-white">Cleo</span>
-      </div>
-      <div class="flex gap-6 text-sm">
-        <a href="/dashboard/" class="text-gray-400 hover:text-white transition">Calls</a>
-        <a href="/dashboard/config.html" class="text-violet-400 font-medium">Config</a>
+  <!-- Sidebar -->
+  <aside class="sidebar w-56 flex-shrink-0 flex flex-col h-screen">
+    <div class="px-5 py-5 border-b border-[#1f1f1f]">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-md bg-violet-600 flex items-center justify-center text-white font-bold text-xs">C</div>
+        <span class="font-semibold text-white text-sm">Cleo</span>
       </div>
     </div>
-  </nav>
-
-  <div class="max-w-4xl mx-auto px-6 py-10">
-
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-white">Business Configuration</h1>
-      <p class="text-gray-400 mt-1 text-sm">Configure how Cleo represents your business and which integrations are active</p>
+    <nav class="flex-1 px-3 py-4 space-y-0.5">
+      <a href="/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#666] hover:text-white hover:bg-[#1e1e1e] transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+      <a href="/dashboard/calls.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#666] hover:text-white hover:bg-[#1e1e1e] transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+        Calls
+      </a>
+      <a href="/dashboard/config.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white bg-[#1e1e1e]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        Config
+      </a>
+    </nav>
+    <div class="px-3 py-4 border-t border-[#1f1f1f]">
+      <div class="px-3 py-2">
+        <p class="text-xs text-[#444]" id="sidebar-biz">Apex Home Services</p>
+        <div class="flex items-center gap-1.5 mt-1">
+          <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+          <span class="text-xs text-[#555]">Live</span>
+        </div>
+      </div>
     </div>
+  </aside>
 
-    <!-- Toast -->
-    <div id="toast" class="hidden fixed top-6 right-6 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-lg"></div>
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <div class="px-8 py-8 max-w-3xl">
 
-    <form id="config-form" class="space-y-6">
+      <div class="mb-8">
+        <h1 class="text-xl font-semibold text-white">Configuration</h1>
+        <p class="text-sm text-[#555] mt-0.5">Manage business info and integration API keys</p>
+      </div>
 
-      <!-- Business Info -->
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 class="text-base font-semibold text-white mb-5">Business Info</h2>
-        <div class="grid grid-cols-1 gap-4">
-          <div>
-            <label class="block text-xs text-gray-400 mb-1.5">Business Name</label>
-            <input id="name" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
+      <div id="toast" class="hidden fixed top-6 right-6 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-xl"></div>
+
+      <form id="form" class="space-y-5">
+
+        <!-- Business Info -->
+        <div class="card rounded-xl p-6">
+          <h2 class="text-sm font-semibold text-white mb-5">Business Info</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs text-[#555] mb-1.5">Business Name</label>
+              <input id="name" type="text" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
+            </div>
+            <div>
+              <label class="block text-xs text-[#555] mb-1.5">Description <span class="text-[#333]">— used in Cleo's introduction</span></label>
+              <input id="description" type="text" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-[#555] mb-1.5">Timezone</label>
+                <select id="timezone" class="w-full border rounded-lg px-3 py-2.5 text-sm transition">
+                  <option value="America/Chicago">Central (Chicago)</option>
+                  <option value="America/New_York">Eastern (New York)</option>
+                  <option value="America/Denver">Mountain (Denver)</option>
+                  <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
+                  <option value="America/Phoenix">Arizona (Phoenix)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-[#555] mb-1.5">Services <span class="text-[#333]">comma separated</span></label>
+                <input id="services" type="text" placeholder="HVAC, plumbing, electrical" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
+              </div>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1.5">Description <span class="text-gray-600">(used in Cleo's introduction)</span></label>
-            <input id="description" type="text" placeholder="a licensed HVAC, plumbing, and electrical company based in Austin, Texas" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
-          </div>
+        </div>
+
+        <!-- Hours -->
+        <div class="card rounded-xl p-6">
+          <h2 class="text-sm font-semibold text-white mb-5">Business Hours <span class="text-[#444] font-normal">— Monday to Friday</span></h2>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs text-gray-400 mb-1.5">Timezone</label>
-              <select id="timezone" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 transition">
-                <option value="America/Chicago">Central (Chicago)</option>
-                <option value="America/New_York">Eastern (New York)</option>
-                <option value="America/Denver">Mountain (Denver)</option>
-                <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
-                <option value="America/Phoenix">Arizona (Phoenix)</option>
+              <label class="block text-xs text-[#555] mb-1.5">Opens</label>
+              <select id="hours_open" class="w-full border rounded-lg px-3 py-2.5 text-sm transition">
+                <option value="6">6:00 AM</option><option value="7">7:00 AM</option>
+                <option value="8">8:00 AM</option><option value="9">9:00 AM</option>
+                <option value="10">10:00 AM</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs text-gray-400 mb-1.5">Services <span class="text-gray-600">(comma separated)</span></label>
-              <input id="services" type="text" placeholder="HVAC, plumbing, electrical" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
+              <label class="block text-xs text-[#555] mb-1.5">Closes</label>
+              <select id="hours_close" class="w-full border rounded-lg px-3 py-2.5 text-sm transition">
+                <option value="16">4:00 PM</option><option value="17">5:00 PM</option>
+                <option value="18">6:00 PM</option><option value="19">7:00 PM</option>
+                <option value="20">8:00 PM</option>
+              </select>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Business Hours -->
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 class="text-base font-semibold text-white mb-5">Business Hours <span class="text-gray-500 font-normal text-sm">(Monday – Friday)</span></h2>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs text-gray-400 mb-1.5">Opens at</label>
-            <select id="hours_open" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 transition">
-              <option value="6">6:00 AM</option>
-              <option value="7">7:00 AM</option>
-              <option value="8">8:00 AM</option>
-              <option value="9">9:00 AM</option>
-              <option value="10">10:00 AM</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1.5">Closes at</label>
-            <select id="hours_close" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500 transition">
-              <option value="16">4:00 PM</option>
-              <option value="17">5:00 PM</option>
-              <option value="18">6:00 PM</option>
-              <option value="19">7:00 PM</option>
-              <option value="20">8:00 PM</option>
-            </select>
+        <!-- Integrations -->
+        <div class="card rounded-xl p-6">
+          <h2 class="text-sm font-semibold text-white mb-1">Integrations</h2>
+          <p class="text-xs text-[#444] mb-5">Paste your API key to activate. Leave blank to disable.</p>
+          <div class="space-y-3">
+            ${[
+              ['jobber_api_key', 'J', '#16a34a', 'Jobber', 'Field service management — auto-create jobs after bookings'],
+              ['hubspot_token', 'HS', '#ea580c', 'HubSpot', 'CRM — auto-create contacts and deals after each call'],
+              ['housecall_pro_api_key', 'HP', '#2563eb', 'Housecall Pro', 'Field service management — alternative to Jobber'],
+              ['quickbooks_token', 'QB', '#0d9488', 'QuickBooks', 'Accounting — auto-generate invoices after completed jobs'],
+              ['servicetitan_token', 'ST', '#7c3aed', 'ServiceTitan', 'Enterprise field service — requires partner access'],
+            ].map(([id, initials, color, name, desc]) => `
+            <div class="flex items-center gap-4 p-4 bg-[#111] rounded-lg border border-[#1e1e1e]">
+              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:${color}22;color:${color}">${initials}</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-white">${name}</p>
+                <p class="text-xs text-[#444] mt-0.5">${desc}</p>
+              </div>
+              <input id="${id}" type="password" placeholder="API key" class="w-48 border rounded-lg px-3 py-2 text-xs transition flex-shrink-0" />
+            </div>`).join('')}
           </div>
         </div>
-      </div>
 
-      <!-- Integrations -->
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 class="text-base font-semibold text-white mb-1">Integrations</h2>
-        <p class="text-xs text-gray-500 mb-5">Paste your API key or token. Leave blank to disable that integration.</p>
-
-        <div class="space-y-4">
-
-          <div class="flex items-start gap-4 p-4 bg-gray-800/60 rounded-lg border border-gray-700">
-            <div class="w-8 h-8 rounded bg-green-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span class="text-green-400 text-xs font-bold">J</span>
-            </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-white mb-1">Jobber</label>
-              <p class="text-xs text-gray-500 mb-2">Field service management — auto-create jobs after bookings</p>
-              <input id="jobber_api_key" type="password" placeholder="Jobber API key" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
-            </div>
-          </div>
-
-          <div class="flex items-start gap-4 p-4 bg-gray-800/60 rounded-lg border border-gray-700">
-            <div class="w-8 h-8 rounded bg-orange-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span class="text-orange-400 text-xs font-bold">HS</span>
-            </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-white mb-1">HubSpot</label>
-              <p class="text-xs text-gray-500 mb-2">CRM — auto-create contacts and deals after each call</p>
-              <input id="hubspot_token" type="password" placeholder="HubSpot private app token" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
-            </div>
-          </div>
-
-          <div class="flex items-start gap-4 p-4 bg-gray-800/60 rounded-lg border border-gray-700">
-            <div class="w-8 h-8 rounded bg-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span class="text-blue-400 text-xs font-bold">HP</span>
-            </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-white mb-1">Housecall Pro</label>
-              <p class="text-xs text-gray-500 mb-2">Field service management — alternative to Jobber</p>
-              <input id="housecall_pro_api_key" type="password" placeholder="Housecall Pro API key" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
-            </div>
-          </div>
-
-          <div class="flex items-start gap-4 p-4 bg-gray-800/60 rounded-lg border border-gray-700">
-            <div class="w-8 h-8 rounded bg-teal-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span class="text-teal-400 text-xs font-bold">QB</span>
-            </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-white mb-1">QuickBooks</label>
-              <p class="text-xs text-gray-500 mb-2">Accounting — auto-generate invoices after completed jobs</p>
-              <input id="quickbooks_token" type="password" placeholder="QuickBooks access token" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
-            </div>
-          </div>
-
-          <div class="flex items-start gap-4 p-4 bg-gray-800/60 rounded-lg border border-gray-700">
-            <div class="w-8 h-8 rounded bg-purple-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span class="text-purple-400 text-xs font-bold">ST</span>
-            </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-white mb-1">ServiceTitan</label>
-              <p class="text-xs text-gray-500 mb-2">Enterprise field service — requires partner access</p>
-              <input id="servicetitan_token" type="password" placeholder="ServiceTitan token" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500 transition" />
-            </div>
-          </div>
-
+        <div class="flex justify-end">
+          <button type="submit" id="save-btn" class="bg-violet-600 hover:bg-violet-500 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition">
+            Save Changes
+          </button>
         </div>
-      </div>
 
-      <!-- Save -->
-      <div class="flex justify-end">
-        <button type="submit" id="save-btn" class="bg-violet-600 hover:bg-violet-500 text-white font-medium px-6 py-2.5 rounded-lg text-sm transition">
-          Save Changes
-        </button>
-      </div>
-
-    </form>
-  </div>
+      </form>
+    </div>
+  </main>
 
   <script>
     const API = window.location.origin;
 
-    function showToast(msg, ok = true) {
+    function toast(msg, ok = true) {
       const t = document.getElementById('toast');
       t.textContent = msg;
-      t.className = `fixed top-6 right-6 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-lg ${ok ? 'bg-green-700 text-white' : 'bg-red-700 text-white'}`;
+      t.className = `fixed top-6 right-6 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-xl ${ok ? 'bg-green-700 text-white' : 'bg-red-800 text-white'}`;
       t.classList.remove('hidden');
       setTimeout(() => t.classList.add('hidden'), 3000);
     }
 
-    async function loadConfig() {
-      const res = await fetch(`${API}/business/config`);
-      const c = await res.json();
-
+    async function load() {
+      const c = await fetch(`${API}/business/config`).then(r => r.json());
       document.getElementById('name').value = c.name || '';
       document.getElementById('description').value = c.description || '';
       document.getElementById('timezone').value = c.timezone || 'America/Chicago';
       document.getElementById('services').value = (c.services || []).join(', ');
       document.getElementById('hours_open').value = c.hours_open ?? 8;
       document.getElementById('hours_close').value = c.hours_close ?? 18;
+      if (c.name) document.getElementById('sidebar-biz').textContent = c.name;
     }
 
-    document.getElementById('config-form').addEventListener('submit', async (e) => {
+    document.getElementById('form').addEventListener('submit', async e => {
       e.preventDefault();
       const btn = document.getElementById('save-btn');
-      btn.textContent = 'Saving...';
-      btn.disabled = true;
-
-      const services = document.getElementById('services').value
-        .split(',').map(s => s.trim()).filter(Boolean);
+      btn.textContent = 'Saving...'; btn.disabled = true;
 
       const payload = {
         name: document.getElementById('name').value,
         description: document.getElementById('description').value,
         timezone: document.getElementById('timezone').value,
-        services,
-        hours_open: parseInt(document.getElementById('hours_open').value),
-        hours_close: parseInt(document.getElementById('hours_close').value),
+        services: document.getElementById('services').value.split(',').map(s => s.trim()).filter(Boolean),
+        hours_open: +document.getElementById('hours_open').value,
+        hours_close: +document.getElementById('hours_close').value,
         jobber_api_key: document.getElementById('jobber_api_key').value,
         hubspot_token: document.getElementById('hubspot_token').value,
         housecall_pro_api_key: document.getElementById('housecall_pro_api_key').value,
@@ -216,25 +194,15 @@
       };
 
       try {
-        const res = await fetch(`${API}/business/config`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-          showToast('Configuration saved');
-        } else {
-          showToast('Failed to save', false);
-        }
-      } catch {
-        showToast('Network error', false);
-      }
+        const res = await fetch(`${API}/business/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        res.ok ? toast('Saved') : toast('Failed to save', false);
+        if (res.ok) document.getElementById('sidebar-biz').textContent = payload.name;
+      } catch { toast('Network error', false); }
 
-      btn.textContent = 'Save Changes';
-      btn.disabled = false;
+      btn.textContent = 'Save Changes'; btn.disabled = false;
     });
 
-    loadConfig();
+    load();
   </script>
 </body>
 </html>
