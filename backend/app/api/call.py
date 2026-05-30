@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.state import call_caller_info, call_phone_map, pending_first, pending_rest
+from app.core.state import call_caller_info, call_config, call_phone_map, pending_first, pending_rest
+from app.services.business_service import get_business
 from app.services.call_service import end_call, generate_and_save_summary, start_call
 from app.services.conversation_service import _is_business_hours, clear_session
 from app.services.customer_service import get_caller_context
@@ -42,16 +43,19 @@ async def incoming_call(
 
     ctx = await get_caller_context(db, From)
     call_caller_info[CallSid] = ctx
+    config = await get_business(db)
+    call_config[CallSid] = config
 
     await start_call(db, CallSid, From)
 
-    if not _is_business_hours():
-        greeting = "Thank you for calling Apex Home Services. Our office is currently closed, but I can take a message and have someone call you back next business day. What's your name and what do you need help with?"
+    biz_name = config.get("name", "Apex Home Services")
+    if not _is_business_hours(config):
+        greeting = f"Thank you for calling {biz_name}. Our office is currently closed, but I can take a message and have someone call you back next business day. What's your name and what do you need help with?"
     elif ctx.get("name"):
         first_name = ctx["name"].split()[0]
-        greeting = f"Apex Home Services, this is Cleo. Welcome back, {first_name}! How can I help you today?"
+        greeting = f"{biz_name}, this is Cleo. Welcome back, {first_name}! How can I help you today?"
     else:
-        greeting = "Apex Home Services, this is Cleo, your virtual receptionist. How can I help you?"
+        greeting = f"{biz_name}, this is Cleo, your virtual receptionist. How can I help you?"
 
     return twiml_greet_stream(greeting)
 
@@ -162,4 +166,5 @@ async def call_status(
         clear_session(CallSid)
     call_phone_map.pop(CallSid, None)
     call_caller_info.pop(CallSid, None)
+    call_config.pop(CallSid, None)
     return Response(status_code=204)

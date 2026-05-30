@@ -60,18 +60,50 @@ After-hours calls (outside Monday–Friday 8 AM to 6 PM Central Time):
 - For true emergencies (gas smell, flooding, electrical sparks or burning smell, no heat in very cold weather), still direct them to 911 first, then take their info for a callback."""
 
 
-def _is_business_hours() -> bool:
-    now = datetime.now(ZoneInfo("America/Chicago"))
+def _is_business_hours(config: dict | None = None) -> bool:
+    tz = ZoneInfo(config["timezone"] if config else "America/Chicago")
+    now = datetime.now(tz)
     if now.weekday() >= 5:
         return False
-    return 8 <= now.hour < 18
+    open_h = config["hours_open"] if config else 8
+    close_h = config["hours_close"] if config else 18
+    return open_h <= now.hour < close_h
 
 
-def _system_prompt(caller_info: dict | None = None) -> str:
-    now = datetime.now(ZoneInfo("America/Chicago"))
+def _system_prompt(caller_info: dict | None = None, config: dict | None = None) -> str:
+    tz = ZoneInfo(config["timezone"] if config else "America/Chicago")
+    now = datetime.now(tz)
     today = now.strftime("%A, %B %-d, %Y")
     current_time = now.strftime("%-I:%M %p")
-    prompt = _SYSTEM_PROMPT_TEMPLATE.format(today=today, current_time=current_time)
+
+    if config:
+        services = ", ".join(config.get("services") or ["HVAC", "plumbing", "electrical"])
+        biz_name = config.get("name") or "Apex Home Services"
+        biz_desc = config.get("description") or "a licensed HVAC, plumbing, and electrical company based in Austin, Texas"
+        open_h = config.get("hours_open", 8)
+        close_h = config.get("hours_close", 18)
+        open_str = f"{open_h % 12 or 12} {'AM' if open_h < 12 else 'PM'}"
+        close_str = f"{close_h % 12 or 12} {'AM' if close_h < 12 else 'PM'}"
+        template = _SYSTEM_PROMPT_TEMPLATE.replace(
+            "Apex Home Services, a licensed HVAC, plumbing, and electrical company based in Austin, Texas",
+            f"{biz_name}, {biz_desc}",
+        ).replace(
+            "HVAC, plumbing, and electrical",
+            services,
+        ).replace(
+            "Apex Home Services: HVAC, plumbing, electrical, bookings, pricing, and availability",
+            f"{biz_name}: {services}, bookings, pricing, and availability",
+        ).replace(
+            "8 AM to 6 PM Central Time",
+            f"{open_str} to {close_str} Central Time",
+        ).replace(
+            "Monday through Friday, 8 AM to 6 PM Central Time",
+            f"Monday through Friday, {open_str} to {close_str} Central Time",
+        )
+    else:
+        template = _SYSTEM_PROMPT_TEMPLATE
+
+    prompt = template.format(today=today, current_time=current_time)
     if caller_info and caller_info.get("name"):
         name = caller_info["name"]
         summaries = caller_info.get("summaries", [])
@@ -173,7 +205,7 @@ def _get_client() -> AsyncAnthropic:
 
 
 async def stream_response_parts(
-    session_id: str, user_message: str, caller_phone: str = "", caller_info: dict | None = None
+    session_id: str, user_message: str, caller_phone: str = "", caller_info: dict | None = None, config: dict | None = None
 ):
     """Async generator: yields ('first', text) then ('rest', text).
 
@@ -195,7 +227,7 @@ async def stream_response_parts(
     async with client.messages.stream(
         model="claude-sonnet-4-6",
         max_tokens=500,
-        system=_system_prompt(caller_info),
+        system=_system_prompt(caller_info, config),
         messages=history_with_user,
         tools=TOOLS,
     ) as stream:
@@ -251,7 +283,7 @@ async def stream_response_parts(
         async with client.messages.stream(
             model="claude-sonnet-4-6",
             max_tokens=300,
-            system=_system_prompt(caller_info),
+            system=_system_prompt(caller_info, config),
             messages=msgs_with_tools,
         ) as stream2:
             async for text in stream2.text_stream:
@@ -297,7 +329,7 @@ async def stream_response_parts(
 
 
 async def get_response(
-    session_id: str, user_message: str, caller_phone: str = "", caller_info: dict | None = None
+    session_id: str, user_message: str, caller_phone: str = "", caller_info: dict | None = None, config: dict | None = None
 ) -> str:
     context_chunks = await search_documents(user_message, limit=3)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)
@@ -310,7 +342,7 @@ async def get_response(
     response = await client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=500,
-        system=_system_prompt(caller_info),
+        system=_system_prompt(caller_info, config),
         messages=history_with_user,
         tools=TOOLS,
     )
@@ -339,7 +371,7 @@ async def get_response(
         response2 = await client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=300,
-            system=_system_prompt(caller_info),
+            system=_system_prompt(caller_info, config),
             messages=msgs_with_tools,
         )
         reply = response2.content[0].text

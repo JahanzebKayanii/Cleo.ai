@@ -10,3 +10,6 @@ call_phone_map: dict[str, str] = {}  # call_sid -> caller E.164 phone number
 
 # Returning caller info: name + recent call summaries, populated on /incoming
 call_caller_info: dict[str, dict] = {}  # call_sid -> {name, summaries}
+
+# Business config cached per call so stream.py doesn't need DB access
+call_config: dict[str, dict] = {}  # call_sid -> business config dict

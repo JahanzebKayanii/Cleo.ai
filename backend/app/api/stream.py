@@ -10,7 +10,7 @@ from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db_context
-from app.core.state import call_caller_info, call_phone_map, pending_first, pending_rest
+from app.core.state import call_caller_info, call_config, call_phone_map, pending_first, pending_rest
 from app.services.call_service import append_transcript
 from app.services.conversation_service import stream_response_parts
 
@@ -41,7 +41,8 @@ async def _generate_and_store(call_sid: str, transcript: str) -> None:
     full_reply = ""
     phone = call_phone_map.get(call_sid, "")
     caller_info = call_caller_info.get(call_sid, {})
-    async for part, text in stream_response_parts(call_sid, transcript, phone, caller_info):
+    config = call_config.get(call_sid)
+    async for part, text in stream_response_parts(call_sid, transcript, phone, caller_info, config):
         if part == "first":
             pending_first[call_sid] = text
             full_reply = text
