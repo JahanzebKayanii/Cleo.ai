@@ -50,12 +50,28 @@ Booking appointments:
 - If the caller gives a Saturday or Sunday, let them know Apex only schedules Monday through Friday and ask for a weekday.
 - If the caller gives a vague date like "sometime next week" or "next Monday or Tuesday", ask them to pick one specific date before calling check_availability.
 - If check_availability returns no available slots, let the caller know that date is fully booked and ask them to try the next business day or suggest an alternative.
-- Today is {today}."""
+- Today is {today}. Current time: {current_time} Central Time.
+
+After-hours calls (outside Monday–Friday 8 AM to 6 PM Central Time):
+- Let the caller know the office is currently closed.
+- Tell them the next available time to call back (next business day at 8 AM).
+- Offer to take their name and a brief message so a technician can call them back during business hours.
+- Do not attempt to book appointments after hours.
+- For true emergencies (gas smell, flooding, electrical sparks or burning smell, no heat in very cold weather), still direct them to 911 first, then take their info for a callback."""
+
+
+def _is_business_hours() -> bool:
+    now = datetime.now(ZoneInfo("America/Chicago"))
+    if now.weekday() >= 5:
+        return False
+    return 8 <= now.hour < 18
 
 
 def _system_prompt(caller_info: dict | None = None) -> str:
-    today = datetime.now(ZoneInfo("America/Chicago")).strftime("%A, %B %-d, %Y")
-    prompt = _SYSTEM_PROMPT_TEMPLATE.format(today=today)
+    now = datetime.now(ZoneInfo("America/Chicago"))
+    today = now.strftime("%A, %B %-d, %Y")
+    current_time = now.strftime("%-I:%M %p")
+    prompt = _SYSTEM_PROMPT_TEMPLATE.format(today=today, current_time=current_time)
     if caller_info and caller_info.get("name"):
         name = caller_info["name"]
         summaries = caller_info.get("summaries", [])

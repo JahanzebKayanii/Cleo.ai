@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.state import call_caller_info, call_phone_map, pending_first, pending_rest
 from app.services.call_service import end_call, generate_and_save_summary, start_call
-from app.services.conversation_service import clear_session
+from app.services.conversation_service import _is_business_hours, clear_session
 from app.services.customer_service import get_caller_context
 
 router = APIRouter(prefix="/call", tags=["call"])
@@ -45,7 +45,9 @@ async def incoming_call(
 
     await start_call(db, CallSid, From)
 
-    if ctx.get("name"):
+    if not _is_business_hours():
+        greeting = "Thank you for calling Apex Home Services. Our office is currently closed, but I can take a message and have someone call you back next business day. What's your name and what do you need help with?"
+    elif ctx.get("name"):
         first_name = ctx["name"].split()[0]
         greeting = f"Apex Home Services, this is Cleo. Welcome back, {first_name}! How can I help you today?"
     else:
