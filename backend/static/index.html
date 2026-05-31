@@ -14,7 +14,7 @@
     .card { background: #fff; border: 1px solid #e8e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
     .card-glow { box-shadow: 0 4px 20px rgba(16,185,129,0.08); }
     .nav-item { color: #888; transition: all 0.15s; }
-    .nav-item:hover, .nav-item.active { color: #10b981; background: #f5f3ff; }
+    .nav-item:hover, .nav-item.active { color: #10b981; background: #ecfdf5; }
     .table-row:hover { background: #faf9ff; }
     .stat-value { color: #10b981; }
     main { background: #f5f5f9; }
@@ -25,10 +25,10 @@
 
   <!-- Sidebar -->
   <aside class="sidebar w-56 flex-shrink-0 flex flex-col h-screen">
-    <div class="px-5 py-5 border-b border-[#1f1f1f]">
+    <div class="px-5 py-5 border-b border-[#e8e8f0]">
       <div class="flex items-center gap-2.5">
         <svg viewBox="0 0 80 80" width="28" height="28" fill="none"><rect width="80" height="80" rx="18" fill="#10b981"/><rect x="12" y="32" width="8" height="16" rx="4" fill="white" opacity="0.5"/><rect x="24" y="22" width="8" height="36" rx="4" fill="white" opacity="0.75"/><rect x="36" y="14" width="8" height="52" rx="4" fill="white"/><rect x="48" y="22" width="8" height="36" rx="4" fill="white" opacity="0.75"/><rect x="60" y="32" width="8" height="16" rx="4" fill="white" opacity="0.5"/></svg>
-        <span class="font-semibold text-white text-sm">Cleo</span>
+        <span class="font-semibold text-[#111] text-sm">Cleo</span>
       </div>
     </div>
 
@@ -47,7 +47,7 @@
       </a>
     </nav>
 
-    <div class="px-3 py-4 border-t border-[#1f1f1f]">
+    <div class="px-3 py-4 border-t border-[#e8e8f0]">
       <div class="px-3 py-2">
         <p class="text-xs text-[#444]">Apex Home Services</p>
         <div class="flex items-center justify-between mt-1">
@@ -67,7 +67,7 @@
 
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-xl font-semibold text-white">Overview</h1>
+        <h1 class="text-xl font-semibold text-[#111]">Overview</h1>
         <p class="text-sm text-[#555] mt-0.5">Real-time analytics for Cleo</p>
       </div>
 
@@ -94,11 +94,11 @@
       <!-- Charts row -->
       <div class="grid grid-cols-5 gap-4 mb-8">
         <div class="card rounded-xl p-5 col-span-3">
-          <p class="text-sm font-medium text-white mb-4">Call Volume — Last 14 Days</p>
+          <p class="text-sm font-medium text-[#111] mb-4">Call Volume — Last 14 Days</p>
           <canvas id="chart-daily" height="120"></canvas>
         </div>
         <div class="card rounded-xl p-5 col-span-2">
-          <p class="text-sm font-medium text-white mb-4">Peak Hours</p>
+          <p class="text-sm font-medium text-[#111] mb-4">Peak Hours</p>
           <canvas id="chart-hourly" height="120"></canvas>
         </div>
       </div>
@@ -106,19 +106,19 @@
       <!-- Service breakdown + recent calls -->
       <div class="grid grid-cols-5 gap-4">
         <div class="card rounded-xl p-5 col-span-2">
-          <p class="text-sm font-medium text-white mb-5">By Service</p>
+          <p class="text-sm font-medium text-[#111] mb-5">By Service</p>
           <div id="service-breakdown" class="space-y-3"></div>
         </div>
         <div class="card rounded-xl col-span-3 overflow-hidden">
-          <div class="px-5 py-4 border-b border-[#222]">
-            <p class="text-sm font-medium text-white">Recent Calls</p>
+          <div class="px-5 py-4 border-b border-[#e8e8f0]">
+            <p class="text-sm font-medium text-[#111]">Recent Calls</p>
           </div>
           <table class="w-full text-sm">
             <thead>
-              <tr class="border-b border-[#1e1e1e]">
-                <th class="text-left px-5 py-3 text-xs text-[#444] font-medium uppercase tracking-wider">Caller</th>
-                <th class="text-left px-5 py-3 text-xs text-[#444] font-medium uppercase tracking-wider">Status</th>
-                <th class="text-left px-5 py-3 text-xs text-[#444] font-medium uppercase tracking-wider">When</th>
+              <tr class="border-b border-[#e8e8f0]">
+                <th class="text-left px-5 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Caller</th>
+                <th class="text-left px-5 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Status</th>
+                <th class="text-left px-5 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">When</th>
               </tr>
             </thead>
             <tbody id="recent-calls"></tbody>
@@ -132,7 +132,7 @@
   <script>
     const API = window.location.origin;
     const VIOLET = '#10b981';
-    const GRID = '#1f1f1f';
+    const GRID = '#e8e8f0';
     const TEXT = '#555';
     Chart.defaults.color = TEXT;
     Chart.defaults.borderColor = GRID;
@@ -220,9 +220,9 @@
         <div>
           <div class="flex justify-between text-xs mb-1.5">
             <span class="text-[#888]">${k}</span>
-            <span class="text-white font-medium">${v}</span>
+            <span class="text-[#111] font-medium">${v}</span>
           </div>
-          <div class="w-full h-1.5 bg-[#222] rounded-full overflow-hidden">
+          <div class="w-full h-1.5 bg-[#e8e8f0] rounded-full overflow-hidden">
             <div class="h-full ${colors[k]||'bg-gray-500'} rounded-full" style="width:${Math.round(v/total*100)}%"></div>
           </div>
         </div>
@@ -232,8 +232,8 @@
       const recent = calls.slice(0, 8);
       document.getElementById('recent-calls').innerHTML = recent.length
         ? recent.map(c => `
-          <tr class="table-row border-t border-[#1e1e1e] cursor-pointer" onclick="location.href='/dashboard/calls.html'">
-            <td class="px-5 py-3 text-white font-medium">${c.customer_name || c.customer_phone || 'Unknown'}</td>
+          <tr class="table-row border-t border-[#e8e8f0] cursor-pointer" onclick="location.href='/dashboard/calls.html'">
+            <td class="px-5 py-3 text-[#111] font-medium">${c.customer_name || c.customer_phone || 'Unknown'}</td>
             <td class="px-5 py-3">${badge(c.status)}</td>
             <td class="px-5 py-3 text-[#555] text-xs">${timeAgo(c.started_at)}</td>
           </tr>`).join('')
