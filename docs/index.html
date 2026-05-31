@@ -424,6 +424,171 @@
     </div>
   </section>
 
+  <!-- Technical section -->
+  <section class="py-28 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-xs uppercase tracking-widest mb-3 font-semibold text-emerald-600">Under the hood</p>
+        <h2 class="text-4xl font-bold text-gray-900">Built on enterprise-grade infrastructure</h2>
+        <p class="mt-4 text-sm text-gray-400 max-w-xl mx-auto">Cleo is not a simple phone menu. It runs a full large-language model on every call, with real-time speech recognition and sub-second response times.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 items-start">
+
+        <!-- Terminal card -->
+        <div class="fade-up" style="transition-delay:0.1s">
+          <div class="rounded-2xl overflow-hidden" style="border:1px solid #e8e8f0;box-shadow:0 4px 20px rgba(0,0,0,0.06)">
+            <div class="flex items-center gap-2 px-4 py-3" style="background:#1e1e2e">
+              <div class="w-3 h-3 rounded-full bg-red-400"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+              <div class="w-3 h-3 rounded-full bg-green-400"></div>
+              <span class="text-xs ml-2" style="color:#888;font-family:monospace">cleo — call log</span>
+            </div>
+            <div class="p-5" style="background:#13131a;font-family:'Courier New',monospace;font-size:12px;line-height:1.8">
+              <p style="color:#6ee7b7">[STT]  Deepgram nova-2 transcribed in 280ms</p>
+              <p style="color:#888">[RAG]  Searching knowledge base... 3 chunks found</p>
+              <p style="color:#6ee7b7">[LLM]  Claude Sonnet streaming response...</p>
+              <p style="color:#6ee7b7">[LLM]  First sentence ready in 620ms → TTS</p>
+              <p style="color:#888">[CAL]  Checking Google Calendar availability</p>
+              <p style="color:#6ee7b7">[BOOK] Appointment confirmed: Jun 6, 10AM–noon</p>
+              <p style="color:#6ee7b7">[SMS]  Confirmation sent to +16562008586</p>
+              <p style="color:#888">[CRM]  HubSpot: contact + deal created</p>
+              <p style="color:#6ee7b7">[EMAIL] Summary sent to owner@business.com</p>
+              <p style="color:#555">─────────────────────────────────</p>
+              <p style="color:#6ee7b7">[DONE] Call handled in 2m 14s · 0 humans involved</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tech stack -->
+        <div class="space-y-4 fade-up" style="transition-delay:0.2s">
+          <div class="card rounded-2xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg" style="background:#f0fdf4;border:1px solid #d1fae5">🎙️</div>
+            <div>
+              <p class="text-gray-900 font-semibold text-sm mb-1">Deepgram Nova-2 STT</p>
+              <p class="text-xs text-gray-400 leading-relaxed">Industry-leading speech-to-text with phone-audio optimisation. Transcribes in under 300ms with high accuracy on accents and noisy environments.</p>
+            </div>
+          </div>
+          <div class="card rounded-2xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg" style="background:#f0fdf4;border:1px solid #d1fae5">🧠</div>
+            <div>
+              <p class="text-gray-900 font-semibold text-sm mb-1">Claude Sonnet (Anthropic)</p>
+              <p class="text-xs text-gray-400 leading-relaxed">Powers all conversation logic, intent detection, and tool use. Streams the first sentence while the rest generates — callers hear a response in under 1 second.</p>
+            </div>
+          </div>
+          <div class="card rounded-2xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg" style="background:#f0fdf4;border:1px solid #d1fae5">📚</div>
+            <div>
+              <p class="text-gray-900 font-semibold text-sm mb-1">RAG Knowledge Base</p>
+              <p class="text-xs text-gray-400 leading-relaxed">Your business documents — pricing, services, FAQs — are embedded and retrieved on every call. Cleo never invents information it wasn't given.</p>
+            </div>
+          </div>
+          <div class="card rounded-2xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg" style="background:#f0fdf4;border:1px solid #d1fae5">☎️</div>
+            <div>
+              <p class="text-gray-900 font-semibold text-sm mb-1">Twilio Voice Infrastructure</p>
+              <p class="text-xs text-gray-400 leading-relaxed">Carrier-grade call handling with global PSTN access. Works with your existing business phone number — no hardware changes needed.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="py-28 px-6 section-alt">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-xs uppercase tracking-widest mb-3 font-semibold text-emerald-600">FAQ</p>
+        <h2 class="text-4xl font-bold text-gray-900">Common questions</h2>
+      </div>
+
+      <div class="space-y-3 fade-up">
+
+        <details class="card rounded-2xl group" style="transition:all 0.2s">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">How does Cleo know about my business?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            During setup, you upload your business documents — services list, pricing, FAQs, service area, policies. These get embedded into a knowledge base Cleo searches on every call. When your pricing changes, you update the document and Cleo instantly knows. Nothing is hardcoded.
+          </div>
+        </details>
+
+        <details class="card rounded-2xl group">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">What if Cleo can't answer a question?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            If a question isn't covered in your knowledge base, Cleo says it will have a team member follow up — it never makes up an answer. If the caller is frustrated or wants a human, Cleo transfers them to your real phone number immediately.
+          </div>
+        </details>
+
+        <details class="card rounded-2xl group">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">Does it work with my existing phone number?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            Yes. We provision a dedicated phone number for Cleo and forward your existing business number to it. Your customers dial the same number they always have — nothing changes on their end.
+          </div>
+        </details>
+
+        <details class="card rounded-2xl group">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">How long does setup take?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            Usually under 24 hours. We need your services list, business hours, service area, and calendar access. Most of it is a 30-minute conversation and a few documents. We handle all the technical setup.
+          </div>
+        </details>
+
+        <details class="card rounded-2xl group">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">What happens to my call data?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            Every call is transcribed, summarised, and stored in your private dashboard. Only you have access. We never share or sell call data. Transcripts and recordings are available to you indefinitely.
+          </div>
+        </details>
+
+        <details class="card rounded-2xl group">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">Can Cleo handle after-hours calls?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            Yes. Cleo runs 24/7. Outside your configured business hours, it lets callers know you're closed, collects their name and details, and sends you a summary so you can call back first thing in the morning. No lead is ever lost to voicemail.
+          </div>
+        </details>
+
+        <details class="card rounded-2xl group">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">Can I change the business hours or services without contacting you?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            Yes. Your dashboard has a configuration panel where you can update business hours, service area, services offered, and integration settings yourself — no technical skills required. Changes go live immediately.
+          </div>
+        </details>
+
+        <details class="card rounded-2xl group">
+          <summary class="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
+            <span class="text-gray-900 font-medium text-sm">What if I want to cancel?</span>
+            <span class="text-emerald-500 text-lg group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-5 text-sm text-gray-500 leading-relaxed">
+            Cancel anytime with no penalty. Your call history and data are exported to you before we close anything. We don't lock you into contracts.
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
   <!-- Final CTA -->
   <section class="py-28 px-6">
     <div class="max-w-2xl mx-auto text-center fade-up">
