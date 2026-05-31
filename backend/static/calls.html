@@ -12,7 +12,7 @@
     .sidebar { background: #fff; border-right: 1px solid #e8e8f0; }
     .card { background: #fff; border: 1px solid #e8e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
     .nav-item { color: #888; transition: all 0.15s; }
-    .nav-item:hover, .nav-item.active { color: #7c3aed; background: #f5f3ff; }
+    .nav-item:hover, .nav-item.active { color: #10b981; background: #f5f3ff; }
     .table-row:hover { background: #faf9ff; }
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f5f5f9; } ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
   </style>
@@ -23,7 +23,7 @@
   <aside class="sidebar w-56 flex-shrink-0 flex flex-col h-screen">
     <div class="px-5 py-5 border-b border-[#1f1f1f]">
       <div class="flex items-center gap-2.5">
-        <div class="w-7 h-7 rounded-md bg-violet-600 flex items-center justify-center text-white font-bold text-xs">C</div>
+        <svg viewBox="0 0 80 80" width="28" height="28" fill="none"><rect width="80" height="80" rx="18" fill="#10b981"/><rect x="12" y="32" width="8" height="16" rx="4" fill="white" opacity="0.5"/><rect x="24" y="22" width="8" height="36" rx="4" fill="white" opacity="0.75"/><rect x="36" y="14" width="8" height="52" rx="4" fill="white"/><rect x="48" y="22" width="8" height="36" rx="4" fill="white" opacity="0.75"/><rect x="60" y="32" width="8" height="16" rx="4" fill="white" opacity="0.5"/></svg>
         <span class="font-semibold text-white text-sm">Cleo</span>
       </div>
     </div>
@@ -106,7 +106,7 @@
       return new Date(d).toLocaleDateString();
     }
     function badge(status) {
-      const m = { completed:'text-green-400 bg-green-400/10', in_progress:'text-violet-400 bg-violet-400/10', failed:'text-red-400 bg-red-400/10' };
+      const m = { completed:'text-green-400 bg-green-400/10', in_progress:'text-emerald-400 bg-emerald-400/10', failed:'text-red-400 bg-red-400/10' };
       return `<span class="px-2 py-0.5 rounded text-xs font-medium ${m[status]||'text-gray-400 bg-gray-400/10'}">${status.replace('_',' ')}</span>`;
     }
 
