@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -49,3 +50,9 @@ async def get_db_context():
 async def create_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Add new columns that don't exist yet (safe to run every startup)
+        migrations = [
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS service_area TEXT DEFAULT 'Austin, TX and surrounding areas within 30 miles'",
+        ]
+        for sql in migrations:
+            await conn.execute(text(sql))
