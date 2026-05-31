@@ -12,8 +12,8 @@
     .sidebar { background: #fff; border-right: 1px solid #e8e8f0; }
     .card { background: #fff; border: 1px solid #e8e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
     .nav-item { color: #888; transition: all 0.15s; }
-    .nav-item:hover, .nav-item.active { color: #10b981; background: #f5f3ff; }
-    .table-row:hover { background: #faf9ff; }
+    .nav-item:hover, .nav-item.active { color: #10b981; background: #ecfdf5; }
+    .table-row:hover { background: #f0fdf4; }
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f5f5f9; } ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
   </style>
 </head>
@@ -67,19 +67,19 @@
       <div id="transcript-panel" class="hidden card rounded-xl p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <p class="text-white font-medium" id="tp-name"></p>
-            <p class="text-xs text-[#555] mt-0.5" id="tp-meta"></p>
+            <p class="text-[#111] font-medium" id="tp-name"></p>
+            <p class="text-xs text-[#666] mt-0.5" id="tp-meta"></p>
           </div>
-          <button onclick="closePanel()" class="text-[#555] hover:text-white text-xs">✕ Close</button>
+          <button onclick="closePanel()" class="text-[#888] hover:text-red-500 text-xs transition">✕ Close</button>
         </div>
-        <div id="tp-summary" class="text-sm text-[#888] mb-4 p-3 bg-[#111] rounded-lg"></div>
-        <div id="tp-transcript" class="text-xs text-[#666] whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto p-3 bg-[#111] rounded-lg font-mono"></div>
+        <div id="tp-summary" class="text-sm text-[#444] mb-4 p-4 bg-[#f5f5f9] rounded-lg border border-[#e8e8f0]"></div>
+        <div id="tp-transcript" class="text-xs text-[#555] whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto p-4 bg-[#f5f5f9] rounded-lg border border-[#e8e8f0] font-mono"></div>
       </div>
 
       <div class="card rounded-xl overflow-hidden">
         <table class="w-full text-sm">
           <thead>
-            <tr class="border-b border-[#1e1e1e]">
+            <tr class="border-b border-[#e8e8f0]">
               <th class="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Caller</th>
               <th class="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Phone</th>
               <th class="text-left px-6 py-3 text-xs text-[#888] font-medium uppercase tracking-wider">Status</th>
@@ -106,8 +106,8 @@
       return new Date(d).toLocaleDateString();
     }
     function badge(status) {
-      const m = { completed:'text-green-400 bg-green-400/10', in_progress:'text-emerald-400 bg-emerald-400/10', failed:'text-red-400 bg-red-400/10' };
-      return `<span class="px-2 py-0.5 rounded text-xs font-medium ${m[status]||'text-gray-400 bg-gray-400/10'}">${status.replace('_',' ')}</span>`;
+      const m = { completed:'text-green-700 bg-green-100', in_progress:'text-emerald-700 bg-emerald-100', failed:'text-red-600 bg-red-100' };
+      return `<span class="px-2 py-0.5 rounded text-xs font-medium ${m[status]||'text-gray-600 bg-gray-100'}">${status.replace('_',' ')}</span>`;
     }
 
     function closePanel() {

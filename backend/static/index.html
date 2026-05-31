@@ -149,8 +149,8 @@
       return new Date(d).toLocaleDateString();
     }
     function badge(status) {
-      const m = { completed:'text-green-400 bg-green-400/10', in_progress:'text-emerald-400 bg-emerald-400/10', failed:'text-red-400 bg-red-400/10' };
-      return `<span class="px-2 py-0.5 rounded text-xs font-medium ${m[status]||'text-gray-400 bg-gray-400/10'}">${status.replace('_',' ')}</span>`;
+      const m = { completed:'text-green-700 bg-green-100', in_progress:'text-emerald-700 bg-emerald-100', failed:'text-red-600 bg-red-100' };
+      return `<span class="px-2 py-0.5 rounded text-xs font-medium ${m[status]||'text-gray-600 bg-gray-100'}">${status.replace('_',' ')}</span>`;
     }
 
     let dailyChart, hourlyChart;
