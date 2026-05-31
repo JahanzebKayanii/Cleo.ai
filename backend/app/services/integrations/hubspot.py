@@ -12,8 +12,7 @@ def _headers(token: str) -> dict:
 async def push(data: CallData, token: str) -> None:
     async with httpx.AsyncClient(timeout=15) as client:
         contact_id = await _upsert_contact(client, token, data)
-        deal_id = await _create_deal(client, token, data, contact_id)
-        await _create_note(client, token, data, contact_id, deal_id)
+        await _create_deal(client, token, data, contact_id)
     print(f"[HubSpot] Pushed call for {data.customer_name}", flush=True)
 
 
