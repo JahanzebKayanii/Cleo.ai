@@ -42,7 +42,22 @@ async def test_integrations(body: TestIntegrationRequest, db: AsyncSession = Dep
         summary=summary,
         config=config,
     )
-    return {"status": "done", "integrations_triggered": [
-        k for k in ["hubspot_token", "jobber_api_key", "housecall_pro_api_key", "quickbooks_token", "servicetitan_token"]
-        if config.get(k)
-    ]}
+
+    if config.get("owner_email"):
+        from app.services.email_service import send_call_summary
+        await send_call_summary(
+            to_email=config["owner_email"],
+            business_name=config.get("name", "Apex Home Services"),
+            customer_name=body.customer_name,
+            customer_phone=body.customer_phone,
+            summary=summary,
+            transcript=transcript,
+            booked=body.booked,
+            appointment_date=body.appointment_date,
+            appointment_time=body.appointment_time,
+        )
+
+    triggered = [k for k in ["hubspot_token", "jobber_api_key", "housecall_pro_api_key", "quickbooks_token", "servicetitan_token"] if config.get(k)]
+    if config.get("owner_email"):
+        triggered.append("email")
+    return {"status": "done", "integrations_triggered": triggered}
