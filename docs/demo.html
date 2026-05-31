@@ -117,10 +117,11 @@
           <textarea id="message" rows="3" placeholder="Current tools, pain points, questions..." class="w-full rounded-lg px-3 py-2.5 text-sm resize-none"></textarea>
         </div>
 
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-sm transition mt-2">
+        <button type="submit" id="submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-sm transition mt-2">
           Request Demo →
         </button>
-        <p class="text-xs text-[#444] text-center">We'll get back to you within 24 hours</p>
+        <div id="error-msg" class="hidden text-xs text-red-400 text-center mt-2">Something went wrong. Please try again.</div>
+        <p class="text-xs text-[#444] text-center mt-1">We'll get back to you within 24 hours</p>
       </form>
 
       <div id="success" class="hidden text-center py-8">
@@ -133,31 +134,42 @@
   </div>
 
   <script>
-    document.getElementById('demo-form').addEventListener('submit', function(e) {
+    document.getElementById('demo-form').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const first = document.getElementById('first_name').value;
-      const last = document.getElementById('last_name').value;
-      const business = document.getElementById('business').value;
-      const email = document.getElementById('email').value;
-      const phone = document.getElementById('phone').value;
-      const service = document.getElementById('service').value;
-      const calls = document.getElementById('calls').value;
-      const message = document.getElementById('message').value;
+      const btn = document.getElementById('submit-btn');
+      const errMsg = document.getElementById('error-msg');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      errMsg.classList.add('hidden');
 
-      const body = `Demo Request from Cleo Landing Page
+      const data = {
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value,
+        business: document.getElementById('business').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        service: document.getElementById('service').value,
+        monthly_calls: document.getElementById('calls').value,
+        message: document.getElementById('message').value,
+      };
 
-Name: ${first} ${last}
-Business: ${business}
-Email: ${email}
-Phone: ${phone}
-Service type: ${service}
-Monthly calls: ${calls}
-Message: ${message || 'N/A'}`;
-
-      window.location.href = `mailto:jahanzeb2005@gmail.com?subject=Demo Request — ${business}&body=${encodeURIComponent(body)}`;
-
-      document.getElementById('demo-form').classList.add('hidden');
-      document.getElementById('success').classList.remove('hidden');
+      try {
+        const res = await fetch('https://formspree.io/f/REPLACE_WITH_YOUR_ID', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) {
+          document.getElementById('demo-form').classList.add('hidden');
+          document.getElementById('success').classList.remove('hidden');
+        } else {
+          throw new Error('failed');
+        }
+      } catch {
+        errMsg.classList.remove('hidden');
+        btn.textContent = 'Request Demo →';
+        btn.disabled = false;
+      }
     });
   </script>
 </body>
