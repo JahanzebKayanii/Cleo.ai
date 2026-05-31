@@ -8,14 +8,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     * { font-family: 'Inter', sans-serif; }
-    body { background: #0c0c0c; color: #e5e5e5; }
-    .sidebar { background: #111111; border-right: 1px solid #1f1f1f; }
-    .card { background: #161616; border: 1px solid #222222; }
-    .table-row:hover { background: #1a1a1a; }
-    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #111; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+    body { background: #050508; color: #c8c8d4; }
+    .bg-blob { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.06; pointer-events: none; z-index: 0; }
+    .sidebar { background: rgba(10,10,15,0.95); border-right: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px); position: relative; z-index: 10; }
+    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); backdrop-filter: blur(10px); }
+    .nav-item { color: #444; transition: all 0.2s; }
+    .nav-item:hover, .nav-item.active { color: #fff; background: rgba(124,58,237,0.12); }
+    .table-row:hover { background: rgba(255,255,255,0.02); }
+    .sidebar-logo-glow { box-shadow: 0 0 20px rgba(124,58,237,0.4); }
+    main { position: relative; z-index: 10; }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #050508; } ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden">
+  <div class="bg-blob" style="width:500px;height:500px;background:#7c3aed;top:-200px;left:-100px"></div>
+  <div class="bg-blob" style="width:400px;height:400px;background:#4f46e5;bottom:-100px;right:-100px"></div>
 
   <!-- Sidebar -->
   <aside class="sidebar w-56 flex-shrink-0 flex flex-col h-screen">
