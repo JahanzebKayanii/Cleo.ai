@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     # App
     app_env: str = "development"
     base_url: str = "http://localhost:8000"
+    dashboard_password: str = "admin"
 
     @property
     def database_url(self) -> str:

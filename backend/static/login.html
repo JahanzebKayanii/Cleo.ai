@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cleo — Sign In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>* { font-family: 'Inter', sans-serif; } body { background: #0c0c0c; }</style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-sm px-6">
+
+    <div class="flex items-center gap-3 justify-center mb-10">
+      <div class="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center text-white font-bold">C</div>
+      <span class="text-white font-semibold text-lg">Cleo</span>
+    </div>
+
+    <div style="background:#161616;border:1px solid #222" class="rounded-2xl p-8">
+      <h1 class="text-white font-semibold text-lg mb-1">Sign in</h1>
+      <p class="text-sm mb-6" style="color:#555">Enter your dashboard password to continue</p>
+
+      <form method="POST" action="/auth/login">
+        <div class="mb-4">
+          <label class="block text-xs mb-1.5" style="color:#555">Password</label>
+          <input
+            type="password"
+            name="password"
+            autofocus
+            class="w-full rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none transition"
+            style="background:#111;border:1px solid #2a2a2a;"
+            onfocus="this.style.borderColor='#7c3aed'"
+            onblur="this.style.borderColor='#2a2a2a'"
+          />
+        </div>
+
+        <div id="error" class="hidden mb-4 text-xs text-red-400">Incorrect password. Try again.</div>
+
+        <button type="submit" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-medium py-2.5 rounded-lg text-sm transition">
+          Sign in
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    if (window.location.search.includes('error=1')) {
+      document.getElementById('error').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

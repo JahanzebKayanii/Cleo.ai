@@ -3,11 +3,13 @@ from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.analytics import router as analytics_router
+from app.api.auth import is_valid_session, router as auth_router
 from app.api.appointments import router as appointments_router
 from app.api.business import router as business_router
 from app.api.call import router as call_router
@@ -57,7 +59,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def dashboard_auth(request: Request, call_next):
+    path = request.url.path
+    if path.startswith("/dashboard/") and path != "/dashboard/login.html":
+        token = request.cookies.get("cleo_session")
+        if not is_valid_session(token):
+            return RedirectResponse("/dashboard/login.html")
+    return await call_next(request)
+
 app.include_router(health_router, tags=["health"])
+app.include_router(auth_router)
 app.include_router(analytics_router)
 app.include_router(business_router)
 app.include_router(documents_router)
