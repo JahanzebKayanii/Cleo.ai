@@ -138,6 +138,7 @@ async def book_appointment(
     customer_name: str,
     customer_phone: str,
     notes: str = "",
+    address: str = "",
 ) -> dict:
     date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=TIMEZONE)
     h, m = map(int, start_time_24h.split(":"))
@@ -148,7 +149,8 @@ async def book_appointment(
         svc = _get_service()
         event = {
             "summary": f"{service} – {customer_name}",
-            "description": f"Phone: {customer_phone}\nService: {service}" + (f"\nIssue: {notes}" if notes else ""),
+            "description": f"Phone: {customer_phone}\nService: {service}" + (f"\nAddress: {address}" if address else "") + (f"\nIssue: {notes}" if notes else ""),
+            "location": address or "",
             "start": {"dateTime": start.isoformat(), "timeZone": "America/Chicago"},
             "end": {"dateTime": end.isoformat(), "timeZone": "America/Chicago"},
         }

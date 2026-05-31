@@ -32,7 +32,8 @@ Return JSON with exactly these fields:
   "issue_description": "brief description of the problem",
   "booked": true or false,
   "appointment_date": "YYYY-MM-DD or null",
-  "appointment_time": "time window string or null"
+  "appointment_time": "time window string or null",
+  "address": "full service address or empty string"
 }}"""
 
     response = await _get_client().messages.create(
@@ -59,6 +60,7 @@ Return JSON with exactly these fields:
         appointment_date=d.get("appointment_date"),
         appointment_time=d.get("appointment_time"),
         call_summary=summary,
+        address=d.get("address", ""),
     )
 
 

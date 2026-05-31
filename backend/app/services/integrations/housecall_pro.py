@@ -29,6 +29,8 @@ async def _upsert_customer(client: httpx.AsyncClient, api_key: str, data: CallDa
         "last_name": parts[1] if len(parts) > 1 else "",
         "mobile_number": data.customer_phone,
     }
+    if data.address:
+        payload["address"] = data.address
     res = await client.post(f"{_BASE}/v1/customers", headers=_headers(api_key), json=payload)
     return res.json()["id"]
 

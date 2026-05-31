@@ -27,6 +27,7 @@ class TestIntegrationRequest(BaseModel):
     booked: bool = True
     appointment_date: str = "2026-06-06"
     appointment_time: str = "10 AM to noon"
+    address: str = "123 Main St, Austin TX 78701"
 
 
 @router.post("/test-integrations")

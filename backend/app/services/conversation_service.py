@@ -37,14 +37,16 @@ Booking appointments:
   1. Ask about the problem: "What's going on with your [service]?" Get a description before anything else.
   2. Ask for their preferred date.
   3. Ask for their name, then spell it back letter by letter to confirm — for example: "Just to confirm, is that J-O-H-N S-M-I-T-H?" Wait for confirmation before proceeding.
-  4. Call check_availability with the date.
-  5. Present the available windows.
-  6. Once they pick a slot, call book_appointment.
+  4. Ask for the service address: "And what's the address where you need the technician to come?" Get the full address including street, city, and zip.
+  5. Call check_availability with the date.
+  6. Present the available windows.
+  7. Once they pick a slot, call book_appointment.
 - Never skip step 1. Never ask for the date or name before you have a problem description.
+- Never skip step 4. The address is required before checking availability.
 - Use the check_availability tool to find open slots. If nothing is available on that date, ask for an alternative.
 - Present available windows naturally, for example: "We have openings from 8 to 10 AM, 10 AM to noon, and 2 to 4 PM. Which works best for you?"
-- Once the caller confirms a specific window, immediately use the book_appointment tool, including the problem description in the notes field.
-- After booking succeeds, confirm the details: date, window, and service. Keep it short.
+- Once the caller confirms a specific window, immediately use the book_appointment tool, including the problem description in the notes field and the address in the address field.
+- After booking succeeds, confirm the details: date, window, service, and address. Keep it short.
 - Apex schedules Monday through Friday, 8 AM to 6 PM Central Time.
 - If the caller gives a date in the past (before today), tell them that date has already passed and ask for a future date.
 - If the caller gives a Saturday or Sunday, let them know Apex only schedules Monday through Friday and ask for a weekday.
@@ -157,8 +159,12 @@ TOOLS = [
                     "type": "string",
                     "description": "Brief description of the problem the customer described",
                 },
+                "address": {
+                    "type": "string",
+                    "description": "Full service address where the technician should go",
+                },
             },
-            "required": ["date", "start_time", "service", "customer_name", "notes"],
+            "required": ["date", "start_time", "service", "customer_name", "notes", "address"],
         },
     },
 ]
@@ -181,6 +187,7 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str) -> dict:
             customer_name=inputs["customer_name"],
             customer_phone=caller_phone,
             notes=inputs.get("notes", ""),
+            address=inputs.get("address", ""),
         )
         if result.get("success") and caller_phone:
             from app.core.database import get_db_context

@@ -34,6 +34,8 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
         props["firstname"] = parts[0]
         if len(parts) > 1:
             props["lastname"] = parts[1]
+    if data.address:
+        props["address"] = data.address
 
     res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": props})
     return res.json()["id"]

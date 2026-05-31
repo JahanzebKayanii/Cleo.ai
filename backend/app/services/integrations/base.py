@@ -11,3 +11,4 @@ class CallData:
     appointment_date: str | None
     appointment_time: str | None
     call_summary: str
+    address: str = ""

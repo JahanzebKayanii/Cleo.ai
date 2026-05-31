@@ -44,6 +44,8 @@ async def _upsert_client(client: httpx.AsyncClient, token: str, data: CallData) 
         "lastName": parts[1] if len(parts) > 1 else "",
         "phones": [{"number": data.customer_phone, "primary": True}],
     }
+    if data.address:
+        inp["billingAddress"] = {"street": data.address}
     res = await client.post(_GQL, headers=_headers(token), json={"query": mutation, "variables": {"input": inp}})
     return res.json()["data"]["clientCreate"]["client"]["id"]
 
