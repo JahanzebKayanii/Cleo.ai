@@ -20,6 +20,7 @@ def _to_dict(b: Business) -> dict:
         "services": json.loads(b.services) if b.services else [],
         "hours_open": b.hours_open,
         "hours_close": b.hours_close,
+        "service_area": b.service_area or "Austin, TX and surrounding areas within 30 miles",
         "jobber_api_key": b.jobber_api_key or "",
         "hubspot_token": b.hubspot_token or "",
         "housecall_pro_api_key": b.housecall_pro_api_key or "",
@@ -75,6 +76,8 @@ async def update_business(db: AsyncSession, data: dict) -> dict:
         business.hours_open = int(data["hours_open"])
     if "hours_close" in data:
         business.hours_close = int(data["hours_close"])
+    if "service_area" in data:
+        business.service_area = data["service_area"] or None
     if "jobber_api_key" in data:
         business.jobber_api_key = data["jobber_api_key"] or None
     if "hubspot_token" in data:

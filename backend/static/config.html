@@ -77,6 +77,10 @@
               <label class="block text-xs text-[#555] mb-1.5">Description <span class="text-[#333]">— used in Cleo's introduction</span></label>
               <input id="description" type="text" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
+            <div>
+              <label class="block text-xs text-[#555] mb-1.5">Service Area <span class="text-[#333]">— Cleo will decline bookings outside this area</span></label>
+              <input id="service_area" type="text" placeholder="Austin, TX and surrounding areas within 30 miles" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
+            </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs text-[#555] mb-1.5">Timezone</label>
@@ -196,6 +200,7 @@
       document.getElementById('services').value = (c.services || []).join(', ');
       document.getElementById('hours_open').value = c.hours_open ?? 8;
       document.getElementById('hours_close').value = c.hours_close ?? 18;
+      document.getElementById('service_area').value = c.service_area || '';
       if (c.name) document.getElementById('sidebar-biz').textContent = c.name;
     }
 
@@ -211,6 +216,7 @@
         services: document.getElementById('services').value.split(',').map(s => s.trim()).filter(Boolean),
         hours_open: +document.getElementById('hours_open').value,
         hours_close: +document.getElementById('hours_close').value,
+        service_area: document.getElementById('service_area').value,
         jobber_api_key: document.getElementById('jobber_api_key').value,
         hubspot_token: document.getElementById('hubspot_token').value,
         housecall_pro_api_key: document.getElementById('housecall_pro_api_key').value,
