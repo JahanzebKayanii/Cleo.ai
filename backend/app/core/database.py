@@ -53,6 +53,7 @@ async def create_tables() -> None:
         # Add new columns that don't exist yet (safe to run every startup)
         migrations = [
             "ALTER TABLE business ADD COLUMN IF NOT EXISTS service_area TEXT DEFAULT 'Austin, TX and surrounding areas within 30 miles'",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS owner_email VARCHAR(255)",
         ]
         for sql in migrations:
             await conn.execute(text(sql))

@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     base_url: str = "http://localhost:8000"
     dashboard_password: str = "admin"
 
+    # Email
+    gmail_user: str = ""
+    gmail_app_password: str = ""
+
     @property
     def database_url(self) -> str:
         if self.database_url_override:

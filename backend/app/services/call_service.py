@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timezone
 
 from anthropic import AsyncAnthropic
@@ -93,3 +94,17 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
         ],
     )
     call.summary = response.content[0].text.strip()
+
+    # Send email summary to business owner
+    from app.services.business_service import get_business
+    from app.services.email_service import send_call_summary
+    config = await get_business(db)
+    if config.get("owner_email"):
+        asyncio.create_task(send_call_summary(
+            to_email=config["owner_email"],
+            business_name=config.get("name", "Apex Home Services"),
+            customer_name=call.customer.name if call.customer else None,
+            customer_phone=call.customer.phone if call.customer else "",
+            summary=call.summary,
+            transcript=call.transcript,
+        ))

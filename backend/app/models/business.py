@@ -17,6 +17,7 @@ class Business(Base):
     hours_open: Mapped[int] = mapped_column(Integer, default=8)
     hours_close: Mapped[int] = mapped_column(Integer, default=18)
     service_area: Mapped[str | None] = mapped_column(Text, default="Austin, TX and surrounding areas within 30 miles")
+    owner_email: Mapped[str | None] = mapped_column(String(255))
     # Integration API keys
     jobber_api_key: Mapped[str | None] = mapped_column(Text)
     hubspot_token: Mapped[str | None] = mapped_column(Text)
