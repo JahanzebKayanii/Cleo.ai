@@ -22,6 +22,7 @@ def _to_dict(b: Business) -> dict:
         "hours_close": b.hours_close,
         "service_area": b.service_area or "Austin, TX and surrounding areas within 30 miles",
         "owner_email": b.owner_email or "",
+        "transfer_phone": b.transfer_phone or "",
         "jobber_api_key": "saved" if b.jobber_api_key else "",
         "hubspot_token": "saved" if b.hubspot_token else "",
         "housecall_pro_api_key": "saved" if b.housecall_pro_api_key else "",
@@ -81,6 +82,8 @@ async def update_business(db: AsyncSession, data: dict) -> dict:
         business.service_area = data["service_area"] or None
     if "owner_email" in data:
         business.owner_email = data["owner_email"] or None
+    if "transfer_phone" in data:
+        business.transfer_phone = data["transfer_phone"] or None
     # Only update integration keys if a non-empty value is provided — empty means "leave as is"
     if data.get("jobber_api_key"):
         business.jobber_api_key = data["jobber_api_key"]

@@ -85,6 +85,10 @@
               <input id="owner_email" type="email" placeholder="you@example.com" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
             <div>
+              <label class="block text-xs text-[#555] mb-1.5">Transfer Phone <span class="text-[#333]">— Cleo dials this when caller asks for a human</span></label>
+              <input id="transfer_phone" type="text" placeholder="+15551234567" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
+            </div>
+            <div>
               <label class="block text-xs text-[#555] mb-1.5">Service Area <span class="text-[#333]">— Cleo will decline bookings outside this area</span></label>
               <input id="service_area" type="text" placeholder="Austin, TX and surrounding areas within 30 miles" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
@@ -225,6 +229,7 @@
       document.getElementById('hours_open').value = c.hours_open ?? 8;
       document.getElementById('hours_close').value = c.hours_close ?? 18;
       document.getElementById('owner_email').value = c.owner_email || '';
+      document.getElementById('transfer_phone').value = c.transfer_phone || '';
       document.getElementById('service_area').value = c.service_area || '';
       if (c.name) document.getElementById('sidebar-biz').textContent = c.name;
 
@@ -255,6 +260,7 @@
         hours_open: +document.getElementById('hours_open').value,
         hours_close: +document.getElementById('hours_close').value,
         owner_email: document.getElementById('owner_email').value,
+        transfer_phone: document.getElementById('transfer_phone').value,
         service_area: document.getElementById('service_area').value,
       };
       // Only include integration keys if non-empty (empty = leave existing key as-is)

@@ -58,6 +58,12 @@ Booking appointments:
 - Today is {today}. Current time: {current_time} Central Time.
 - Service area: {service_area}.
 
+Live transfer:
+- If the caller asks to speak to a human, a real person, or a manager — call transfer_to_human immediately. Do not try to talk them out of it.
+- If the caller is clearly frustrated or upset — offer to transfer them: "I can transfer you to one of our team members right now if you'd like."
+- Before calling transfer_to_human, always say something like: "Of course, let me transfer you to one of our team members right now. Please hold for just a moment."
+- If no transfer number is configured, apologize and offer to take a message.
+
 After-hours calls (outside Monday–Friday 8 AM to 6 PM Central Time):
 - Let the caller know the office is currently closed.
 - Tell them the next available time to call back (next business day at 8 AM).
@@ -139,6 +145,11 @@ TOOLS = [
         },
     },
     {
+        "name": "transfer_to_human",
+        "description": "Transfer the caller to a live team member. Call this when: the caller asks to speak to a human or real person, the caller is clearly frustrated or upset, or the request is too complex to handle.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
         "name": "book_appointment",
         "description": "Book a confirmed appointment on the calendar. Only call this after the caller has agreed to a specific time window.",
         "input_schema": {
@@ -175,8 +186,14 @@ TOOLS = [
 ]
 
 
-async def _execute_tool(name: str, inputs: dict, caller_phone: str) -> dict:
+async def _execute_tool(name: str, inputs: dict, caller_phone: str, config: dict | None = None) -> dict:
     from app.services.calendar_service import book_appointment, get_available_slots
+
+    if name == "transfer_to_human":
+        phone = (config or {}).get("transfer_phone", "")
+        if phone:
+            return {"transfer": True, "phone": phone}
+        return {"transfer": False, "message": "No transfer number configured. Please call back during business hours."}
 
     if name == "check_availability":
         slots = await get_available_slots(inputs["date"])
@@ -259,9 +276,12 @@ async def stream_response_parts(
     if final_msg.stop_reason == "tool_use":
         # Execute all tools Claude requested
         tool_results = []
+        transfer_phone = None
         for block in final_msg.content:
             if block.type == "tool_use":
-                result = await _execute_tool(block.name, block.input, caller_phone)
+                result = await _execute_tool(block.name, block.input, caller_phone, config)
+                if result.get("transfer"):
+                    transfer_phone = result.get("phone", "")
                 tool_results.append(
                     {
                         "type": "tool_result",
@@ -269,6 +289,12 @@ async def stream_response_parts(
                         "content": json.dumps(result),
                     }
                 )
+
+        if transfer_phone is not None:
+            if not first_yielded:
+                yield "first", "Please hold while I transfer you to one of our team members."
+            yield "transfer", transfer_phone
+            return
 
         # Build assistant message with all content blocks as dicts
         assistant_content = []
@@ -370,7 +396,7 @@ async def get_response(
                 assistant_content.append(
                     {"type": "tool_use", "id": block.id, "name": block.name, "input": block.input}
                 )
-                result = await _execute_tool(block.name, block.input, caller_phone)
+                result = await _execute_tool(block.name, block.input, caller_phone, config)
                 print(f"[TOOL] {block.name} result: {json.dumps(result)}", flush=True)
                 tool_results.append(
                     {"type": "tool_result", "tool_use_id": block.id, "content": json.dumps(result)}
