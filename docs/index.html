@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cleo — AI Receptionist for Home Service Businesses</title>
+  <meta name="description" content="Cleo answers every call, books appointments, and syncs with your tools — automatically. Built for HVAC, plumbing, and electrical businesses." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #080808; color: #e5e5e5; }
+    .gradient-text { background: linear-gradient(135deg, #fff 0%, #a78bfa 60%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glow { box-shadow: 0 0 40px rgba(124,58,237,0.15); }
+    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); }
+    .integration-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
+    .integration-card:hover { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.3); }
+    .hero-glow { background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 70%); }
+    .btn-primary { background: #7c3aed; transition: all 0.2s; }
+    .btn-primary:hover { background: #6d28d9; transform: translateY(-1px); }
+    .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+    .feature-icon { background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.2); }
+    .pricing-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
+    .pricing-card.featured { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.4); }
+    .step-line { background: linear-gradient(180deg, #7c3aed, transparent); }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5" style="background:rgba(8,8,8,0.85);backdrop-filter:blur(20px)">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-white font-bold text-sm">C</div>
+        <span class="font-semibold text-white text-lg">Cleo</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8 text-sm text-[#888]">
+        <a href="#how-it-works" class="hover:text-white transition">How it works</a>
+        <a href="#features" class="hover:text-white transition">Features</a>
+        <a href="#integrations" class="hover:text-white transition">Integrations</a>
+        <a href="#pricing" class="hover:text-white transition">Pricing</a>
+      </div>
+      <a href="tel:+13613043353" class="btn-primary text-white text-sm font-medium px-4 py-2 rounded-lg">
+        Try Demo →
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero-glow pt-32 pb-24 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-8" style="background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);color:#a78bfa">
+        Built for HVAC · Plumbing · Electrical
+      </div>
+
+      <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-6">
+        <span class="gradient-text">AI that answers, books,</span><br />
+        <span class="text-white">and follows up — automatically.</span>
+      </h1>
+
+      <p class="text-lg text-[#888] max-w-2xl mx-auto mb-10 leading-relaxed">
+        Cleo handles every inbound call for your home service business. Books appointments, answers questions, collects job details, and syncs everything with your existing tools.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="tel:+13613043353" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-xl text-sm w-full sm:w-auto">
+          📞 Call Cleo now: +1 (361) 304-3353
+        </a>
+        <a href="#how-it-works" class="btn-secondary text-white font-medium px-8 py-3.5 rounded-xl text-sm w-full sm:w-auto">
+          See how it works
+        </a>
+      </div>
+
+      <p class="text-xs text-[#555] mt-4">Live demo — call and ask to book an HVAC appointment</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="max-w-3xl mx-auto mt-20 grid grid-cols-3 gap-6">
+      <div class="card rounded-2xl p-6 text-center">
+        <p class="text-3xl font-bold text-white mb-1">24/7</p>
+        <p class="text-sm text-[#555]">Always answering</p>
+      </div>
+      <div class="card rounded-2xl p-6 text-center">
+        <p class="text-3xl font-bold text-white mb-1">&lt;1s</p>
+        <p class="text-sm text-[#555]">Response time</p>
+      </div>
+      <div class="card rounded-2xl p-6 text-center">
+        <p class="text-3xl font-bold text-white mb-1">0</p>
+        <p class="text-sm text-[#555]">Missed calls</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="py-24 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16">
+        <p class="text-xs text-violet-400 uppercase tracking-widest mb-3 font-medium">How it works</p>
+        <h2 class="text-3xl font-bold text-white">From call to booked job in under 2 minutes</h2>
+      </div>
+
+      <div class="relative">
+        <div class="absolute left-8 top-8 bottom-8 w-px step-line hidden md:block"></div>
+        <div class="space-y-8">
+          <div class="flex gap-6 items-start">
+            <div class="w-16 h-16 rounded-2xl bg-violet-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 relative z-10">1</div>
+            <div class="card rounded-2xl p-6 flex-1">
+              <h3 class="text-white font-semibold text-lg mb-2">Customer calls your number</h3>
+              <p class="text-[#666] text-sm leading-relaxed">Cleo picks up instantly — no hold music, no voicemail. It greets them by name if they've called before and gets straight to the point.</p>
+            </div>
+          </div>
+          <div class="flex gap-6 items-start">
+            <div class="w-16 h-16 rounded-2xl bg-violet-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 relative z-10">2</div>
+            <div class="card rounded-2xl p-6 flex-1">
+              <h3 class="text-white font-semibold text-lg mb-2">Cleo collects all the job details</h3>
+              <p class="text-[#666] text-sm leading-relaxed">Problem description, service address, preferred date, and name — all confirmed and verified before booking. Cleo even reads the address back to catch mistakes.</p>
+            </div>
+          </div>
+          <div class="flex gap-6 items-start">
+            <div class="w-16 h-16 rounded-2xl bg-violet-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 relative z-10">3</div>
+            <div class="card rounded-2xl p-6 flex-1">
+              <h3 class="text-white font-semibold text-lg mb-2">Appointment booked, everything synced</h3>
+              <p class="text-[#666] text-sm leading-relaxed">The job lands in your Google Calendar, a deal is created in HubSpot or Jobber, and you get an email summary — all within seconds of the call ending.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-24 px-6" style="background:rgba(255,255,255,0.01)">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <p class="text-xs text-violet-400 uppercase tracking-widest mb-3 font-medium">Features</p>
+        <h2 class="text-3xl font-bold text-white">Everything your front desk does, automated</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="card rounded-2xl p-6">
+          <div class="feature-icon w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg">📅</div>
+          <h3 class="text-white font-semibold mb-2">Appointment Booking</h3>
+          <p class="text-[#555] text-sm leading-relaxed">Checks your calendar, presents available slots, and books confirmed appointments without any manual work.</p>
+        </div>
+        <div class="card rounded-2xl p-6">
+          <div class="feature-icon w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg">🔁</div>
+          <h3 class="text-white font-semibold mb-2">Returning Caller Recognition</h3>
+          <p class="text-[#555] text-sm leading-relaxed">Recognizes repeat customers by phone number, greets them by name, and references their call history.</p>
+        </div>
+        <div class="card rounded-2xl p-6">
+          <div class="feature-icon w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg">🌙</div>
+          <h3 class="text-white font-semibold mb-2">After-Hours Handling</h3>
+          <p class="text-[#555] text-sm leading-relaxed">Outside business hours, Cleo takes a detailed message and lets the caller know when to expect a callback.</p>
+        </div>
+        <div class="card rounded-2xl p-6">
+          <div class="feature-icon w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg">📧</div>
+          <h3 class="text-white font-semibold mb-2">Email Summaries</h3>
+          <p class="text-[#555] text-sm leading-relaxed">Every call ends with a detailed summary emailed to you — caller info, job description, and full transcript.</p>
+        </div>
+        <div class="card rounded-2xl p-6">
+          <div class="feature-icon w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg">🔀</div>
+          <h3 class="text-white font-semibold mb-2">Live Transfer</h3>
+          <p class="text-[#555] text-sm leading-relaxed">If a caller needs to speak to a human, Cleo transfers them to your real number instantly — no drop, no hold music.</p>
+        </div>
+        <div class="card rounded-2xl p-6">
+          <div class="feature-icon w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg">📊</div>
+          <h3 class="text-white font-semibold mb-2">Analytics Dashboard</h3>
+          <p class="text-[#555] text-sm leading-relaxed">See call volume, peak hours, service breakdown, and full call transcripts from a clean admin dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Integrations -->
+  <section id="integrations" class="py-24 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16">
+        <p class="text-xs text-violet-400 uppercase tracking-widest mb-3 font-medium">Integrations</p>
+        <h2 class="text-3xl font-bold text-white">Plugs into the tools you already use</h2>
+        <p class="text-[#555] mt-4 text-sm">No switching software. Cleo sends data straight into your existing workflow.</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="integration-card rounded-2xl p-5 text-center">
+          <div class="text-2xl mb-2">📋</div>
+          <p class="text-white text-sm font-medium">Jobber</p>
+          <p class="text-[#444] text-xs mt-1">Field service</p>
+        </div>
+        <div class="integration-card rounded-2xl p-5 text-center">
+          <div class="text-2xl mb-2">🟠</div>
+          <p class="text-white text-sm font-medium">HubSpot</p>
+          <p class="text-[#444] text-xs mt-1">CRM</p>
+        </div>
+        <div class="integration-card rounded-2xl p-5 text-center">
+          <div class="text-2xl mb-2">🏠</div>
+          <p class="text-white text-sm font-medium">Housecall Pro</p>
+          <p class="text-[#444] text-xs mt-1">Field service</p>
+        </div>
+        <div class="integration-card rounded-2xl p-5 text-center">
+          <div class="text-2xl mb-2">📗</div>
+          <p class="text-white text-sm font-medium">QuickBooks</p>
+          <p class="text-[#444] text-xs mt-1">Accounting</p>
+        </div>
+        <div class="integration-card rounded-2xl p-5 text-center">
+          <div class="text-2xl mb-2">📆</div>
+          <p class="text-white text-sm font-medium">Google Calendar</p>
+          <p class="text-[#444] text-xs mt-1">Scheduling</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-24 px-6" style="background:rgba(255,255,255,0.01)">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16">
+        <p class="text-xs text-violet-400 uppercase tracking-widest mb-3 font-medium">Pricing</p>
+        <h2 class="text-3xl font-bold text-white">Simple, flat monthly pricing</h2>
+        <p class="text-[#555] mt-4 text-sm">No per-call fees. No setup costs. Cancel anytime.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="pricing-card rounded-2xl p-7">
+          <p class="text-[#666] text-sm font-medium mb-4">Starter</p>
+          <p class="text-4xl font-bold text-white mb-1">$199<span class="text-lg text-[#555] font-normal">/mo</span></p>
+          <p class="text-[#555] text-xs mb-6">Up to 300 calls/month</p>
+          <ul class="space-y-3 text-sm text-[#888] mb-8">
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> AI voice receptionist</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Appointment booking</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Google Calendar sync</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Email summaries</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Analytics dashboard</li>
+          </ul>
+          <a href="mailto:jahanzeb2005@gmail.com?subject=Cleo Starter Plan" class="block text-center btn-secondary text-white text-sm font-medium py-2.5 rounded-lg">Get started</a>
+        </div>
+
+        <div class="pricing-card featured rounded-2xl p-7 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-violet-600 rounded-full text-xs text-white font-medium">Most popular</div>
+          <p class="text-violet-400 text-sm font-medium mb-4">Growth</p>
+          <p class="text-4xl font-bold text-white mb-1">$399<span class="text-lg text-[#555] font-normal">/mo</span></p>
+          <p class="text-[#555] text-xs mb-6">Unlimited calls</p>
+          <ul class="space-y-3 text-sm text-[#888] mb-8">
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Everything in Starter</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Jobber / HubSpot sync</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Housecall Pro sync</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Live call transfer</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> SMS confirmations</li>
+          </ul>
+          <a href="mailto:jahanzeb2005@gmail.com?subject=Cleo Growth Plan" class="block text-center btn-primary text-white text-sm font-medium py-2.5 rounded-lg">Get started</a>
+        </div>
+
+        <div class="pricing-card rounded-2xl p-7">
+          <p class="text-[#666] text-sm font-medium mb-4">Enterprise</p>
+          <p class="text-4xl font-bold text-white mb-1">Custom</p>
+          <p class="text-[#555] text-xs mb-6">Multi-location businesses</p>
+          <ul class="space-y-3 text-sm text-[#888] mb-8">
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Everything in Growth</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> ServiceTitan integration</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Multi-location support</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Custom AI training</li>
+            <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Dedicated support</li>
+          </ul>
+          <a href="mailto:jahanzeb2005@gmail.com?subject=Cleo Enterprise" class="block text-center btn-secondary text-white text-sm font-medium py-2.5 rounded-lg">Contact us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-24 px-6">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-4xl font-bold text-white mb-4">Hear it for yourself.</h2>
+      <p class="text-[#555] mb-8">Call the live demo right now. Ask to book an HVAC appointment and see what your customers will experience.</p>
+      <a href="tel:+13613043353" class="btn-primary inline-block text-white font-semibold px-10 py-4 rounded-xl text-base glow">
+        📞 Call +1 (361) 304-3353
+      </a>
+      <p class="text-xs text-[#444] mt-4">Or email <a href="mailto:jahanzeb2005@gmail.com" class="text-violet-400">jahanzeb2005@gmail.com</a> to get set up</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/5 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center text-white font-bold text-xs">C</div>
+        <span class="font-semibold text-white text-sm">Cleo</span>
+        <span class="text-[#444] text-sm">— AI Receptionist for Home Services</span>
+      </div>
+      <p class="text-[#444] text-xs">© 2026 Cleo. Built for HVAC, plumbing & electrical businesses.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>
