@@ -28,11 +28,7 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
         return results[0]["id"]
 
     # Create new contact
-    props = {
-        "phone": data.customer_phone,
-        "hs_lead_status": "NEW",
-        "lead_source": "Cleo AI Voice",
-    }
+    props = {"phone": data.customer_phone, "hs_lead_status": "NEW"}
     if data.customer_name:
         parts = data.customer_name.strip().split(" ", 1)
         props["firstname"] = parts[0]
@@ -40,20 +36,7 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
             props["lastname"] = parts[1]
 
     res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": props})
-    data_json = res.json()
-    print(f"[HubSpot] Contact create response ({res.status_code}): {data_json}", flush=True)
-    if "id" not in data_json:
-        # Retry with minimal fields only
-        minimal = {"phone": data.customer_phone}
-        if data.customer_name:
-            parts = data.customer_name.strip().split(" ", 1)
-            minimal["firstname"] = parts[0]
-            if len(parts) > 1:
-                minimal["lastname"] = parts[1]
-        res = await client.post(f"{_BASE}/crm/v3/objects/contacts", headers=_headers(token), json={"properties": minimal})
-        data_json = res.json()
-        print(f"[HubSpot] Contact retry response ({res.status_code}): {data_json}", flush=True)
-    return data_json["id"]
+    return res.json()["id"]
 
 
 async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, contact_id: str) -> str:
@@ -89,9 +72,7 @@ async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, co
         headers=_headers(token),
         json={"properties": props},
     )
-    resp = res.json()
-    print(f"[HubSpot] Deal create response ({res.status_code}): {resp}", flush=True)
-    deal_id = resp["id"]
+    deal_id = res.json()["id"]
     # Associate deal with contact
     await client.put(
         f"{_BASE}/crm/v3/objects/deals/{deal_id}/associations/contacts/{contact_id}/deal_to_contact",
