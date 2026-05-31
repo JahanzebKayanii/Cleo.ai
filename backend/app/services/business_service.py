@@ -21,11 +21,11 @@ def _to_dict(b: Business) -> dict:
         "hours_open": b.hours_open,
         "hours_close": b.hours_close,
         "service_area": b.service_area or "Austin, TX and surrounding areas within 30 miles",
-        "jobber_api_key": b.jobber_api_key or "",
-        "hubspot_token": b.hubspot_token or "",
-        "housecall_pro_api_key": b.housecall_pro_api_key or "",
-        "quickbooks_token": b.quickbooks_token or "",
-        "servicetitan_token": b.servicetitan_token or "",
+        "jobber_api_key": "saved" if b.jobber_api_key else "",
+        "hubspot_token": "saved" if b.hubspot_token else "",
+        "housecall_pro_api_key": "saved" if b.housecall_pro_api_key else "",
+        "quickbooks_token": "saved" if b.quickbooks_token else "",
+        "servicetitan_token": "saved" if b.servicetitan_token else "",
     }
 
 
