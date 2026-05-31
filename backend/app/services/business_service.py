@@ -78,16 +78,21 @@ async def update_business(db: AsyncSession, data: dict) -> dict:
         business.hours_close = int(data["hours_close"])
     if "service_area" in data:
         business.service_area = data["service_area"] or None
-    if "jobber_api_key" in data:
-        business.jobber_api_key = data["jobber_api_key"] or None
-    if "hubspot_token" in data:
-        business.hubspot_token = data["hubspot_token"] or None
-    if "housecall_pro_api_key" in data:
-        business.housecall_pro_api_key = data["housecall_pro_api_key"] or None
-    if "quickbooks_token" in data:
-        business.quickbooks_token = data["quickbooks_token"] or None
-    if "servicetitan_token" in data:
-        business.servicetitan_token = data["servicetitan_token"] or None
+    # Only update integration keys if a non-empty value is provided — empty means "leave as is"
+    if data.get("jobber_api_key"):
+        business.jobber_api_key = data["jobber_api_key"]
+    if data.get("hubspot_token"):
+        business.hubspot_token = data["hubspot_token"]
+    if data.get("housecall_pro_api_key"):
+        business.housecall_pro_api_key = data["housecall_pro_api_key"]
+    if data.get("quickbooks_token"):
+        business.quickbooks_token = data["quickbooks_token"]
+    if data.get("servicetitan_token"):
+        business.servicetitan_token = data["servicetitan_token"]
+    # Explicit clear: send "__clear__" to remove a key
+    for field in ["jobber_api_key", "hubspot_token", "housecall_pro_api_key", "quickbooks_token", "servicetitan_token"]:
+        if data.get(field) == "__clear__":
+            setattr(business, field, None)
 
     _cache = None  # invalidate cache
     _cache_ts = 0
