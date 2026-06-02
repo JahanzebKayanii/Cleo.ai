@@ -1,11 +1,39 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.document import Document
-from app.services.document_service import ingest_document, search_documents
+from app.services.document_service import ingest_document, search_documents, delete_document_vectors
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
+
+@router.get("/")
+async def list_documents(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Document).order_by(Document.created_at.desc()))
+    docs = result.scalars().all()
+    return [
+        {
+            "id": d.id,
+            "filename": d.filename,
+            "chunk_count": d.chunk_count,
+            "status": d.status,
+            "created_at": d.created_at.isoformat(),
+        }
+        for d in docs
+    ]
+
+
+@router.delete("/{doc_id}")
+async def delete_document(doc_id: int, db: AsyncSession = Depends(get_db)):
+    doc = await db.get(Document, doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    await delete_document_vectors(doc_id)
+    await db.delete(doc)
+    await db.commit()
+    return {"ok": True}
 
 
 @router.post("/upload")

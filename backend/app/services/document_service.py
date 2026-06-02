@@ -82,6 +82,17 @@ async def ingest_document(document_id: int, filename: str, text: str) -> int:
     return len(chunks)
 
 
+async def delete_document_vectors(document_id: int) -> None:
+    from qdrant_client.models import Filter, FieldCondition, MatchValue
+    qdrant = get_qdrant()
+    await qdrant.delete(
+        collection_name=settings.qdrant_collection,
+        points_selector=Filter(
+            must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))]
+        ),
+    )
+
+
 async def search_documents(query: str, limit: int = 5) -> List[dict]:
     embeddings = await embed_texts([query])
     query_vector = embeddings[0]
