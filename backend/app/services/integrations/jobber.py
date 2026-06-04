@@ -160,7 +160,7 @@ async def _create_request(
     res = await client.post(
         _GQL,
         headers=_headers(token),
-        json={"query": mutation, "variables": {"input": {"title": title, "clientId": client_id, "details": details}}},
+        json={"query": mutation, "variables": {"input": {"title": title, "clientId": client_id}}},
     )
     print(f"[Jobber] requestCreate status={res.status_code} body={res.text[:300]}", flush=True)
     if res.status_code == 401:
