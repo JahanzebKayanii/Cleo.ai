@@ -58,6 +58,29 @@ async def get_call(call_id: int, db: AsyncSession = Depends(get_db)):
     }
 
 
+@router.post("/{call_id}/push-integrations")
+async def push_integrations(call_id: int, db: AsyncSession = Depends(get_db)):
+    call = await db.get(Call, call_id)
+    if not call or not call.twilio_call_sid:
+        raise HTTPException(status_code=404, detail="Call not found")
+    from app.services.business_service import get_business_raw
+    from app.services.call_service import generate_and_save_summary, get_call_for_integrations
+    from app.services.integration_service import push_to_integrations
+    await generate_and_save_summary(db, call.twilio_call_sid)
+    call_info = await get_call_for_integrations(db, call.twilio_call_sid)
+    if not call_info:
+        raise HTTPException(status_code=400, detail="No transcript found for this call")
+    config = await get_business_raw(db)
+    await push_to_integrations(
+        customer_name=call_info.get("customer_name"),
+        customer_phone=call_info.get("customer_phone", ""),
+        transcript=call_info.get("transcript", ""),
+        summary=call_info.get("summary", ""),
+        config=config,
+    )
+    return {"ok": True}
+
+
 @router.get("/{call_id}/recording")
 async def get_recording(call_id: int, db: AsyncSession = Depends(get_db)):
     call = await db.get(Call, call_id)
