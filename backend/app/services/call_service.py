@@ -78,6 +78,7 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
     if not call or not call.transcript:
         return
 
+    name_hint = f" The customer's name is {call.customer.name}." if call.customer and call.customer.name else ""
     client = _get_anthropic()
     response = await client.messages.create(
         model="claude-sonnet-4-6",
@@ -86,7 +87,7 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
             {
                 "role": "user",
                 "content": (
-                    "Summarise this Apex Home Services call in 2-3 sentences. "
+                    f"Summarise this Apex Home Services call in 2-3 sentences.{name_hint} "
                     "Cover: what the customer wanted, what was resolved, and any follow-up needed.\n\n"
                     f"{call.transcript}"
                 ),
