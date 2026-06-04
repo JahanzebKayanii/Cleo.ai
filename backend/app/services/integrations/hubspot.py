@@ -1,3 +1,5 @@
+import time
+
 import httpx
 
 from app.services.integrations.base import CallData
@@ -103,12 +105,19 @@ async def _create_note(client: httpx.AsyncClient, token: str, data: CallData, co
     if data.call_summary:
         lines.append(f"\nSummary: {data.call_summary}")
     body = "\n".join(lines)
+    if not body:
+        return
+    ts = str(int(time.time() * 1000))
     res = await client.post(
         f"{_BASE}/crm/v3/objects/notes",
         headers=_headers(token),
-        json={"properties": {"hs_note_body": body, "hs_timestamp": "0"}},
+        json={"properties": {"hs_note_body": body, "hs_timestamp": ts}},
     )
-    note_id = res.json()["id"]
+    data_resp = res.json()
+    if "id" not in data_resp:
+        print(f"[HubSpot] Note creation failed: {data_resp}", flush=True)
+        return
+    note_id = data_resp["id"]
     for obj_type, obj_id, assoc in [
         ("contacts", contact_id, "note_to_contact"),
         ("deals", deal_id, "note_to_deal"),
