@@ -90,6 +90,8 @@ async def media_stream(websocket: WebSocket):
         channels=1,
         endpointing=500,
         interim_results=True,
+        smart_format=True,
+        numerals=True,
     )
 
     try:
