@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     gmail_user: str = ""
     gmail_app_password: str = ""
 
+    # Jobber OAuth
+    jobber_client_id: str = ""
+    jobber_client_secret: str = ""
+
     @property
     def database_url(self) -> str:
         if self.database_url_override:

@@ -25,6 +25,7 @@ def _to_dict(b: Business, mask_keys: bool = True) -> dict:
         "owner_email": b.owner_email or "",
         "transfer_phone": b.transfer_phone or "",
         "jobber_api_key": _mask(b.jobber_api_key) if mask_keys else (b.jobber_api_key or ""),
+        "jobber_refresh_token": "" if mask_keys else (b.jobber_refresh_token or ""),
         "hubspot_token": _mask(b.hubspot_token) if mask_keys else (b.hubspot_token or ""),
         "housecall_pro_api_key": _mask(b.housecall_pro_api_key) if mask_keys else (b.housecall_pro_api_key or ""),
         "quickbooks_token": _mask(b.quickbooks_token) if mask_keys else (b.quickbooks_token or ""),
@@ -109,6 +110,8 @@ async def update_business(db: AsyncSession, data: dict) -> dict:
     for field in ["jobber_api_key", "hubspot_token", "housecall_pro_api_key", "quickbooks_token", "servicetitan_token"]:
         if data.get(field) == "__clear__":
             setattr(business, field, None)
+    if data.get("jobber_api_key") == "__clear__":
+        business.jobber_refresh_token = None
 
     _cache = None  # invalidate cache
     _cache_ts = 0

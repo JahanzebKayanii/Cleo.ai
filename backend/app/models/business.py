@@ -19,8 +19,9 @@ class Business(Base):
     service_area: Mapped[str | None] = mapped_column(Text, default="Austin, TX and surrounding areas within 30 miles")
     owner_email: Mapped[str | None] = mapped_column(String(255))
     transfer_phone: Mapped[str | None] = mapped_column(String(20))
-    # Integration API keys
-    jobber_api_key: Mapped[str | None] = mapped_column(Text)
+    # Integration API keys / OAuth tokens
+    jobber_api_key: Mapped[str | None] = mapped_column(Text)      # stores access token
+    jobber_refresh_token: Mapped[str | None] = mapped_column(Text)
     hubspot_token: Mapped[str | None] = mapped_column(Text)
     housecall_pro_api_key: Mapped[str | None] = mapped_column(Text)
     quickbooks_token: Mapped[str | None] = mapped_column(Text)

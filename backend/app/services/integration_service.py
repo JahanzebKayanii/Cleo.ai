@@ -84,7 +84,7 @@ async def push_to_integrations(
 
     if config.get("jobber_api_key"):
         from app.services.integrations import jobber
-        tasks.append(_safe_push("Jobber", jobber.push(call_data, config["jobber_api_key"])))
+        tasks.append(_safe_push("Jobber", jobber.push(call_data, config)))
 
     if config.get("housecall_pro_api_key"):
         from app.services.integrations import housecall_pro

@@ -148,12 +148,17 @@
             <div class="flex items-center gap-4 p-4 bg-[#f9f9fb] rounded-lg border border-[#e8e8f0]">
               <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#16a34a22;color:#16a34a">J</div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#111]">Jobber <span id="jobber_api_key_status" class="hidden ml-2 text-xs text-green-500 font-normal">● connected</span></p>
-                <p class="text-xs text-[#444] mt-0.5">Field service management — auto-create jobs after bookings</p>
+                <p class="text-sm font-medium text-[#111]">Jobber <span id="jobber_connected_badge" class="hidden ml-2 text-xs text-green-500 font-normal">● connected</span></p>
+                <p class="text-xs text-[#444] mt-0.5">Field service management — auto-create clients &amp; requests after calls</p>
               </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <input id="jobber_api_key" type="password" placeholder="API key" class="w-40 border rounded-lg px-3 py-2 text-xs transition" />
-                <button type="button" onclick="clearKey('jobber_api_key')" class="text-xs text-[#444] hover:text-red-400 transition">clear</button>
+              <div id="jobber_disconnected" class="flex-shrink-0">
+                <a href="/auth/jobber/connect" class="text-xs bg-[#16a34a] text-white px-3 py-1.5 rounded-lg hover:bg-[#15803d] transition">Connect Jobber</a>
+              </div>
+              <div id="jobber_connected" class="hidden flex items-center gap-2 flex-shrink-0">
+                <span class="text-xs text-[#555]">Connected</span>
+                <form method="post" action="/auth/jobber/disconnect" style="display:inline">
+                  <button type="submit" class="text-xs text-[#444] hover:text-red-400 transition">disconnect</button>
+                </form>
               </div>
             </div>
             <div class="flex items-center gap-4 p-4 bg-[#f9f9fb] rounded-lg border border-[#e8e8f0]">
@@ -224,7 +229,7 @@
       setTimeout(() => t.classList.add('hidden'), 3000);
     }
 
-    const KEY_FIELDS = ['jobber_api_key','hubspot_token','housecall_pro_api_key','quickbooks_token','servicetitan_token'];
+    const KEY_FIELDS = ['hubspot_token','housecall_pro_api_key','quickbooks_token','servicetitan_token'];
 
     async function load() {
       const c = await fetch(`${API}/business/config`).then(r => r.json());
@@ -239,7 +244,18 @@
       document.getElementById('service_area').value = c.service_area || '';
       if (c.name) document.getElementById('sidebar-biz').textContent = c.name;
 
-      // Show saved indicator for integration keys
+      // Jobber OAuth state
+      if (c.jobber_api_key) {
+        document.getElementById('jobber_connected_badge').classList.remove('hidden');
+        document.getElementById('jobber_disconnected').classList.add('hidden');
+        document.getElementById('jobber_connected').classList.remove('hidden');
+      } else {
+        document.getElementById('jobber_connected_badge').classList.add('hidden');
+        document.getElementById('jobber_disconnected').classList.remove('hidden');
+        document.getElementById('jobber_connected').classList.add('hidden');
+      }
+
+      // Show saved indicator for other integration keys
       KEY_FIELDS.forEach(field => {
         const input = document.getElementById(field);
         const indicator = document.getElementById(field + '_status');
@@ -296,6 +312,11 @@
     }
 
     load();
+
+    // Show toast if redirected back from Jobber OAuth
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('jobber') === 'connected') toast('Jobber connected successfully');
+    if (params.get('jobber') === 'error') toast('Jobber connection failed — check your app settings', false);
   </script>
 </body>
 </html>
