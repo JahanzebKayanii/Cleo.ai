@@ -74,7 +74,10 @@
             <p class="text-[#111] font-medium" id="tp-name"></p>
             <p class="text-xs text-[#666] mt-0.5" id="tp-meta"></p>
           </div>
-          <button onclick="closePanel()" class="text-[#888] hover:text-red-500 text-xs transition">✕ Close</button>
+          <div class="flex items-center gap-3">
+            <button id="tp-push-btn" onclick="pushIntegrations()" class="text-xs text-emerald-600 border border-emerald-200 hover:bg-emerald-50 px-3 py-1 rounded-lg transition">Push to integrations</button>
+            <button onclick="closePanel()" class="text-[#888] hover:text-red-500 text-xs transition">✕ Close</button>
+          </div>
         </div>
         <div id="tp-summary" class="text-sm text-[#444] mb-4 p-4 bg-[#f5f5f9] rounded-lg border border-[#e8e8f0]"></div>
         <div id="tp-recording-wrap" class="mb-4">
@@ -123,11 +126,25 @@
       document.getElementById('transcript-panel').classList.add('hidden');
     }
 
+    let currentCallId = null;
+
+    async function pushIntegrations() {
+      const btn = document.getElementById('tp-push-btn');
+      btn.textContent = 'Pushing...';
+      btn.disabled = true;
+      const res = await fetch(`${API}/calls/${currentCallId}/push-integrations`, { method: 'POST' });
+      btn.textContent = res.ok ? 'Done ✓' : 'Failed ✗';
+      btn.disabled = false;
+    }
+
     async function openCall(id) {
+      currentCallId = id;
       const res = await fetch(`${API}/calls/${id}`);
       const c = await res.json();
       document.getElementById('tp-name').textContent = c.customer_name || c.phone || 'Unknown';
-      document.getElementById('tp-meta').textContent = `${c.phone || ''} · ${timeAgo(c.started_at)}`;
+      document.getElementById('tp-meta').textContent = `#${id} · ${c.phone || ''} · ${timeAgo(c.started_at)}`;
+      document.getElementById('tp-push-btn').textContent = 'Push to integrations';
+      document.getElementById('tp-push-btn').disabled = false;
       document.getElementById('tp-summary').textContent = c.summary || 'No summary yet.';
       document.getElementById('tp-transcript').textContent = c.transcript || 'No transcript.';
 
