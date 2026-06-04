@@ -3,6 +3,7 @@ import asyncio
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
+from pydantic import BaseModel
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from twilio.rest import Client as TwilioClient
@@ -12,6 +13,56 @@ from app.core.database import get_db
 from app.models.call import Call
 
 router = APIRouter(prefix="/calls", tags=["calls"])
+
+
+class TestPushPayload(BaseModel):
+    customer_name: str = "John Smith"
+    customer_phone: str = "+15551234567"
+    service_type: str = "HVAC"
+    issue_description: str = "AC not cooling, making loud noise"
+    address: str = "123 Main St, Austin TX 78701"
+    booked: bool = True
+    appointment_date: str | None = "2026-06-10"
+    appointment_time: str | None = "10am - 12pm"
+    summary: str = "Customer called about AC unit not cooling and making a loud noise. Appointment booked for June 10th between 10am and 12pm at 123 Main St."
+
+
+@router.post("/test-push")
+async def test_push(payload: TestPushPayload, db: AsyncSession = Depends(get_db)):
+    """Simulate a completed call and push to all configured integrations. Use for testing without a real call."""
+    from app.services.business_service import get_business_raw
+    from app.services.integration_service import push_to_integrations
+
+    transcript = (
+        f"Caller: Hi, I need help with my AC, it's not cooling and making a loud noise.\n"
+        f"Cleo: I can help with that. Can I get your name?\n"
+        f"Caller: {payload.customer_name}.\n"
+        f"Cleo: And your address?\n"
+        f"Caller: {payload.address}.\n"
+        f"Cleo: Got it. We can send a technician on {payload.appointment_date} between {payload.appointment_time}. Does that work?\n"
+        f"Caller: Yes that works great.\n"
+        f"Cleo: Perfect, you're booked. Is there anything else?\n"
+        f"Caller: No that's all, thanks.\n"
+        f"Cleo: Have a great day!\n"
+    ) if payload.booked else (
+        f"Caller: Hi, I need help with my {payload.service_type.lower()}, {payload.issue_description}.\n"
+        f"Cleo: I can help with that. Can I get your name?\n"
+        f"Caller: {payload.customer_name}.\n"
+        f"Cleo: And your address?\n"
+        f"Caller: {payload.address}.\n"
+        f"Cleo: Let me check availability and have someone call you back.\n"
+        f"Caller: Ok thanks.\n"
+    )
+
+    config = await get_business_raw(db)
+    await push_to_integrations(
+        customer_name=payload.customer_name,
+        customer_phone=payload.customer_phone,
+        transcript=transcript,
+        summary=payload.summary,
+        config=config,
+    )
+    return {"ok": True, "pushed_to": [k for k in ["hubspot_token", "jobber_api_key", "housecall_pro_api_key", "quickbooks_token"] if config.get(k)]}
 
 _twilio: TwilioClient | None = None
 
