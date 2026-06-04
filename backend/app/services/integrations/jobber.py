@@ -100,6 +100,7 @@ async def _upsert_client(client: httpx.AsyncClient, token: str, data: CallData) 
         headers=_headers(token),
         json={"query": query, "variables": {"q": data.customer_phone}},
     )
+    print(f"[Jobber] client search status={res.status_code} body={res.text[:300]}", flush=True)
     if res.status_code == 401:
         raise _TokenExpiredError()
     body = res.json()
@@ -132,6 +133,7 @@ async def _upsert_client(client: httpx.AsyncClient, token: str, data: CallData) 
         headers=_headers(token),
         json={"query": mutation, "variables": {"input": inp}},
     )
+    print(f"[Jobber] clientCreate status={res.status_code} body={res.text[:300]}", flush=True)
     if res.status_code == 401:
         raise _TokenExpiredError()
     body = res.json()
@@ -175,6 +177,7 @@ async def _create_request(
         headers=_headers(token),
         json={"query": mutation, "variables": {"input": {"title": title, "clientId": client_id, "details": details}}},
     )
+    print(f"[Jobber] requestCreate status={res.status_code} body={res.text[:300]}", flush=True)
     if res.status_code == 401:
         raise _TokenExpiredError()
     body = res.json()
