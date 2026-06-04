@@ -12,7 +12,8 @@ def _headers(token: str) -> dict:
 async def push(data: CallData, token: str) -> None:
     async with httpx.AsyncClient(timeout=15) as client:
         contact_id = await _upsert_contact(client, token, data)
-        await _create_deal(client, token, data, contact_id)
+        deal_id = await _create_deal(client, token, data, contact_id)
+        await _create_note(client, token, data, contact_id, deal_id)
     print(f"[HubSpot] Pushed call for {data.customer_name}", flush=True)
 
 
@@ -25,7 +26,14 @@ async def _upsert_contact(client: httpx.AsyncClient, token: str, data: CallData)
     )
     results = res.json().get("results", [])
     if results:
-        return results[0]["id"]
+        contact_id = results[0]["id"]
+        if data.address:
+            await client.patch(
+                f"{_BASE}/crm/v3/objects/contacts/{contact_id}",
+                headers=_headers(token),
+                json={"properties": {"address": data.address}},
+            )
+        return contact_id
 
     # Create new contact
     props = {"phone": data.customer_phone, "hs_lead_status": "NEW"}
@@ -61,6 +69,8 @@ async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, co
         "dealstage": stage,
         "hs_deal_stage_probability": "1" if data.booked else "0.5",
     }
+    if notes_body:
+        props["description"] = notes_body
     if data.booked and data.appointment_date:
         from datetime import datetime
         try:
@@ -75,7 +85,6 @@ async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, co
         json={"properties": props},
     )
     deal_id = res.json()["id"]
-    # Associate deal with contact
     await client.put(
         f"{_BASE}/crm/v3/objects/deals/{deal_id}/associations/contacts/{contact_id}/deal_to_contact",
         headers=_headers(token),
@@ -84,9 +93,16 @@ async def _create_deal(client: httpx.AsyncClient, token: str, data: CallData, co
 
 
 async def _create_note(client: httpx.AsyncClient, token: str, data: CallData, contact_id: str, deal_id: str) -> None:
-    body = f"Call summary: {data.call_summary}"
+    lines = []
+    if data.issue_description:
+        lines.append(f"Issue: {data.issue_description}")
+    if data.address:
+        lines.append(f"Service address: {data.address}")
     if data.booked and data.appointment_date:
-        body += f"\nAppointment: {data.appointment_date} {data.appointment_time or ''}"
+        lines.append(f"Appointment: {data.appointment_date} {data.appointment_time or ''}".strip())
+    if data.call_summary:
+        lines.append(f"\nSummary: {data.call_summary}")
+    body = "\n".join(lines)
     res = await client.post(
         f"{_BASE}/crm/v3/objects/notes",
         headers=_headers(token),
