@@ -95,29 +95,7 @@ async def _save_new_token(new_token: str, new_refresh: str) -> None:
 
 
 async def _upsert_client(client: httpx.AsyncClient, token: str, data: CallData) -> str:
-    query = """
-    query SearchClients($q: String!) {
-      clients(filter: { keywords: $q }) {
-        nodes { id }
-      }
-    }
-    """
-    res = await client.post(
-        _GQL,
-        headers=_headers(token),
-        json={"query": query, "variables": {"q": data.customer_phone}},
-    )
-    print(f"[Jobber] client search status={res.status_code} body={res.text[:300]}", flush=True)
-    if res.status_code == 401:
-        raise _TokenExpiredError()
-    body = res.json()
-    if "errors" in body:
-        print(f"[Jobber] Client search errors: {body['errors']}", flush=True)
-    nodes = body.get("data", {}).get("clients", {}).get("nodes", [])
-    if nodes:
-        return nodes[0]["id"]
-
-    # Create new client
+    # Create new client — Jobber's filter API doesn't support phone search reliably
     parts = data.customer_name.strip().split(" ", 1) if data.customer_name else ["Unknown"]
     inp: dict = {
         "firstName": parts[0],
@@ -125,7 +103,7 @@ async def _upsert_client(client: httpx.AsyncClient, token: str, data: CallData) 
         "phones": [{"number": data.customer_phone, "primary": True}],
     }
     if data.address:
-        inp["billingAddress"] = {"street": data.address, "postalCode": ""}
+        inp["billingAddress"] = {"street1": data.address}
 
     mutation = """
     mutation CreateClient($input: ClientCreateInput!) {
