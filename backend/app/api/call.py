@@ -3,6 +3,7 @@ import html
 
 from fastapi import APIRouter, Depends, Form, Response
 from sqlalchemy.ext.asyncio import AsyncSession
+from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -13,6 +14,15 @@ from app.services.conversation_service import _is_business_hours, clear_session
 from app.services.customer_service import get_caller_context
 
 router = APIRouter(prefix="/call", tags=["call"])
+
+
+async def _start_recording(call_sid: str) -> None:
+    try:
+        client = TwilioClient(settings.twilio_account_sid, settings.twilio_auth_token)
+        await asyncio.to_thread(lambda: client.calls(call_sid).recordings.create())
+        print(f"[RECORD] Started for {call_sid}", flush=True)
+    except Exception as e:
+        print(f"[RECORD] Failed to start recording: {e}", flush=True)
 
 
 async def _run_integrations(call_info: dict, config: dict) -> None:
@@ -58,6 +68,7 @@ async def incoming_call(
     call_config[CallSid] = config
 
     await start_call(db, CallSid, From)
+    asyncio.create_task(_start_recording(CallSid))
 
     biz_name = config.get("name", "Apex Home Services")
     if not _is_business_hours(config):
