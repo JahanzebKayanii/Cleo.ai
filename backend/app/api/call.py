@@ -8,8 +8,7 @@ from twilio.rest import Client as TwilioClient
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_transfer_map, pending_first, pending_rest
-from app.services.business_service import get_business
-from app.services.call_service import end_call, generate_and_save_summary, get_call_for_integrations, start_call
+from app.services.call_service import end_call, start_call
 from app.services.conversation_service import _is_business_hours, clear_session
 from app.services.customer_service import get_caller_context
 
@@ -25,15 +24,25 @@ async def _start_recording(call_sid: str) -> None:
         print(f"[RECORD] Failed to start recording: {e}", flush=True)
 
 
-async def _run_integrations(call_info: dict, config: dict) -> None:
+async def _finalize_call(twilio_sid: str) -> None:
+    """Runs after a short delay to avoid racing with the final transcript commit."""
+    await asyncio.sleep(4)
+    from app.core.database import get_db_context
+    from app.services.business_service import get_business_raw
+    from app.services.call_service import generate_and_save_summary, get_call_for_integrations
     from app.services.integration_service import push_to_integrations
-    await push_to_integrations(
-        customer_name=call_info.get("customer_name"),
-        customer_phone=call_info.get("customer_phone", ""),
-        transcript=call_info.get("transcript", ""),
-        summary=call_info.get("summary", ""),
-        config=config,
-    )
+    async with get_db_context() as db:
+        await generate_and_save_summary(db, twilio_sid)
+        call_info = await get_call_for_integrations(db, twilio_sid)
+        if call_info:
+            config = await get_business_raw(db)
+            await push_to_integrations(
+                customer_name=call_info.get("customer_name"),
+                customer_phone=call_info.get("customer_phone", ""),
+                transcript=call_info.get("transcript", ""),
+                summary=call_info.get("summary", ""),
+                config=config,
+            )
 
 
 def _stream_url() -> str:
@@ -209,11 +218,7 @@ async def call_status(
 ):
     if CallStatus == "completed":
         await end_call(db, CallSid)
-        await generate_and_save_summary(db, CallSid)
-        call_info = await get_call_for_integrations(db, CallSid)
-        if call_info:
-            config = await get_business(db)
-            asyncio.create_task(_run_integrations(call_info, config))
+        asyncio.create_task(_finalize_call(CallSid))
         clear_session(CallSid)
     elif CallStatus in ("failed", "busy", "no-answer"):
         await end_call(db, CallSid)

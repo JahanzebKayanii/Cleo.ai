@@ -11,7 +11,8 @@ _cache_ts: float = 0
 _CACHE_TTL = 60  # seconds
 
 
-def _to_dict(b: Business) -> dict:
+def _to_dict(b: Business, mask_keys: bool = True) -> dict:
+    def _mask(v): return "saved" if v else ""
     return {
         "id": b.id,
         "name": b.name,
@@ -23,11 +24,11 @@ def _to_dict(b: Business) -> dict:
         "service_area": b.service_area or "Austin, TX and surrounding areas within 30 miles",
         "owner_email": b.owner_email or "",
         "transfer_phone": b.transfer_phone or "",
-        "jobber_api_key": "saved" if b.jobber_api_key else "",
-        "hubspot_token": "saved" if b.hubspot_token else "",
-        "housecall_pro_api_key": "saved" if b.housecall_pro_api_key else "",
-        "quickbooks_token": "saved" if b.quickbooks_token else "",
-        "servicetitan_token": "saved" if b.servicetitan_token else "",
+        "jobber_api_key": _mask(b.jobber_api_key) if mask_keys else (b.jobber_api_key or ""),
+        "hubspot_token": _mask(b.hubspot_token) if mask_keys else (b.hubspot_token or ""),
+        "housecall_pro_api_key": _mask(b.housecall_pro_api_key) if mask_keys else (b.housecall_pro_api_key or ""),
+        "quickbooks_token": _mask(b.quickbooks_token) if mask_keys else (b.quickbooks_token or ""),
+        "servicetitan_token": _mask(b.servicetitan_token) if mask_keys else (b.servicetitan_token or ""),
     }
 
 
@@ -55,6 +56,15 @@ async def get_business(db: AsyncSession) -> dict:
     _cache = _to_dict(business)
     _cache_ts = time.time()
     return _cache
+
+
+async def get_business_raw(db: AsyncSession) -> dict:
+    """Returns real API keys — for internal use only, never expose to frontend."""
+    result = await db.execute(select(Business).where(Business.id == 1))
+    business = result.scalar_one_or_none()
+    if not business:
+        return {}
+    return _to_dict(business, mask_keys=False)
 
 
 async def update_business(db: AsyncSession, data: dict) -> dict:
