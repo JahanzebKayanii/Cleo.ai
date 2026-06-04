@@ -5,7 +5,7 @@ from app.services.integrations.base import CallData
 
 _GQL = "https://api.getjobber.com/api/graphql"
 _TOKEN_URL = "https://api.getjobber.com/api/oauth/token"
-_VERSION = "2024-07-05"
+_VERSION = "2023-11-15"
 
 
 def _headers(token: str) -> dict:
@@ -16,7 +16,7 @@ def _headers(token: str) -> dict:
     }
 
 
-async def _refresh_access_token(refresh_token: str) -> str | None:
+async def _refresh_access_token(refresh_token: str) -> tuple[str, str] | None:
     from app.core.config import settings
     async with httpx.AsyncClient(timeout=15) as client:
         res = await client.post(
@@ -30,7 +30,12 @@ async def _refresh_access_token(refresh_token: str) -> str | None:
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
     tokens = res.json()
-    return tokens.get("access_token")
+    print(f"[Jobber] Token refresh response: {tokens}", flush=True)
+    access = tokens.get("access_token")
+    new_refresh = tokens.get("refresh_token", refresh_token)
+    if not access:
+        return None
+    return access, new_refresh
 
 
 async def _get_valid_token(config: dict) -> str | None:
@@ -60,12 +65,12 @@ async def push(data: CallData, config: dict) -> None:
             if not refresh_token:
                 print("[Jobber] Token expired but no refresh token stored", flush=True)
                 return
-            new_token = await _refresh_access_token(refresh_token)
-            if not new_token:
+            result = await _refresh_access_token(refresh_token)
+            if not result:
                 print("[Jobber] Token refresh failed", flush=True)
                 return
-            # Persist new token
-            await _save_new_token(new_token)
+            new_token, new_refresh = result
+            await _save_new_token(new_token, new_refresh)
             client_id = await _upsert_client(client, new_token, data)
             await _create_request(client, new_token, data, client_id)
 
@@ -76,7 +81,7 @@ class _TokenExpiredError(Exception):
     pass
 
 
-async def _save_new_token(new_token: str) -> None:
+async def _save_new_token(new_token: str, new_refresh: str) -> None:
     from app.core.database import get_db_context
     from app.models.business import Business
     async with get_db_context() as db:
@@ -84,7 +89,9 @@ async def _save_new_token(new_token: str) -> None:
         biz = result.scalar_one_or_none()
         if biz:
             biz.jobber_api_key = new_token
+            biz.jobber_refresh_token = new_refresh
             await db.commit()
+    print("[Jobber] Saved refreshed tokens to DB", flush=True)
 
 
 async def _upsert_client(client: httpx.AsyncClient, token: str, data: CallData) -> str:
