@@ -16,3 +16,6 @@ call_config: dict[str, dict] = {}  # call_sid -> business config dict
 
 # Set to transfer phone number when Claude requests a live transfer
 call_transfer_map: dict[str, str] = {}  # call_sid -> transfer phone number
+
+# Set when Claude signals the conversation is complete and Cleo should hang up
+call_hangup_set: set[str] = set()  # call_sids pending hangup

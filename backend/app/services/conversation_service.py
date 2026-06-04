@@ -150,6 +150,11 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
+        "name": "end_call",
+        "description": "End the phone call. Call this after: a booking is confirmed and you have read back all details, the caller says goodbye or thanks and there is nothing left to do, or the caller indicates they are done. Always deliver your final confirmation message before calling this tool.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
         "name": "book_appointment",
         "description": "Book a confirmed appointment on the calendar. Only call this after the caller has agreed to a specific time window.",
         "input_schema": {
@@ -188,6 +193,9 @@ TOOLS = [
 
 async def _execute_tool(name: str, inputs: dict, caller_phone: str, config: dict | None = None) -> dict:
     from app.services.calendar_service import book_appointment, get_available_slots
+
+    if name == "end_call":
+        return {"end_call": True}
 
     if name == "transfer_to_human":
         phone = (config or {}).get("transfer_phone", "")
@@ -277,11 +285,14 @@ async def stream_response_parts(
         # Execute all tools Claude requested
         tool_results = []
         transfer_phone = None
+        should_end = False
         for block in final_msg.content:
             if block.type == "tool_use":
                 result = await _execute_tool(block.name, block.input, caller_phone, config)
                 if result.get("transfer"):
                     transfer_phone = result.get("phone", "")
+                if result.get("end_call"):
+                    should_end = True
                 tool_results.append(
                     {
                         "type": "tool_result",
@@ -351,6 +362,9 @@ async def stream_response_parts(
         _sessions[session_id] = msgs_with_tools + [
             {"role": "assistant", "content": second_text.strip()}
         ]
+
+        if should_end:
+            yield "end_call", ""
 
     else:
         # No tool use — normal path

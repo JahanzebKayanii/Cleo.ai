@@ -7,7 +7,7 @@ from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.state import call_caller_info, call_config, call_phone_map, call_transfer_map, pending_first, pending_rest
+from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_transfer_map, pending_first, pending_rest
 from app.services.business_service import get_business
 from app.services.call_service import end_call, generate_and_save_summary, get_call_for_integrations, start_call
 from app.services.conversation_service import _is_business_hours, clear_session
@@ -135,7 +135,21 @@ async def pending_response(CallSid: str = Form(...)):
 async def continue_response(CallSid: str = Form(...)):
     stream_url = _stream_url()
 
-    # Check for live transfer first
+    # Check for hangup first
+    if CallSid in call_hangup_set:
+        call_hangup_set.discard(CallSid)
+        pending_first.pop(CallSid, None)
+        pending_rest.pop(CallSid, None)
+        body = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            "<Response>"
+            "<Hangup/>"
+            "</Response>"
+        )
+        print(f"[HANGUP] Hanging up {CallSid}", flush=True)
+        return Response(content=body, media_type="application/xml")
+
+    # Check for live transfer
     if CallSid in call_transfer_map:
         transfer_phone = call_transfer_map.pop(CallSid)
         pending_first.pop(CallSid, None)
