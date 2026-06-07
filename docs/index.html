@@ -737,12 +737,64 @@
     .fade-up { opacity: 0; transform: translateY(28px); transition: all 0.65s cubic-bezier(0.22,1,0.36,1); }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
+    /* ─── Hamburger ─── */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 4px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #111;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 62px;
+      left: 0; right: 0;
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      flex-direction: column;
+      z-index: 99;
+      padding: 8px 20px 16px;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111;
+      text-decoration: none;
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .mobile-nav a:last-child {
+      border-bottom: none;
+      margin-top: 8px;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      border-radius: 100px;
+      padding: 13px 0;
+    }
+
     /* ─── Mobile ─── */
     @media (max-width: 768px) {
-      /* Nav — hide links, keep logo + demo button */
+      /* Nav */
       nav { padding: 0 20px; }
       .nav-links { display: none; }
-      .nav-actions .btn-pill-black { display: none; }
+      .nav-actions { display: none; }
+      .nav-hamburger { display: flex; }
 
       /* Hero */
       .hero-wrap { padding: 72px 8px 8px; }
@@ -808,7 +860,18 @@
       <a href="demo.html" class="btn-pill-outline">Get a demo</a>
       <a href="#products" class="btn-pill-black">Explore →</a>
     </div>
+
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#products" onclick="document.getElementById('mobile-nav').classList.remove('open')">Products</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="about.html">About</a>
+    <a href="demo.html">Get a demo</a>
+  </div>
 
   <!-- Hero — bounded cream box -->
   <div class="hero-wrap">
@@ -980,6 +1043,10 @@
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.06 });
     document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+    document.getElementById('hamburger').addEventListener('click', function() {
+      document.getElementById('mobile-nav').classList.toggle('open');
+    });
   </script>
 
 </body>
