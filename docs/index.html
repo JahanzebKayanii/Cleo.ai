@@ -736,6 +736,50 @@
     /* Scroll anim */
     .fade-up { opacity: 0; transform: translateY(28px); transition: all 0.65s cubic-bezier(0.22,1,0.36,1); }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Mobile ─── */
+    @media (max-width: 768px) {
+      /* Nav — hide links, keep logo + demo button */
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .nav-actions .btn-pill-black { display: none; }
+
+      /* Hero */
+      .hero-wrap { padding: 72px 8px 8px; }
+      .hero-box { padding: 52px 24px 44px; border-radius: 18px; }
+      .hero-sub { font-size: 15px; max-width: 100%; }
+      .hero-ctas { flex-direction: column; align-items: stretch; gap: 10px; }
+      .btn-hero-black, .btn-hero-outline { justify-content: center; text-align: center; }
+      .trust-bar { flex-wrap: wrap; row-gap: 6px; column-gap: 10px; margin-top: 36px; }
+      .trust-sep { display: none; }
+
+      /* Products dark */
+      .products-dark { padding: 52px 16px 64px; margin: 8px; border-radius: 18px; }
+      .products-dark-label { font-size: 22px; margin-bottom: 36px; }
+      .dark-grid { grid-template-columns: 1fr; gap: 12px; }
+      .dcard { padding: 26px 22px; }
+
+      /* Why strip */
+      .why-strip { margin: 8px; padding: 48px 24px; border-radius: 18px; }
+      .why-inner { grid-template-columns: 1fr; gap: 36px; }
+      .why-left h2 { font-size: 32px; }
+
+      /* CTA */
+      .cta-wrap { margin: 8px; border-radius: 18px; }
+      .cta-section { padding: 64px 24px; }
+      .cta-btns { flex-direction: column; align-items: stretch; gap: 10px; }
+      .cta-btns .btn-hero-black, .cta-btns .btn-hero-outline { justify-content: center; text-align: center; }
+
+      /* Footer */
+      footer { flex-direction: column; align-items: center; gap: 20px; padding: 32px 20px; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; gap: 12px 18px; }
+    }
+
+    @media (max-width: 400px) {
+      .hero-box h1 { font-size: 42px; }
+      .dcard-name { font-size: 24px; }
+      .dcard-desc { font-size: 13.5px; }
+    }
   </style>
 </head>
 <body>
