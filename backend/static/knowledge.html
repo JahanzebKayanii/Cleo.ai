@@ -48,7 +48,7 @@
     </nav>
     <div class="px-3 py-4 border-t border-[#e8e8f0]">
       <div class="px-3 py-2">
-        <p class="text-xs text-[#444]">Apex Home Services</p>
+        <p class="text-xs text-[#444]" id="sidebar-biz">Apex Home Services</p>
         <div class="flex items-center justify-between mt-1">
           <div class="flex items-center gap-1.5">
             <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
@@ -137,7 +137,11 @@
 
     async function loadDocs() {
       const bid = await getBid();
-      const res = await fetch(`${API}/documents/?business_id=${bid}`);
+      const [res, config] = await Promise.all([
+        fetch(`${API}/documents/?business_id=${bid}`),
+        fetch(`${API}/business/config?business_id=${bid}`).then(r => r.json()),
+      ]);
+      if (config.name) document.getElementById('sidebar-biz').textContent = config.name;
       const docs = await res.json();
       const el = document.getElementById('docs-list');
       if (!docs.length) {

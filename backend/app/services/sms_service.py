@@ -50,22 +50,33 @@ async def send_confirmation_sms(
 
 
 async def send_morning_reminders() -> None:
+    from app.core.database import get_db_context
+    from app.services.business_service import list_businesses
     from app.services.calendar_service import get_todays_appointments
 
-    appointments = await get_todays_appointments()
-    print(f"[SMS] Morning reminders: {len(appointments)} appointment(s) today", flush=True)
+    async with get_db_context() as db:
+        tenants = await list_businesses(db)
 
-    for appt in appointments:
-        phone = appt.get("phone", "")
-        if not phone:
+    for tenant in tenants:
+        if not tenant.get("is_active"):
             continue
-        first_name = (appt.get("customer_name") or "there").split()[0]
-        window = appt.get("window", "")
-        service = appt.get("service", "")
-        biz_name = appt.get("business_name", "us")
-        body = (
-            f"Hi {first_name}, just a reminder that your {service} appointment "
-            f"with {biz_name} is today from {window}. See you soon! "
-            "Reply STOP to opt out."
-        )
-        await send_sms(phone, body)
+        if not tenant.get("google_calendar_id") and not tenant.get("id") == 1:
+            continue  # skip tenants with no calendar configured
+
+        appointments = await get_todays_appointments(config=tenant)
+        print(f"[SMS] Tenant {tenant['id']} ({tenant['name']}): {len(appointments)} appointment(s) today", flush=True)
+
+        for appt in appointments:
+            phone = appt.get("phone", "")
+            if not phone:
+                continue
+            first_name = (appt.get("customer_name") or "there").split()[0]
+            window = appt.get("window", "")
+            service = appt.get("service", "")
+            biz_name = tenant.get("name", "us")
+            body = (
+                f"Hi {first_name}, just a reminder that your {service} appointment "
+                f"with {biz_name} is today from {window}. See you soon! "
+                "Reply STOP to opt out."
+            )
+            await send_sms(phone, body)
