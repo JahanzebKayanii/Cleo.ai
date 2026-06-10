@@ -28,7 +28,7 @@ class TestPushPayload(BaseModel):
 
 
 @router.post("/test-push")
-async def test_push(payload: TestPushPayload, db: AsyncSession = Depends(get_db)):
+async def test_push(payload: TestPushPayload, business_id: int = 1, db: AsyncSession = Depends(get_db)):
     """Simulate a completed call and push to all configured integrations. Use for testing without a real call."""
     from app.services.business_service import get_business_raw
     from app.services.integration_service import push_to_integrations
@@ -54,7 +54,7 @@ async def test_push(payload: TestPushPayload, db: AsyncSession = Depends(get_db)
         f"Caller: Ok thanks.\n"
     )
 
-    config = await get_business_raw(db)
+    config = await get_business_raw(db, business_id)
     await push_to_integrations(
         customer_name=payload.customer_name,
         customer_phone=payload.customer_phone,
@@ -126,7 +126,7 @@ async def push_integrations(call_id: int, db: AsyncSession = Depends(get_db)):
     call_info = await get_call_for_integrations(db, call.twilio_call_sid)
     if not call_info:
         raise HTTPException(status_code=400, detail="No transcript found for this call")
-    config = await get_business_raw(db)
+    config = await get_business_raw(db, call.business_id or 1)
     await push_to_integrations(
         customer_name=call_info.get("customer_name"),
         customer_phone=call_info.get("customer_phone", ""),

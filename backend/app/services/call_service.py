@@ -64,6 +64,7 @@ async def get_call_for_integrations(db: AsyncSession, twilio_sid: str) -> dict |
     if not call or not call.transcript:
         return None
     return {
+        "business_id": call.business_id or 1,
         "customer_name": call.customer.name if call.customer else None,
         "customer_phone": call.customer.phone if call.customer else "",
         "transcript": call.transcript or "",
@@ -105,7 +106,7 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
     if config.get("owner_email"):
         asyncio.create_task(send_call_summary(
             to_email=config["owner_email"],
-            business_name=config.get("name", "Apex Home Services"),
+            business_name=config.get("name", "the business"),
             customer_name=call.customer.name if call.customer else None,
             customer_phone=call.customer.phone if call.customer else "",
             summary=call.summary,

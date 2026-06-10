@@ -36,7 +36,7 @@ async def _finalize_call(twilio_sid: str) -> None:
         await generate_and_save_summary(db, twilio_sid)
         call_info = await get_call_for_integrations(db, twilio_sid)
         if call_info:
-            config = await get_business_raw(db)
+            config = await get_business_raw(db, call_info.get("business_id", 1))
             await push_to_integrations(
                 customer_name=call_info.get("customer_name"),
                 customer_phone=call_info.get("customer_phone", ""),

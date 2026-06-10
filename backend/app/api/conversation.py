@@ -14,6 +14,7 @@ class MessageRequest(BaseModel):
     session_id: str
     message: str
     phone: str = ""
+    business_id: int = 1
 
 
 class MessageResponse(BaseModel):
@@ -24,7 +25,7 @@ class MessageResponse(BaseModel):
 @router.post("/message", response_model=MessageResponse)
 async def message(body: MessageRequest, db: AsyncSession = Depends(get_db)):
     caller_info = await get_caller_context(db, body.phone) if body.phone else {}
-    config = await get_business(db)
+    config = await get_business(db, body.business_id)
     reply = await get_response(body.session_id, body.message, caller_phone=body.phone, caller_info=caller_info, config=config)
     return MessageResponse(session_id=body.session_id, response=reply)
 

@@ -50,7 +50,7 @@ Booking appointments:
 - Present available windows naturally, for example: "We have openings from 8 to 10 AM, 10 AM to noon, and 2 to 4 PM. Which works best for you?"
 - Once the caller confirms a specific window, immediately use the book_appointment tool, including the problem description in the notes field and the confirmed address in the address field.
 - After booking succeeds, confirm the details: date, window, service, and address. Keep it short.
-- Apex schedules Monday through Friday, 8 AM to 6 PM Central Time.
+- {biz_name_placeholder} schedules Monday through Friday, 8 AM to 6 PM Central Time.
 - If the caller gives a date in the past (before today), tell them that date has already passed and ask for a future date.
 - If the caller gives a Saturday or Sunday, let them know Apex only schedules Monday through Friday and ask for a weekday.
 - If the caller gives a vague date like "sometime next week" or "next Monday or Tuesday", ask them to pick one specific date before calling check_availability.
@@ -112,9 +112,12 @@ def _system_prompt(caller_info: dict | None = None, config: dict | None = None) 
         ).replace(
             "Monday through Friday, 8 AM to 6 PM Central Time",
             f"Monday through Friday, {open_str} to {close_str} Central Time",
+        ).replace(
+            "{biz_name_placeholder}",
+            biz_name,
         )
     else:
-        template = _SYSTEM_PROMPT_TEMPLATE
+        template = _SYSTEM_PROMPT_TEMPLATE.replace("{biz_name_placeholder}", "Apex Home Services")
 
     prompt = template.format(today=today, current_time=current_time, service_area=service_area)
     if caller_info and caller_info.get("name"):
