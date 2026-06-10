@@ -1,3 +1,5 @@
+import time
+
 # Shared in-memory state between stream and call handlers
 pending_responses: dict[str, str | None] = {}  # legacy, kept for safety
 
@@ -19,3 +21,19 @@ call_transfer_map: dict[str, str] = {}  # call_sid -> transfer phone number
 
 # Set when Claude signals the conversation is complete and Cleo should hang up
 call_hangup_set: set[str] = set()  # call_sids pending hangup
+
+# Track when each call was started so we can purge stale entries
+# if Twilio never sends a final /call/status event (network failure, crash).
+call_started_at: dict[str, float] = {}  # call_sid -> unix timestamp
+
+_MAX_CALL_AGE = 60 * 60  # 1 hour — generous upper bound for a real call
+
+
+def purge_stale_calls() -> None:
+    now = time.time()
+    stale = [sid for sid, ts in call_started_at.items() if now - ts > _MAX_CALL_AGE]
+    for sid in stale:
+        for d in (call_phone_map, call_caller_info, call_config, call_transfer_map,
+                  pending_first, pending_rest, call_started_at):
+            d.pop(sid, None)
+        call_hangup_set.discard(sid)

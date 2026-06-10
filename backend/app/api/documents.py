@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.auth import require_tenant_access
 from app.core.database import get_db
 from app.models.document import Document
 from app.services.business_service import get_business
@@ -11,7 +12,8 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 
 
 @router.get("/")
-async def list_documents(business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def list_documents(request: Request, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     result = await db.execute(
         select(Document)
         .where(Document.business_id == business_id)
@@ -31,10 +33,13 @@ async def list_documents(business_id: int = 1, db: AsyncSession = Depends(get_db
 
 
 @router.delete("/{doc_id}")
-async def delete_document(doc_id: int, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def delete_document(doc_id: int, request: Request, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     doc = await db.get(Document, doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
+    if doc.business_id != business_id:
+        raise HTTPException(status_code=403, detail="Document belongs to another tenant")
     config = await get_business(db, business_id)
     collection = config.get("qdrant_collection")
     await delete_document_vectors(doc_id, collection, chunk_count=doc.chunk_count or 500)
@@ -45,10 +50,12 @@ async def delete_document(doc_id: int, business_id: int = 1, db: AsyncSession = 
 
 @router.post("/upload")
 async def upload_document(
+    request: Request,
     file: UploadFile = File(...),
     business_id: int = 1,
     db: AsyncSession = Depends(get_db),
 ):
+    require_tenant_access(request, business_id)
     if not file.filename.endswith((".txt", ".md")):
         raise HTTPException(status_code=400, detail="Only .txt and .md files are supported")
 
@@ -77,7 +84,8 @@ async def upload_document(
 
 
 @router.get("/search")
-async def search(q: str, limit: int = 5, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def search(request: Request, q: str, limit: int = 5, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     if not q.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     config = await get_business(db, business_id)

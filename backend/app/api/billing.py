@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.auth import get_session
+from app.api.auth import require_admin
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.business import Business
@@ -27,10 +27,7 @@ def _stripe():
 @router.post("/checkout")
 async def create_checkout(request: Request, db: AsyncSession = Depends(get_db)):
     """Create a Stripe Checkout session for a given tenant."""
-    token = request.cookies.get("cleo_session")
-    s = get_session(token)
-    if not s or s.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
+    require_admin(request)
 
     body = await request.json()
     business_id = body.get("business_id", 1)
@@ -117,10 +114,7 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 @router.get("/portal")
 async def billing_portal(request: Request, business_id: int = 1, db: AsyncSession = Depends(get_db)):
     """Redirect to Stripe Customer Portal for subscription management."""
-    token = request.cookies.get("cleo_session")
-    s = get_session(token)
-    if not s or s.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
+    require_admin(request)
 
     result = await db.execute(select(Business).where(Business.id == business_id))
     business = result.scalar_one_or_none()

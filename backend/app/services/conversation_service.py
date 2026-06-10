@@ -226,8 +226,9 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str, config: dict
         if result.get("success") and caller_phone:
             from app.core.database import get_db_context
             from app.services.customer_service import update_customer_name
+            biz_id = (config or {}).get("id", 1)
             async with get_db_context() as db:
-                await update_customer_name(db, caller_phone, inputs["customer_name"])
+                await update_customer_name(db, caller_phone, inputs["customer_name"], biz_id)
         return result
 
     return {"error": f"Unknown tool: {name}"}

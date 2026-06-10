@@ -10,7 +10,7 @@ class Document(Base):
     __tablename__ = "documents"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    business_id: Mapped[int] = mapped_column(ForeignKey("business.id"), default=1, index=True)
+    business_id: Mapped[int] = mapped_column(ForeignKey("business.id"), index=True)
     filename: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
     chunk_count: Mapped[int] = mapped_column(Integer, default=0)

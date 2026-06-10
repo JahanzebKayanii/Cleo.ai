@@ -22,7 +22,7 @@ def _get_anthropic() -> AsyncAnthropic:
 async def start_call(
     db: AsyncSession, twilio_sid: str, from_phone: str, business_id: int = 1
 ) -> tuple[Call, int]:
-    customer, _ = await get_or_create_customer(db, from_phone)
+    customer, _ = await get_or_create_customer(db, from_phone, business_id)
     call = Call(
         customer_id=customer.id,
         business_id=business_id,

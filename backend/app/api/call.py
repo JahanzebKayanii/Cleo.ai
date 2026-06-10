@@ -7,7 +7,7 @@ from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_transfer_map, pending_first, pending_rest
+from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_started_at, call_transfer_map, pending_first, pending_rest
 from app.services.business_service import get_business, get_business_by_phone
 from app.services.call_service import end_call, start_call
 from app.services.conversation_service import _is_business_hours, clear_session
@@ -70,8 +70,10 @@ async def incoming_call(
     To: str = Form(default=""),
     db: AsyncSession = Depends(get_db),
 ):
+    import time
     print(f"[CALL] Incoming call: {CallSid} from {From} to {To}", flush=True)
     call_phone_map[CallSid] = From
+    call_started_at[CallSid] = time.time()
 
     # Route to the right tenant by the Twilio number that was dialled
     config = await get_business_by_phone(db, To) if To else None
@@ -79,10 +81,10 @@ async def incoming_call(
         config = await get_business(db, 1)  # fallback to default tenant
     call_config[CallSid] = config
 
-    ctx = await get_caller_context(db, From)
+    business_id = config.get("id", 1)
+    ctx = await get_caller_context(db, From, business_id)
     call_caller_info[CallSid] = ctx
 
-    business_id = config.get("id", 1)
     await start_call(db, CallSid, From, business_id)
     asyncio.create_task(_start_recording(CallSid))
 
@@ -234,4 +236,5 @@ async def call_status(
     call_caller_info.pop(CallSid, None)
     call_config.pop(CallSid, None)
     call_transfer_map.pop(CallSid, None)
+    call_started_at.pop(CallSid, None)
     return Response(status_code=204)

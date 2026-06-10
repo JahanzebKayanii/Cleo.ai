@@ -1,4 +1,5 @@
 import secrets
+import time
 from urllib.parse import urlencode
 
 import httpx
@@ -12,20 +13,34 @@ from app.core.database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# session_token -> {"role": "admin"|"tenant", "business_id": int}
+_SESSION_TTL = 86400 * 7  # 7 days
+
+# session_token -> {"role": "admin"|"tenant", "business_id": int, "created": float}
 _sessions: dict[str, dict] = {}
 _jobber_states: set[str] = set()
+
+
+def _cleanup_expired_sessions() -> None:
+    now = time.time()
+    expired = [k for k, v in _sessions.items() if now - v.get("created", 0) > _SESSION_TTL]
+    for k in expired:
+        _sessions.pop(k, None)
 
 _JOBBER_AUTH_URL = "https://api.getjobber.com/api/oauth/authorize"
 _JOBBER_TOKEN_URL = "https://api.getjobber.com/api/oauth/token"
 
 
 def is_valid_session(token: str | None) -> bool:
-    return bool(token and token in _sessions)
+    if not token or token not in _sessions:
+        return False
+    if time.time() - _sessions[token].get("created", 0) > _SESSION_TTL:
+        _sessions.pop(token, None)
+        return False
+    return True
 
 
 def get_session(token: str | None) -> dict | None:
-    if not token:
+    if not is_valid_session(token):
         return None
     return _sessions.get(token)
 
@@ -37,9 +52,39 @@ def session_business_id(token: str | None) -> int:
     return s.get("business_id", 1)
 
 
+def require_tenant_access(request, business_id: int) -> dict:
+    """Reject if the logged-in session can't access this business_id.
+    Admins can access any tenant. Tenants can only access their own.
+    Returns the session dict on success. Raises 401/403 on failure.
+    """
+    from fastapi import HTTPException
+    token = request.cookies.get("cleo_session")
+    s = get_session(token)
+    if not s:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    if s.get("role") == "admin":
+        return s
+    if s.get("business_id") != business_id:
+        raise HTTPException(status_code=403, detail="Access denied for this tenant")
+    return s
+
+
+def require_admin(request) -> dict:
+    """Reject if the logged-in session is not an admin."""
+    from fastapi import HTTPException
+    token = request.cookies.get("cleo_session")
+    s = get_session(token)
+    if not s:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    if s.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return s
+
+
 def _make_session(role: str, business_id: int) -> str:
+    _cleanup_expired_sessions()
     token = secrets.token_hex(32)
-    _sessions[token] = {"role": role, "business_id": business_id}
+    _sessions[token] = {"role": role, "business_id": business_id, "created": time.time()}
     return token
 
 
@@ -124,7 +169,10 @@ async def jobber_callback(code: str, state: str, request: Request, db: AsyncSess
         return RedirectResponse("/dashboard/config.html?jobber=error", status_code=302)
 
     token = request.cookies.get("cleo_session")
-    business_id = session_business_id(token)
+    s = get_session(token)
+    if not s:
+        return RedirectResponse("/dashboard/login.html", status_code=302)
+    business_id = s["business_id"]
 
     from app.models.business import Business
     result = await db.execute(select(Business).where(Business.id == business_id))

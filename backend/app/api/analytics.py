@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.auth import require_tenant_access
 from app.core.database import get_db
 from app.models.call import Call
 
@@ -11,7 +12,8 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 @router.get("/overview")
-async def overview(business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def overview(request: Request, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = today_start - timedelta(days=7)

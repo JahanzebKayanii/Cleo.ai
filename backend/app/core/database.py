@@ -72,6 +72,14 @@ async def create_tables() -> None:
             # Back-fill existing rows to tenant 1
             "UPDATE calls SET business_id = 1 WHERE business_id IS NULL",
             "UPDATE documents SET business_id = 1 WHERE business_id IS NULL",
+            # Scope customers to a tenant
+            "ALTER TABLE customers ADD COLUMN IF NOT EXISTS business_id INTEGER REFERENCES business(id)",
+            "UPDATE customers SET business_id = 1 WHERE business_id IS NULL",
+            # The old unique constraint on (phone) must be dropped before the new composite constraint applies
+            "ALTER TABLE customers DROP CONSTRAINT IF EXISTS customers_phone_key",
+            # Add the composite unique constraint (safe to run repeatedly)
+            "ALTER TABLE customers DROP CONSTRAINT IF EXISTS uq_customer_business_phone",
+            "ALTER TABLE customers ADD CONSTRAINT uq_customer_business_phone UNIQUE (business_id, phone)",
         ]
         for sql in migrations:
             await conn.execute(text(sql))

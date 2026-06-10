@@ -1,13 +1,14 @@
 import asyncio
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from twilio.rest import Client as TwilioClient
 
+from app.api.auth import require_tenant_access
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.call import Call
@@ -28,7 +29,8 @@ class TestPushPayload(BaseModel):
 
 
 @router.post("/test-push")
-async def test_push(payload: TestPushPayload, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def test_push(request: Request, payload: TestPushPayload, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     """Simulate a completed call and push to all configured integrations. Use for testing without a real call."""
     from app.services.business_service import get_business_raw
     from app.services.integration_service import push_to_integrations
@@ -75,7 +77,8 @@ def _get_twilio() -> TwilioClient:
 
 
 @router.get("/")
-async def list_calls(business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def list_calls(request: Request, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     result = await db.execute(
         select(Call)
         .where(Call.business_id == business_id)
@@ -98,11 +101,12 @@ async def list_calls(business_id: int = 1, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{call_id}")
-async def get_call(call_id: int, db: AsyncSession = Depends(get_db)):
+async def get_call(call_id: int, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Call).where(Call.id == call_id))
     call = result.scalar_one_or_none()
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
+    require_tenant_access(request, call.business_id or 1)
     return {
         "id": call.id,
         "phone": call.customer.phone if call.customer else None,
@@ -115,10 +119,11 @@ async def get_call(call_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/{call_id}/push-integrations")
-async def push_integrations(call_id: int, db: AsyncSession = Depends(get_db)):
+async def push_integrations(call_id: int, request: Request, db: AsyncSession = Depends(get_db)):
     call = await db.get(Call, call_id)
     if not call or not call.twilio_call_sid:
         raise HTTPException(status_code=404, detail="Call not found")
+    require_tenant_access(request, call.business_id or 1)
     from app.services.business_service import get_business_raw
     from app.services.call_service import generate_and_save_summary, get_call_for_integrations
     from app.services.integration_service import push_to_integrations
@@ -138,10 +143,11 @@ async def push_integrations(call_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{call_id}/recording")
-async def get_recording(call_id: int, db: AsyncSession = Depends(get_db)):
+async def get_recording(call_id: int, request: Request, db: AsyncSession = Depends(get_db)):
     call = await db.get(Call, call_id)
     if not call or not call.twilio_call_sid:
         raise HTTPException(status_code=404, detail="No recording")
+    require_tenant_access(request, call.business_id or 1)
 
     client = _get_twilio()
     recordings = await asyncio.to_thread(

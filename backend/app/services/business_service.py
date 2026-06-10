@@ -1,4 +1,6 @@
+import asyncio
 import json
+import re
 import time
 
 from sqlalchemy import select
@@ -9,8 +11,19 @@ from app.models.business import Business
 
 _cache: dict[int, dict] = {}   # business_id -> masked dict
 _cache_ts: dict[int, float] = {}
-_phone_to_id: dict[str, int] = {}  # twilio_phone_number -> business_id
+_phone_to_id: dict[str, int] = {}  # normalized phone -> business_id
+_cache_lock = asyncio.Lock()
 _CACHE_TTL = 60
+
+
+def _normalize_phone(phone: str) -> str:
+    """Strip everything except digits, then prefix with + for E.164.
+    Handles inputs like '+18135550001', '(813) 555-0001', '18135550001'.
+    """
+    if not phone:
+        return ""
+    digits = re.sub(r"\D", "", phone)
+    return "+" + digits if digits else ""
 
 
 def _to_dict(b: Business, mask_keys: bool = True) -> dict:
@@ -43,9 +56,9 @@ def _to_dict(b: Business, mask_keys: bool = True) -> dict:
 
 
 async def get_business(db: AsyncSession, business_id: int = 1) -> dict:
-    global _cache, _cache_ts
-    if business_id in _cache and time.time() - _cache_ts.get(business_id, 0) < _CACHE_TTL:
-        return _cache[business_id]
+    async with _cache_lock:
+        if business_id in _cache and time.time() - _cache_ts.get(business_id, 0) < _CACHE_TTL:
+            return _cache[business_id]
 
     result = await db.execute(select(Business).where(Business.id == business_id))
     business = result.scalar_one_or_none()
@@ -63,11 +76,13 @@ async def get_business(db: AsyncSession, business_id: int = 1) -> dict:
         db.add(business)
         await db.flush()
 
-    _cache[business_id] = _to_dict(business)
-    _cache_ts[business_id] = time.time()
-    if business.twilio_phone_number:
-        _phone_to_id[business.twilio_phone_number] = business.id
-    return _cache[business_id]
+    config = _to_dict(business)
+    async with _cache_lock:
+        _cache[business_id] = config
+        _cache_ts[business_id] = time.time()
+        if business.twilio_phone_number:
+            _phone_to_id[_normalize_phone(business.twilio_phone_number)] = business.id
+    return config
 
 
 async def get_business_raw(db: AsyncSession, business_id: int = 1) -> dict:
@@ -80,30 +95,39 @@ async def get_business_raw(db: AsyncSession, business_id: int = 1) -> dict:
 
 
 async def get_business_by_phone(db: AsyncSession, phone: str) -> dict | None:
-    """Look up a tenant by the Twilio number the caller dialled. Returns masked config."""
-    if phone in _phone_to_id:
-        bid = _phone_to_id[phone]
+    """Look up a tenant by the Twilio number the caller dialled. Returns masked config.
+    Normalizes the input so formatting differences ('+1...', '1...', '(...)...') still match.
+    """
+    normalized = _normalize_phone(phone)
+    if not normalized:
+        return None
+
+    if normalized in _phone_to_id:
+        bid = _phone_to_id[normalized]
         if bid in _cache and time.time() - _cache_ts.get(bid, 0) < _CACHE_TTL:
             return _cache[bid]
 
-    result = await db.execute(select(Business).where(Business.twilio_phone_number == phone))
-    business = result.scalar_one_or_none()
-    if not business:
-        return None
-
-    config = _to_dict(business)
-    _cache[business.id] = config
-    _cache_ts[business.id] = time.time()
-    _phone_to_id[phone] = business.id
-    return config
+    # Fetch all businesses and normalize their numbers for comparison
+    result = await db.execute(select(Business))
+    for business in result.scalars().all():
+        if _normalize_phone(business.twilio_phone_number or "") == normalized:
+            config = _to_dict(business)
+            _cache[business.id] = config
+            _cache_ts[business.id] = time.time()
+            _phone_to_id[normalized] = business.id
+            return config
+    return None
 
 
 async def get_business_raw_by_phone(db: AsyncSession, phone: str) -> dict | None:
-    result = await db.execute(select(Business).where(Business.twilio_phone_number == phone))
-    business = result.scalar_one_or_none()
-    if not business:
+    normalized = _normalize_phone(phone)
+    if not normalized:
         return None
-    return _to_dict(business, mask_keys=False)
+    result = await db.execute(select(Business))
+    for business in result.scalars().all():
+        if _normalize_phone(business.twilio_phone_number or "") == normalized:
+            return _to_dict(business, mask_keys=False)
+    return None
 
 
 async def list_businesses(db: AsyncSession) -> list[dict]:
@@ -181,10 +205,11 @@ async def update_business(db: AsyncSession, data: dict, business_id: int = 1) ->
             setattr(business, field, data[field] or None)
 
     # Invalidate cache
-    _cache.pop(business_id, None)
-    _cache_ts.pop(business_id, None)
-    if business.twilio_phone_number:
-        _phone_to_id[business.twilio_phone_number] = business.id
+    async with _cache_lock:
+        _cache.pop(business_id, None)
+        _cache_ts.pop(business_id, None)
+        if business.twilio_phone_number:
+            _phone_to_id[_normalize_phone(business.twilio_phone_number)] = business.id
 
     return _to_dict(business)
 

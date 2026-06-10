@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.auth import get_session
+from app.api.auth import require_admin
 from app.core.database import get_db
 from app.models.business import Business
 from app.services.business_service import create_business, list_businesses, update_business, invalidate_cache
@@ -11,10 +11,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 def _require_admin(request: Request) -> None:
-    token = request.cookies.get("cleo_session")
-    s = get_session(token)
-    if not s or s.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
+    require_admin(request)
 
 
 @router.get("/tenants")

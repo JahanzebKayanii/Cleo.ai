@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.auth import require_tenant_access
 from app.core.database import get_db
 from app.services.business_service import get_business, get_business_raw, update_business
 from app.services.integration_service import push_to_integrations
@@ -10,12 +11,14 @@ router = APIRouter(prefix="/business", tags=["business"])
 
 
 @router.get("/config")
-async def get_config(business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def get_config(request: Request, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     return await get_business(db, business_id)
 
 
 @router.put("/config")
-async def put_config(data: dict, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+async def put_config(request: Request, data: dict, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    require_tenant_access(request, business_id)
     return await update_business(db, data, business_id)
 
 
@@ -32,10 +35,12 @@ class TestIntegrationRequest(BaseModel):
 
 @router.post("/test-integrations")
 async def test_integrations(
+    request: Request,
     body: TestIntegrationRequest,
     business_id: int = 1,
     db: AsyncSession = Depends(get_db),
 ):
+    require_tenant_access(request, business_id)
     config = await get_business_raw(db, business_id)
     transcript = f"Caller: I need help with my {body.service_type}. {body.issue}\nCleo: I can help with that."
     summary = f"Caller reported {body.issue}. {'Appointment booked for ' + body.appointment_date + ' ' + body.appointment_time + '.' if body.booked else 'No appointment booked.'}"

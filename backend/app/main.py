@@ -30,6 +30,13 @@ async def _run_morning_reminders() -> None:
     await send_morning_reminders()
 
 
+async def _run_state_cleanup() -> None:
+    from app.api.auth import _cleanup_expired_sessions
+    from app.core.state import purge_stale_calls
+    purge_stale_calls()
+    _cleanup_expired_sessions()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_tables()
@@ -38,6 +45,12 @@ async def lifespan(app: FastAPI):
         _run_morning_reminders,
         CronTrigger(hour=8, minute=0, timezone="America/Chicago"),
         id="morning_reminders",
+        replace_existing=True,
+    )
+    _scheduler.add_job(
+        _run_state_cleanup,
+        CronTrigger(minute=0),  # every hour on the hour
+        id="state_cleanup",
         replace_existing=True,
     )
     _scheduler.start()
