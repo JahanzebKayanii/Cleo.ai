@@ -47,8 +47,27 @@ async def delete_tenant(business_id: int, request: Request, db: AsyncSession = D
     business = result.scalar_one_or_none()
     if not business:
         raise HTTPException(status_code=404, detail="Tenant not found")
+
+    # Cascade: delete all related rows so the FK constraint doesn't reject us
+    from sqlalchemy import text
+    qdrant_collection = business.qdrant_collection
+    await db.execute(text("DELETE FROM calls WHERE business_id = :bid"), {"bid": business_id})
+    await db.execute(text("DELETE FROM documents WHERE business_id = :bid"), {"bid": business_id})
+    await db.execute(text("DELETE FROM customers WHERE business_id = :bid"), {"bid": business_id})
     await db.delete(business)
+    await db.commit()
     invalidate_cache(business_id)
+
+    # Best-effort Qdrant cleanup — don't fail the delete if Qdrant errors
+    if qdrant_collection:
+        try:
+            from app.core.qdrant import get_qdrant
+            qdrant = get_qdrant()
+            if await qdrant.collection_exists(qdrant_collection):
+                await qdrant.delete_collection(qdrant_collection)
+        except Exception as e:
+            print(f"[admin] Failed to delete Qdrant collection {qdrant_collection}: {e}", flush=True)
+
     return {"ok": True}
 
 

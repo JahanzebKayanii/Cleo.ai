@@ -49,7 +49,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
         Config
       </a>
-      <a id="admin-link" href="/dashboard/admin.html" class="hidden nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium">
+      <a id="admin-link" href="/dashboard/admin.html" class="hidden flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#666] hover:text-emerald-600 hover:bg-emerald-50 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         Tenants
       </a>
@@ -156,8 +156,24 @@
       if (_bid !== null) return _bid;
       const p = new URLSearchParams(window.location.search);
       if (p.has('bid')) { _bid = +p.get('bid'); return _bid; }
-      const s = await fetch(`${API}/auth/session`).then(r => r.json()).catch(() => ({}));
+      const sr = await fetch(`${API}/auth/session`);
+      if (sr.status === 401) { window.location.href = '/dashboard/login.html'; return 1; }
+      const s = await sr.json().catch(() => ({}));
+      if (!s.authenticated) { window.location.href = '/dashboard/login.html'; return 1; }
       _bid = s.business_id || 1;
+      // Reveal admin link + carry bid through all sidebar nav links
+      if (s.role === 'admin') {
+        const al = document.getElementById('admin-link');
+        if (al) al.classList.remove('hidden');
+      }
+      const navBid = _bid;
+      document.querySelectorAll('aside a[href^="/dashboard/"]').forEach(a => {
+        const u = new URL(a.href, window.location.origin);
+        if (!u.searchParams.has('bid')) {
+          u.searchParams.set('bid', navBid);
+          a.href = u.pathname + u.search;
+        }
+      });
       // Show admin link if admin
       if (s.role === 'admin') {
         const adminLink = document.getElementById('admin-link');
