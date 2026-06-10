@@ -179,6 +179,7 @@
         const adminLink = document.getElementById('admin-link');
         if (adminLink) adminLink.classList.remove('hidden');
       }
+      await initTenantSwitcher();
       return _bid;
     }
 
