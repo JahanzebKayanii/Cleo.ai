@@ -75,8 +75,13 @@ def _get_twilio() -> TwilioClient:
 
 
 @router.get("/")
-async def list_calls(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Call).order_by(desc(Call.started_at)).limit(100))
+async def list_calls(business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Call)
+        .where(Call.business_id == business_id)
+        .order_by(desc(Call.started_at))
+        .limit(100)
+    )
     calls = result.scalars().all()
     return [
         {

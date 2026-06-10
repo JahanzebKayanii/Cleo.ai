@@ -56,13 +56,17 @@ async def embed_texts(texts: List[str]) -> List[List[float]]:
     raise RuntimeError("embed_texts: unreachable")
 
 
-async def ingest_document(document_id: int, filename: str, text: str) -> int:
+async def ingest_document(document_id: int, filename: str, text: str, collection: str | None = None) -> int:
     chunks = chunk_text(text)
     if not chunks:
         return 0
 
+    collection = collection or settings.qdrant_collection
     embeddings = await embed_texts(chunks)
     qdrant = get_qdrant()
+
+    from app.core.qdrant import ensure_tenant_collection
+    await ensure_tenant_collection(collection)
 
     points = [
         PointStruct(
@@ -78,31 +82,36 @@ async def ingest_document(document_id: int, filename: str, text: str) -> int:
         for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
     ]
 
-    await qdrant.upsert(collection_name=settings.qdrant_collection, points=points)
+    await qdrant.upsert(collection_name=collection, points=points)
     return len(chunks)
 
 
-async def delete_document_vectors(document_id: int) -> None:
+async def delete_document_vectors(document_id: int, collection: str | None = None) -> None:
     from qdrant_client.models import Filter, FieldCondition, MatchValue
+    collection = collection or settings.qdrant_collection
     qdrant = get_qdrant()
     await qdrant.delete(
-        collection_name=settings.qdrant_collection,
+        collection_name=collection,
         points_selector=Filter(
             must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))]
         ),
     )
 
 
-async def search_documents(query: str, limit: int = 5) -> List[dict]:
+async def search_documents(query: str, limit: int = 5, collection: str | None = None) -> List[dict]:
+    collection = collection or settings.qdrant_collection
     embeddings = await embed_texts([query])
     query_vector = embeddings[0]
 
     qdrant = get_qdrant()
-    hits = await qdrant.search(
-        collection_name=settings.qdrant_collection,
-        query_vector=query_vector,
-        limit=limit,
-    )
+    try:
+        hits = await qdrant.search(
+            collection_name=collection,
+            query_vector=query_vector,
+            limit=limit,
+        )
+    except Exception:
+        return []
 
     return [
         {

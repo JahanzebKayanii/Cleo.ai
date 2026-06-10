@@ -25,10 +25,14 @@ def get_qdrant() -> AsyncQdrantClient:
 
 
 async def ensure_collection() -> None:
+    await ensure_tenant_collection(settings.qdrant_collection)
+
+
+async def ensure_tenant_collection(collection_name: str) -> None:
     client = get_qdrant()
-    exists = await client.collection_exists(settings.qdrant_collection)
+    exists = await client.collection_exists(collection_name)
     if not exists:
         await client.create_collection(
-            collection_name=settings.qdrant_collection,
+            collection_name=collection_name,
             vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )

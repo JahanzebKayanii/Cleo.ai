@@ -94,6 +94,16 @@
               <label class="block text-xs text-[#555] mb-1.5">Transfer Phone <span class="text-[#aaa]">— Cleo dials this when caller asks for a human</span></label>
               <input id="transfer_phone" type="text" placeholder="+15551234567" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-[#555] mb-1.5">Twilio Number <span class="text-[#aaa]">— calls to this number route here</span></label>
+                <input id="twilio_phone_number" type="text" placeholder="+15559876543" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
+              </div>
+              <div>
+                <label class="block text-xs text-[#555] mb-1.5">Dashboard Password <span class="text-[#aaa]">— leave blank to keep existing</span></label>
+                <input id="dashboard_password" type="password" placeholder="new password" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
+              </div>
+            </div>
             <div>
               <label class="block text-xs text-[#555] mb-1.5">Service Area <span class="text-[#aaa]">— Cleo will decline bookings outside this area</span></label>
               <input id="service_area" type="text" placeholder="Austin, TX and surrounding areas within 30 miles" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
@@ -221,6 +231,16 @@
   <script>
     const API = window.location.origin;
 
+    let _bid = null;
+    async function getBid() {
+      if (_bid !== null) return _bid;
+      const p = new URLSearchParams(window.location.search);
+      if (p.has('bid')) { _bid = +p.get('bid'); return _bid; }
+      const s = await fetch(`${API}/auth/session`).then(r => r.json()).catch(() => ({}));
+      _bid = s.business_id || 1;
+      return _bid;
+    }
+
     function toast(msg, ok = true) {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -232,7 +252,8 @@
     const KEY_FIELDS = ['hubspot_token','housecall_pro_api_key','quickbooks_token','servicetitan_token'];
 
     async function load() {
-      const c = await fetch(`${API}/business/config`).then(r => r.json());
+      const bid = await getBid();
+      const c = await fetch(`${API}/business/config?business_id=${bid}`).then(r => r.json());
       document.getElementById('name').value = c.name || '';
       document.getElementById('description').value = c.description || '';
       document.getElementById('timezone').value = c.timezone || 'America/Chicago';
@@ -242,6 +263,7 @@
       document.getElementById('owner_email').value = c.owner_email || '';
       document.getElementById('transfer_phone').value = c.transfer_phone || '';
       document.getElementById('service_area').value = c.service_area || '';
+      document.getElementById('twilio_phone_number').value = c.twilio_phone_number || '';
       if (c.name) document.getElementById('sidebar-biz').textContent = c.name;
 
       // Jobber OAuth state
@@ -284,7 +306,10 @@
         owner_email: document.getElementById('owner_email').value,
         transfer_phone: document.getElementById('transfer_phone').value,
         service_area: document.getElementById('service_area').value,
+        twilio_phone_number: document.getElementById('twilio_phone_number').value || null,
       };
+      const pw = document.getElementById('dashboard_password').value;
+      if (pw) payload.dashboard_password = pw;
       // Only include integration keys if non-empty (empty = leave existing key as-is)
       KEY_FIELDS.forEach(field => {
         const val = document.getElementById(field).value;
@@ -292,7 +317,8 @@
       });
 
       try {
-        const res = await fetch(`${API}/business/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const bid = await getBid();
+        const res = await fetch(`${API}/business/config?business_id=${bid}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         res.ok ? toast('Saved') : toast('Failed to save', false);
         if (res.ok) document.getElementById('sidebar-biz').textContent = payload.name;
       } catch { toast('Network error', false); }
@@ -302,7 +328,8 @@
 
     async function clearKey(field) {
       if (!confirm('Remove this API key?')) return;
-      const res = await fetch(`${API}/business/config`, {
+      const bid = await getBid();
+      const res = await fetch(`${API}/business/config?business_id=${bid}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: '__clear__' }),

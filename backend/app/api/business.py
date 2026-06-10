@@ -3,20 +3,20 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.services.business_service import get_business, update_business
+from app.services.business_service import get_business, get_business_raw, update_business
 from app.services.integration_service import push_to_integrations
 
 router = APIRouter(prefix="/business", tags=["business"])
 
 
 @router.get("/config")
-async def get_config(db: AsyncSession = Depends(get_db)):
-    return await get_business(db)
+async def get_config(business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    return await get_business(db, business_id)
 
 
 @router.put("/config")
-async def put_config(data: dict, db: AsyncSession = Depends(get_db)):
-    return await update_business(db, data)
+async def put_config(data: dict, business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    return await update_business(db, data, business_id)
 
 
 class TestIntegrationRequest(BaseModel):
@@ -31,8 +31,12 @@ class TestIntegrationRequest(BaseModel):
 
 
 @router.post("/test-integrations")
-async def test_integrations(body: TestIntegrationRequest, db: AsyncSession = Depends(get_db)):
-    config = await get_business(db)
+async def test_integrations(
+    body: TestIntegrationRequest,
+    business_id: int = 1,
+    db: AsyncSession = Depends(get_db),
+):
+    config = await get_business_raw(db, business_id)
     transcript = f"Caller: I need help with my {body.service_type}. {body.issue}\nCleo: I can help with that."
     summary = f"Caller reported {body.issue}. {'Appointment booked for ' + body.appointment_date + ' ' + body.appointment_time + '.' if body.booked else 'No appointment booked.'}"
     await push_to_integrations(
@@ -47,7 +51,7 @@ async def test_integrations(body: TestIntegrationRequest, db: AsyncSession = Dep
         from app.services.email_service import send_call_summary
         await send_call_summary(
             to_email=config["owner_email"],
-            business_name=config.get("name", "Apex Home Services"),
+            business_name=config.get("name", "the business"),
             customer_name=body.customer_name,
             customer_phone=body.customer_phone,
             summary=summary,

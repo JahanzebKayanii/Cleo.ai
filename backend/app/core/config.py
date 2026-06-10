@@ -52,6 +52,11 @@ class Settings(BaseSettings):
     jobber_client_id: str = ""
     jobber_client_secret: str = ""
 
+    # Stripe
+    stripe_secret_key: str = ""
+    stripe_price_id: str = ""
+    stripe_webhook_secret: str = ""
+
     @property
     def database_url(self) -> str:
         if self.database_url_override:

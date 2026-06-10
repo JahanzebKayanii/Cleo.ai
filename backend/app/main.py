@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.analytics import router as analytics_router
 from app.api.auth import is_valid_session, router as auth_router
+from app.api.admin import router as admin_router
+from app.api.billing import router as billing_router
 from app.api.appointments import router as appointments_router
 from app.api.business import router as business_router
 from app.api.call import router as call_router
@@ -80,6 +82,8 @@ app.include_router(customers_router)
 app.include_router(call_router)
 app.include_router(calls_router)
 app.include_router(stream_router)
+app.include_router(admin_router)
+app.include_router(billing_router)
 
 _static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
 if os.path.isdir(_static_dir):

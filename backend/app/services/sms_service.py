@@ -38,10 +38,11 @@ async def send_confirmation_sms(
     date_display: str,
     window: str,
     service: str,
+    business_name: str = "the business",
 ) -> None:
     first_name = customer_name.split()[0] if customer_name else "there"
     body = (
-        f"Hi {first_name}, your {service} appointment with Apex Home Services "
+        f"Hi {first_name}, your {service} appointment with {business_name} "
         f"is confirmed for {date_display} from {window}. "
         "Questions? Call us back. Reply STOP to opt out."
     )
@@ -61,9 +62,10 @@ async def send_morning_reminders() -> None:
         first_name = (appt.get("customer_name") or "there").split()[0]
         window = appt.get("window", "")
         service = appt.get("service", "")
+        biz_name = appt.get("business_name", "us")
         body = (
             f"Hi {first_name}, just a reminder that your {service} appointment "
-            f"with Apex Home Services is today from {window}. See you soon! "
+            f"with {biz_name} is today from {window}. See you soon! "
             "Reply STOP to opt out."
         )
         await send_sms(phone, body)

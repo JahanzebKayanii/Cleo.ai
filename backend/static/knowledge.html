@@ -109,6 +109,16 @@
   <script>
     const API = window.location.origin;
 
+    let _bid = null;
+    async function getBid() {
+      if (_bid !== null) return _bid;
+      const p = new URLSearchParams(window.location.search);
+      if (p.has('bid')) { _bid = +p.get('bid'); return _bid; }
+      const s = await fetch(`${API}/auth/session`).then(r => r.json()).catch(() => ({}));
+      _bid = s.business_id || 1;
+      return _bid;
+    }
+
     function toast(msg, ok = true) {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -126,7 +136,8 @@
     }
 
     async function loadDocs() {
-      const res = await fetch(`${API}/documents/`);
+      const bid = await getBid();
+      const res = await fetch(`${API}/documents/?business_id=${bid}`);
       const docs = await res.json();
       const el = document.getElementById('docs-list');
       if (!docs.length) {
@@ -150,7 +161,8 @@
 
     async function deleteDoc(id, filename) {
       if (!confirm(`Delete "${filename}"? Cleo will no longer use this document.`)) return;
-      const res = await fetch(`${API}/documents/${id}`, { method: 'DELETE' });
+      const bid = await getBid();
+      const res = await fetch(`${API}/documents/${id}?business_id=${bid}`, { method: 'DELETE' });
       if (res.ok) { toast('Document deleted'); loadDocs(); }
       else toast('Failed to delete', false);
     }
@@ -174,7 +186,8 @@
       try {
         bar.style.width = '60%';
         label.textContent = 'Processing...';
-        const res = await fetch(`${API}/documents/upload`, { method: 'POST', body: form });
+        const bid = await getBid();
+        const res = await fetch(`${API}/documents/upload?business_id=${bid}`, { method: 'POST', body: form });
         if (res.ok) {
           const data = await res.json();
           bar.style.width = '100%';

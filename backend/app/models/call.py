@@ -11,6 +11,7 @@ class Call(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     customer_id: Mapped[int | None] = mapped_column(ForeignKey("customers.id"))
+    business_id: Mapped[int | None] = mapped_column(ForeignKey("business.id"), index=True)
     twilio_call_sid: Mapped[str | None] = mapped_column(String(64), index=True)
     transcript: Mapped[str | None] = mapped_column(Text)
     summary: Mapped[str | None] = mapped_column(Text)

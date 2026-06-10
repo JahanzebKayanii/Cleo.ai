@@ -6,68 +6,69 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.call import Call
-from app.models.customer import Customer
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 @router.get("/overview")
-async def overview(db: AsyncSession = Depends(get_db)):
+async def overview(business_id: int = 1, db: AsyncSession = Depends(get_db)):
     now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = today_start - timedelta(days=7)
     days_14_start = today_start - timedelta(days=13)
 
-    # Totals
-    total_res = await db.execute(select(func.count()).select_from(Call))
+    def _filter(q):
+        return q.where(Call.business_id == business_id)
+
+    total_res = await db.execute(_filter(select(func.count()).select_from(Call)))
     total_calls = total_res.scalar() or 0
 
     completed_res = await db.execute(
-        select(func.count()).select_from(Call).where(Call.status == "completed")
+        _filter(select(func.count()).select_from(Call)).where(Call.status == "completed")
     )
     completed_calls = completed_res.scalar() or 0
 
     active_res = await db.execute(
-        select(func.count()).select_from(Call).where(Call.status == "in_progress")
+        _filter(select(func.count()).select_from(Call)).where(Call.status == "in_progress")
     )
     active_calls = active_res.scalar() or 0
 
     today_res = await db.execute(
-        select(func.count()).select_from(Call).where(Call.started_at >= today_start)
+        _filter(select(func.count()).select_from(Call)).where(Call.started_at >= today_start)
     )
     calls_today = today_res.scalar() or 0
 
     week_res = await db.execute(
-        select(func.count()).select_from(Call).where(Call.started_at >= week_start)
+        _filter(select(func.count()).select_from(Call)).where(Call.started_at >= week_start)
     )
     calls_this_week = week_res.scalar() or 0
 
     # Calls by day (last 14 days)
     daily_res = await db.execute(
-        select(
-            func.date(Call.started_at).label("day"),
-            func.count().label("count"),
+        _filter(
+            select(
+                func.date(Call.started_at).label("day"),
+                func.count().label("count"),
+            ).where(Call.started_at >= days_14_start)
         )
-        .where(Call.started_at >= days_14_start)
         .group_by(func.date(Call.started_at))
         .order_by(func.date(Call.started_at))
     )
     daily_rows = daily_res.all()
-
-    # Fill in zeros for missing days
     day_map = {str(r.day): r.count for r in daily_rows}
     calls_by_day = []
     for i in range(14):
         d = (days_14_start + timedelta(days=i)).strftime("%Y-%m-%d")
         calls_by_day.append({"date": d, "count": day_map.get(d, 0)})
 
-    # Calls by hour (all time)
+    # Calls by hour
     hourly_res = await db.execute(
-        select(
-            func.extract("hour", Call.started_at).label("hour"),
-            func.count().label("count"),
+        _filter(
+            select(
+                func.extract("hour", Call.started_at).label("hour"),
+                func.count().label("count"),
+            ).where(Call.status == "completed")
         )
-        .where(Call.status == "completed")
         .group_by(func.extract("hour", Call.started_at))
         .order_by(func.extract("hour", Call.started_at))
     )
@@ -75,25 +76,27 @@ async def overview(db: AsyncSession = Depends(get_db)):
     hour_map = {int(r.hour): r.count for r in hourly_rows}
     calls_by_hour = [{"hour": h, "count": hour_map.get(h, 0)} for h in range(8, 19)]
 
-    # Service breakdown from summaries
+    # Service breakdown from summaries (keyword-based, generic)
     all_summaries_res = await db.execute(
-        select(Call.summary).where(Call.summary.isnot(None))
+        _filter(select(Call.summary).where(Call.summary.isnot(None)))
     )
     summaries = [r[0].lower() for r in all_summaries_res.all()]
-    service_counts = {"HVAC": 0, "Plumbing": 0, "Electrical": 0, "Other": 0}
+    service_counts: dict[str, int] = {}
     for s in summaries:
-        if "hvac" in s or "ac " in s or "heat" in s or "air condition" in s or "furnace" in s:
-            service_counts["HVAC"] += 1
-        elif "plumb" in s or "pipe" in s or "leak" in s or "drain" in s or "water heater" in s:
-            service_counts["Plumbing"] += 1
-        elif "electric" in s or "outlet" in s or "breaker" in s or "wiring" in s:
-            service_counts["Electrical"] += 1
+        if any(kw in s for kw in ["hvac", "ac ", "heat", "air condition", "furnace", "cooling"]):
+            service_counts["HVAC"] = service_counts.get("HVAC", 0) + 1
+        elif any(kw in s for kw in ["plumb", "pipe", "leak", "drain", "water heater"]):
+            service_counts["Plumbing"] = service_counts.get("Plumbing", 0) + 1
+        elif any(kw in s for kw in ["electric", "outlet", "breaker", "wiring"]):
+            service_counts["Electrical"] = service_counts.get("Electrical", 0) + 1
+        elif any(kw in s for kw in ["dental", "teeth", "cavity", "cleaning", "appointment"]):
+            service_counts["Dental"] = service_counts.get("Dental", 0) + 1
         else:
-            service_counts["Other"] += 1
+            service_counts["Other"] = service_counts.get("Other", 0) + 1
 
     # Unique callers
     unique_res = await db.execute(
-        select(func.count(func.distinct(Call.customer_id))).select_from(Call)
+        _filter(select(func.count(func.distinct(Call.customer_id))).select_from(Call))
     )
     unique_callers = unique_res.scalar() or 0
 

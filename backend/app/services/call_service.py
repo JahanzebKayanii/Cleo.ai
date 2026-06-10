@@ -20,11 +20,12 @@ def _get_anthropic() -> AsyncAnthropic:
 
 
 async def start_call(
-    db: AsyncSession, twilio_sid: str, from_phone: str
+    db: AsyncSession, twilio_sid: str, from_phone: str, business_id: int = 1
 ) -> tuple[Call, int]:
     customer, _ = await get_or_create_customer(db, from_phone)
     call = Call(
         customer_id=customer.id,
+        business_id=business_id,
         twilio_call_sid=twilio_sid,
         status="in_progress",
     )
@@ -79,6 +80,9 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
         return
 
     name_hint = f" The customer's name is {call.customer.name}." if call.customer and call.customer.name else ""
+    from app.services.business_service import get_business
+    config = await get_business(db, call.business_id or 1)
+    biz_name = config.get("name", "the business")
     client = _get_anthropic()
     response = await client.messages.create(
         model="claude-sonnet-4-6",
@@ -87,7 +91,7 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
             {
                 "role": "user",
                 "content": (
-                    f"Summarise this Apex Home Services call in 2-3 sentences.{name_hint} "
+                    f"Summarise this {biz_name} call in 2-3 sentences.{name_hint} "
                     "Cover: what the customer wanted, what was resolved, and any follow-up needed.\n\n"
                     f"{call.transcript}"
                 ),
@@ -97,9 +101,7 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
     call.summary = response.content[0].text.strip()
 
     # Send email summary to business owner
-    from app.services.business_service import get_business
     from app.services.email_service import send_call_summary
-    config = await get_business(db)
     if config.get("owner_email"):
         asyncio.create_task(send_call_summary(
             to_email=config["owner_email"],

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cleo — Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #f5f5f9; color: #111; }
+    .sidebar { background: #fff; border-right: 1px solid #e8e8f0; }
+    .card { background: #fff; border: 1px solid #e8e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    input, select { background: #fff !important; border: 1px solid #e5e7eb !important; color: #111 !important; }
+    input:focus, select:focus { border-color: #10b981 !important; outline: none; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f5f5f9; } ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar w-56 flex-shrink-0 flex flex-col h-screen">
+    <div class="px-5 py-5 border-b border-[#e8e8f0]">
+      <div class="flex items-center gap-2.5">
+        <svg viewBox="0 0 80 80" width="28" height="28" fill="none"><rect width="80" height="80" rx="18" fill="#10b981"/><rect x="12" y="32" width="8" height="16" rx="4" fill="white" opacity="0.5"/><rect x="24" y="22" width="8" height="36" rx="4" fill="white" opacity="0.75"/><rect x="36" y="14" width="8" height="52" rx="4" fill="white"/><rect x="48" y="22" width="8" height="36" rx="4" fill="white" opacity="0.75"/><rect x="60" y="32" width="8" height="16" rx="4" fill="white" opacity="0.5"/></svg>
+        <span class="font-semibold text-[#111] text-sm">Cleo</span>
+      </div>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-0.5">
+      <a href="/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#666] hover:text-emerald-600 hover:bg-emerald-50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+      <a href="/dashboard/calls.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#666] hover:text-emerald-600 hover:bg-emerald-50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+        Calls
+      </a>
+      <a href="/dashboard/admin.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-emerald-600 bg-emerald-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Tenants
+      </a>
+      <a href="/dashboard/config.html" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#666] hover:text-emerald-600 hover:bg-emerald-50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        Config
+      </a>
+    </nav>
+    <div class="px-3 py-4 border-t border-[#e8e8f0]">
+      <div class="px-3 py-2">
+        <p class="text-xs text-[#444]">Admin</p>
+        <a href="/auth/logout" class="text-xs text-[#444] hover:text-red-400 transition">sign out</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <div class="px-8 py-8 max-w-5xl">
+
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-xl font-semibold text-[#111]">Tenants</h1>
+          <p class="text-sm text-[#555] mt-0.5">Manage all Cleo customers</p>
+        </div>
+        <button onclick="showCreateModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+          + New Tenant
+        </button>
+      </div>
+
+      <div id="toast" class="hidden fixed top-6 right-6 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-xl"></div>
+
+      <!-- Tenant list -->
+      <div id="tenant-list" class="space-y-3"></div>
+
+    </div>
+  </main>
+
+  <!-- Create / Edit Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="px-6 py-5 border-b border-[#e8e8f0] flex items-center justify-between">
+        <h2 id="modal-title" class="text-base font-semibold text-[#111]">New Tenant</h2>
+        <button onclick="closeModal()" class="text-[#888] hover:text-red-400 text-sm">✕</button>
+      </div>
+      <form id="modal-form" class="px-6 py-5 space-y-4">
+        <input type="hidden" id="edit-id" value="" />
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Business Name *</label>
+            <input id="f-name" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" required />
+          </div>
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Industry</label>
+            <select id="f-industry" class="w-full border rounded-lg px-3 py-2 text-sm">
+              <option value="hvac">HVAC</option>
+              <option value="plumbing">Plumbing</option>
+              <option value="electrical">Electrical</option>
+              <option value="dental">Dental</option>
+              <option value="medical">Medical</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-[#555] mb-1.5">Description <span class="text-[#aaa]">— used in Cleo's introduction</span></label>
+          <input id="f-description" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Twilio Phone Number *</label>
+            <input id="f-twilio" type="text" placeholder="+15551234567" class="w-full border rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Slug <span class="text-[#aaa]">— URL identifier</span></label>
+            <input id="f-slug" type="text" placeholder="apex-hvac" class="w-full border rounded-lg px-3 py-2 text-sm" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Dashboard Password</label>
+            <input id="f-password" type="text" placeholder="client sets this" class="w-full border rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Owner Email</label>
+            <input id="f-email" type="email" class="w-full border rounded-lg px-3 py-2 text-sm" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Transfer Phone</label>
+            <input id="f-transfer" type="text" placeholder="+15551234567" class="w-full border rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Timezone</label>
+            <select id="f-timezone" class="w-full border rounded-lg px-3 py-2 text-sm">
+              <option value="America/Chicago">Central (Chicago)</option>
+              <option value="America/New_York">Eastern (New York)</option>
+              <option value="America/Denver">Mountain (Denver)</option>
+              <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
+              <option value="America/Phoenix">Arizona (Phoenix)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Opens</label>
+            <select id="f-open" class="w-full border rounded-lg px-3 py-2 text-sm">
+              <option value="7">7:00 AM</option>
+              <option value="8" selected>8:00 AM</option>
+              <option value="9">9:00 AM</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-[#555] mb-1.5">Closes</label>
+            <select id="f-close" class="w-full border rounded-lg px-3 py-2 text-sm">
+              <option value="17">5:00 PM</option>
+              <option value="18" selected>6:00 PM</option>
+              <option value="19">7:00 PM</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-[#555] mb-1.5">Services <span class="text-[#aaa]">comma separated</span></label>
+          <input id="f-services" type="text" placeholder="HVAC, plumbing, electrical" class="w-full border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-[#555] mb-1.5">Service Area</label>
+          <input id="f-area" type="text" placeholder="Austin, TX and surrounding areas within 30 miles" class="w-full border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-[#555] mb-1.5">Google Calendar ID</label>
+          <input id="f-calendar" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeModal()" class="text-sm text-[#555] hover:text-[#111] px-4 py-2 rounded-lg transition">Cancel</button>
+          <button type="submit" id="modal-save-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-5 py-2 rounded-lg transition">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API = window.location.origin;
+    let tenants = [];
+
+    function toast(msg, ok = true) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `fixed top-6 right-6 z-50 px-4 py-3 rounded-lg text-sm font-medium shadow-xl ${ok ? 'bg-green-700 text-white' : 'bg-red-800 text-white'}`;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 3000);
+    }
+
+    async function load() {
+      const res = await fetch(`${API}/admin/tenants`);
+      if (res.status === 403) { window.location.href = '/dashboard/'; return; }
+      tenants = await res.json();
+      render();
+
+      // Show billing toast if redirected back from Stripe
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('billing') === 'success') toast('Subscription activated');
+      if (p.get('billing') === 'cancelled') toast('Checkout cancelled', false);
+    }
+
+    function render() {
+      const el = document.getElementById('tenant-list');
+      if (!tenants.length) {
+        el.innerHTML = '<p class="text-sm text-[#888]">No tenants yet. Click "New Tenant" to add one.</p>';
+        return;
+      }
+      el.innerHTML = tenants.map(t => `
+        <div class="card rounded-xl p-5 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0" style="background:#10b98122;color:#10b981">
+            ${(t.name || '?')[0].toUpperCase()}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-semibold text-[#111]">${t.name}</p>
+              <span class="text-xs px-2 py-0.5 rounded-full ${t.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">${t.is_active ? 'Active' : 'Inactive'}</span>
+              ${t.stripe_subscription_id ? '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Subscribed</span>' : ''}
+            </div>
+            <p class="text-xs text-[#666] mt-0.5">${t.twilio_phone_number || 'No phone set'} · ${t.industry} · ID ${t.id}</p>
+            ${t.owner_email ? `<p class="text-xs text-[#888]">${t.owner_email}</p>` : ''}
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="/dashboard/?bid=${t.id}" class="text-xs text-emerald-600 border border-emerald-200 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition">View</a>
+            <button onclick="editTenant(${t.id})" class="text-xs text-[#555] border border-[#e5e7eb] hover:bg-[#f9f9fb] px-3 py-1.5 rounded-lg transition">Edit</button>
+            ${!t.stripe_subscription_id ? `<button onclick="startBilling(${t.id})" class="text-xs text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition">Billing</button>` : `<button onclick="managePortal(${t.id})" class="text-xs text-blue-600 border border-blue-200 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition">Portal</button>`}
+            ${t.is_active
+              ? `<button onclick="toggleActive(${t.id}, false)" class="text-xs text-orange-500 border border-orange-200 hover:bg-orange-50 px-3 py-1.5 rounded-lg transition">Pause</button>`
+              : `<button onclick="toggleActive(${t.id}, true)" class="text-xs text-green-600 border border-green-200 hover:bg-green-50 px-3 py-1.5 rounded-lg transition">Activate</button>`}
+            ${t.id !== 1 ? `<button onclick="deleteTenant(${t.id})" class="text-xs text-red-400 hover:text-red-600 transition">Delete</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showCreateModal() {
+      document.getElementById('edit-id').value = '';
+      document.getElementById('modal-title').textContent = 'New Tenant';
+      document.getElementById('modal-form').reset();
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function editTenant(id) {
+      const t = tenants.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('edit-id').value = id;
+      document.getElementById('modal-title').textContent = 'Edit Tenant';
+      document.getElementById('f-name').value = t.name || '';
+      document.getElementById('f-industry').value = t.industry || 'hvac';
+      document.getElementById('f-description').value = t.description || '';
+      document.getElementById('f-twilio').value = t.twilio_phone_number || '';
+      document.getElementById('f-slug').value = t.slug || '';
+      document.getElementById('f-email').value = t.owner_email || '';
+      document.getElementById('f-transfer').value = t.transfer_phone || '';
+      document.getElementById('f-timezone').value = t.timezone || 'America/Chicago';
+      document.getElementById('f-open').value = t.hours_open ?? 8;
+      document.getElementById('f-close').value = t.hours_close ?? 18;
+      document.getElementById('f-services').value = (t.services || []).join(', ');
+      document.getElementById('f-area').value = t.service_area || '';
+      document.getElementById('f-calendar').value = t.google_calendar_id || '';
+      document.getElementById('f-password').value = '';
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    document.getElementById('modal-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('modal-save-btn');
+      btn.textContent = 'Saving...'; btn.disabled = true;
+
+      const editId = document.getElementById('edit-id').value;
+      const payload = {
+        name: document.getElementById('f-name').value,
+        industry: document.getElementById('f-industry').value,
+        description: document.getElementById('f-description').value,
+        twilio_phone_number: document.getElementById('f-twilio').value || null,
+        slug: document.getElementById('f-slug').value || null,
+        owner_email: document.getElementById('f-email').value || null,
+        transfer_phone: document.getElementById('f-transfer').value || null,
+        timezone: document.getElementById('f-timezone').value,
+        hours_open: +document.getElementById('f-open').value,
+        hours_close: +document.getElementById('f-close').value,
+        services: document.getElementById('f-services').value.split(',').map(s => s.trim()).filter(Boolean),
+        service_area: document.getElementById('f-area').value || null,
+        google_calendar_id: document.getElementById('f-calendar').value || null,
+      };
+      const pw = document.getElementById('f-password').value;
+      if (pw) payload.dashboard_password = pw;
+
+      const url = editId ? `${API}/admin/tenants/${editId}` : `${API}/admin/tenants`;
+      const method = editId ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (res.ok) {
+          toast(editId ? 'Tenant updated' : 'Tenant created');
+          closeModal();
+          await load();
+        } else {
+          const err = await res.json();
+          toast(err.detail || 'Error saving tenant', false);
+        }
+      } catch { toast('Network error', false); }
+
+      btn.textContent = 'Save'; btn.disabled = false;
+    });
+
+    async function deleteTenant(id) {
+      if (!confirm('Delete this tenant? This cannot be undone.')) return;
+      const res = await fetch(`${API}/admin/tenants/${id}`, { method: 'DELETE' });
+      if (res.ok) { toast('Tenant deleted'); load(); }
+      else toast('Failed to delete', false);
+    }
+
+    async function toggleActive(id, activate) {
+      const endpoint = activate ? 'activate' : 'deactivate';
+      const res = await fetch(`${API}/admin/tenants/${id}/${endpoint}`, { method: 'POST' });
+      if (res.ok) { toast(activate ? 'Tenant activated' : 'Tenant paused'); load(); }
+      else toast('Failed', false);
+    }
+
+    async function startBilling(id) {
+      const res = await fetch(`${API}/billing/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ business_id: id }),
+      });
+      if (res.ok) {
+        const { checkout_url } = await res.json();
+        window.location.href = checkout_url;
+      } else {
+        const err = await res.json();
+        toast(err.detail || 'Billing error', false);
+      }
+    }
+
+    async function managePortal(id) {
+      const res = await fetch(`${API}/billing/portal?business_id=${id}`);
+      if (res.ok) {
+        const { portal_url } = await res.json();
+        window.open(portal_url, '_blank');
+      } else toast('Portal unavailable', false);
+    }
+
+    load();
+  </script>
+</body>
+</html>

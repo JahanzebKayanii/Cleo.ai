@@ -204,7 +204,7 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str, config: dict
         return {"transfer": False, "message": "No transfer number configured. Please call back during business hours."}
 
     if name == "check_availability":
-        slots = await get_available_slots(inputs["date"])
+        slots = await get_available_slots(inputs["date"], config=config)
         if not slots:
             return {"available": False, "message": "No slots available on that date."}
         return {"available": True, "slots": slots}
@@ -218,6 +218,7 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str, config: dict
             customer_phone=caller_phone,
             notes=inputs.get("notes", ""),
             address=inputs.get("address", ""),
+            config=config,
         )
         if result.get("success") and caller_phone:
             from app.core.database import get_db_context
@@ -249,9 +250,11 @@ async def stream_response_parts(
     Handles Claude tool use transparently — calendar checks happen between
     the first and rest yields so the caller hears a quick reply immediately.
     """
-    context_chunks = await search_documents(user_message, limit=3)
+    collection = (config or {}).get("qdrant_collection") or None
+    context_chunks = await search_documents(user_message, limit=3, collection=collection)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)
-    augmented_message = f"Relevant Apex knowledge:\n{context}\n\nCaller said: {user_message}"
+    biz_name = (config or {}).get("name", "the business")
+    augmented_message = f"Relevant {biz_name} knowledge:\n{context}\n\nCaller said: {user_message}"
 
     history = _sessions.get(session_id, [])
     history_with_user = history + [{"role": "user", "content": augmented_message}]
@@ -383,9 +386,11 @@ async def stream_response_parts(
 async def get_response(
     session_id: str, user_message: str, caller_phone: str = "", caller_info: dict | None = None, config: dict | None = None
 ) -> str:
-    context_chunks = await search_documents(user_message, limit=3)
+    collection = (config or {}).get("qdrant_collection") or None
+    context_chunks = await search_documents(user_message, limit=3, collection=collection)
     context = "\n\n".join(chunk["text"] for chunk in context_chunks)
-    augmented_message = f"Relevant Apex knowledge:\n{context}\n\nCaller said: {user_message}"
+    biz_name = (config or {}).get("name", "the business")
+    augmented_message = f"Relevant {biz_name} knowledge:\n{context}\n\nCaller said: {user_message}"
 
     history = _sessions.get(session_id, [])
     history_with_user = history + [{"role": "user", "content": augmented_message}]

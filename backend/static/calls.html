@@ -110,6 +110,16 @@
   <script>
     const API = window.location.origin;
 
+    let _bid = null;
+    async function getBid() {
+      if (_bid !== null) return _bid;
+      const p = new URLSearchParams(window.location.search);
+      if (p.has('bid')) { _bid = +p.get('bid'); return _bid; }
+      const s = await fetch(`${API}/auth/session`).then(r => r.json()).catch(() => ({}));
+      _bid = s.business_id || 1;
+      return _bid;
+    }
+
     function timeAgo(d) {
       const diff = Math.floor((Date.now() - new Date(d)) / 1000);
       if (diff < 60) return `${diff}s ago`;
@@ -163,7 +173,8 @@
     }
 
     async function load() {
-      const calls = await fetch(`${API}/calls/`).then(r => r.json());
+      const bid = await getBid();
+      const calls = await fetch(`${API}/calls/?business_id=${bid}`).then(r => r.json());
       const tbody = document.getElementById('calls-table');
       if (!calls.length) {
         tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-[#444]">No calls yet</td></tr>`;

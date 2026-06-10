@@ -8,6 +8,7 @@ from twilio.rest import Client as TwilioClient
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_transfer_map, pending_first, pending_rest
+from app.services.business_service import get_business, get_business_by_phone
 from app.services.call_service import end_call, start_call
 from app.services.conversation_service import _is_business_hours, clear_session
 from app.services.customer_service import get_caller_context
@@ -66,20 +67,26 @@ def twiml_greet_stream(say_text: str) -> Response:
 async def incoming_call(
     CallSid: str = Form(...),
     From: str = Form(...),
+    To: str = Form(default=""),
     db: AsyncSession = Depends(get_db),
 ):
-    print(f"[CALL] Incoming call: {CallSid} from {From}", flush=True)
+    print(f"[CALL] Incoming call: {CallSid} from {From} to {To}", flush=True)
     call_phone_map[CallSid] = From
+
+    # Route to the right tenant by the Twilio number that was dialled
+    config = await get_business_by_phone(db, To) if To else None
+    if config is None:
+        config = await get_business(db, 1)  # fallback to default tenant
+    call_config[CallSid] = config
 
     ctx = await get_caller_context(db, From)
     call_caller_info[CallSid] = ctx
-    config = await get_business(db)
-    call_config[CallSid] = config
 
-    await start_call(db, CallSid, From)
+    business_id = config.get("id", 1)
+    await start_call(db, CallSid, From, business_id)
     asyncio.create_task(_start_recording(CallSid))
 
-    biz_name = config.get("name", "Apex Home Services")
+    biz_name = config.get("name", "us")
     if not _is_business_hours(config):
         greeting = f"Thank you for calling {biz_name}. Our office is currently closed, but I can take a message and have someone call you back next business day. What's your name and what do you need help with?"
     elif ctx.get("name"):

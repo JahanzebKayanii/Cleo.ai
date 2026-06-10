@@ -4,14 +4,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.document import Document
+from app.services.business_service import get_business
 from app.services.document_service import ingest_document, search_documents, delete_document_vectors
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 
 @router.get("/")
-async def list_documents(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Document).order_by(Document.created_at.desc()))
+async def list_documents(business_id: int = 1, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Document)
+        .where(Document.business_id == business_id)
+        .order_by(Document.created_at.desc())
+    )
     docs = result.scalars().all()
     return [
         {
@@ -26,11 +31,13 @@ async def list_documents(db: AsyncSession = Depends(get_db)):
 
 
 @router.delete("/{doc_id}")
-async def delete_document(doc_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_document(doc_id: int, business_id: int = 1, db: AsyncSession = Depends(get_db)):
     doc = await db.get(Document, doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-    await delete_document_vectors(doc_id)
+    config = await get_business(db, business_id)
+    collection = config.get("qdrant_collection")
+    await delete_document_vectors(doc_id, collection)
     await db.delete(doc)
     await db.commit()
     return {"ok": True}
@@ -39,6 +46,7 @@ async def delete_document(doc_id: int, db: AsyncSession = Depends(get_db)):
 @router.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
+    business_id: int = 1,
     db: AsyncSession = Depends(get_db),
 ):
     if not file.filename.endswith((".txt", ".md")):
@@ -53,11 +61,14 @@ async def upload_document(
     if not text.strip():
         raise HTTPException(status_code=400, detail="File is empty")
 
-    doc = Document(filename=file.filename, content=text, status="processing")
+    config = await get_business(db, business_id)
+    collection = config.get("qdrant_collection")
+
+    doc = Document(filename=file.filename, content=text, status="processing", business_id=business_id)
     db.add(doc)
     await db.flush()
 
-    chunk_count = await ingest_document(doc.id, file.filename, text)
+    chunk_count = await ingest_document(doc.id, file.filename, text, collection)
 
     doc.chunk_count = chunk_count
     doc.status = "ready"
@@ -66,8 +77,10 @@ async def upload_document(
 
 
 @router.get("/search")
-async def search(q: str, limit: int = 5):
+async def search(q: str, limit: int = 5, business_id: int = 1, db: AsyncSession = Depends(get_db)):
     if not q.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
-    results = await search_documents(q, limit)
+    config = await get_business(db, business_id)
+    collection = config.get("qdrant_collection")
+    results = await search_documents(q, limit, collection)
     return results

@@ -55,6 +55,23 @@ async def create_tables() -> None:
             "ALTER TABLE business ADD COLUMN IF NOT EXISTS service_area TEXT DEFAULT 'Austin, TX and surrounding areas within 30 miles'",
             "ALTER TABLE business ADD COLUMN IF NOT EXISTS owner_email VARCHAR(255)",
             "ALTER TABLE business ADD COLUMN IF NOT EXISTS transfer_phone VARCHAR(20)",
+            # Multi-tenant columns
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS twilio_phone_number VARCHAR(20)",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS slug VARCHAR(50)",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS dashboard_password VARCHAR(255)",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS industry VARCHAR(50) DEFAULT 'hvac'",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS qdrant_collection VARCHAR(100)",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS google_calendar_id TEXT",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS google_service_account_b64 TEXT",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(100)",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(100)",
+            # Scope calls and documents to a tenant
+            "ALTER TABLE calls ADD COLUMN IF NOT EXISTS business_id INTEGER REFERENCES business(id)",
+            "ALTER TABLE documents ADD COLUMN IF NOT EXISTS business_id INTEGER REFERENCES business(id) DEFAULT 1",
+            # Back-fill existing rows to tenant 1
+            "UPDATE calls SET business_id = 1 WHERE business_id IS NULL",
+            "UPDATE documents SET business_id = 1 WHERE business_id IS NULL",
         ]
         for sql in migrations:
             await conn.execute(text(sql))

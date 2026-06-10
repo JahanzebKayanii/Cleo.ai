@@ -9,19 +9,25 @@ from googleapiclient.discovery import build
 
 from app.core.config import settings
 
-TIMEZONE = ZoneInfo("America/Chicago")
-BUSINESS_START = 8
-BUSINESS_END = 18
 SLOT_HOURS = 2
-
 _SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 
-def _get_service():
-    json_str = base64.b64decode(settings.google_service_account_b64).decode()
+def _get_service(config: dict | None = None):
+    b64 = (config or {}).get("google_service_account_b64") or settings.google_service_account_b64
+    json_str = base64.b64decode(b64).decode()
     info = json.loads(json_str)
     creds = service_account.Credentials.from_service_account_info(info, scopes=_SCOPES)
     return build("calendar", "v3", credentials=creds)
+
+
+def _calendar_id(config: dict | None = None) -> str:
+    return (config or {}).get("google_calendar_id") or settings.google_calendar_id
+
+
+def _timezone(config: dict | None = None) -> ZoneInfo:
+    tz_str = (config or {}).get("timezone") or "America/Chicago"
+    return ZoneInfo(tz_str)
 
 
 def _fmt_time(dt: datetime) -> str:
@@ -35,17 +41,19 @@ def _slot_display(start: datetime, end: datetime) -> str:
     return f"{_fmt_time(start)} to {_fmt_time(end)}"
 
 
-async def get_todays_appointments() -> list[dict]:
-    today = datetime.now(TIMEZONE)
+async def get_todays_appointments(config: dict | None = None) -> list[dict]:
+    tz = _timezone(config)
+    cal_id = _calendar_id(config)
+    today = datetime.now(tz)
     time_min = today.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
     time_max = today.replace(hour=23, minute=59, second=59, microsecond=0).isoformat()
 
     def _list():
-        svc = _get_service()
+        svc = _get_service(config)
         return (
             svc.events()
             .list(
-                calendarId=settings.google_calendar_id,
+                calendarId=cal_id,
                 timeMin=time_min,
                 timeMax=time_max,
                 singleEvents=True,
@@ -73,8 +81,8 @@ async def get_todays_appointments() -> list[dict]:
         end_str = event.get("end", {}).get("dateTime", "")
         window = ""
         if start_str and end_str:
-            s = datetime.fromisoformat(start_str).astimezone(TIMEZONE)
-            e = datetime.fromisoformat(end_str).astimezone(TIMEZONE)
+            s = datetime.fromisoformat(start_str).astimezone(tz)
+            e = datetime.fromisoformat(end_str).astimezone(tz)
             window = _slot_display(s, e)
 
         appointments.append(
@@ -83,12 +91,17 @@ async def get_todays_appointments() -> list[dict]:
     return appointments
 
 
-async def get_available_slots(date_str: str) -> list[dict]:
-    date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=TIMEZONE)
+async def get_available_slots(date_str: str, config: dict | None = None) -> list[dict]:
+    tz = _timezone(config)
+    cal_id = _calendar_id(config)
+    open_h = (config or {}).get("hours_open", 8)
+    close_h = (config or {}).get("hours_close", 18)
+
+    date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=tz)
 
     all_slots = []
-    t = date.replace(hour=BUSINESS_START, minute=0, second=0, microsecond=0)
-    while t.hour + SLOT_HOURS <= BUSINESS_END:
+    t = date.replace(hour=open_h, minute=0, second=0, microsecond=0)
+    while t.hour + SLOT_HOURS <= close_h:
         end = t + timedelta(hours=SLOT_HOURS)
         all_slots.append((t, end))
         t = end
@@ -97,27 +110,23 @@ async def get_available_slots(date_str: str) -> list[dict]:
     time_max = date.replace(hour=23, minute=59, second=59, microsecond=0).isoformat()
 
     def _query():
-        svc = _get_service()
+        svc = _get_service(config)
         body = {
             "timeMin": time_min,
             "timeMax": time_max,
-            "items": [{"id": settings.google_calendar_id}],
-            "timeZone": "America/Chicago",
+            "items": [{"id": cal_id}],
+            "timeZone": str(tz),
         }
         return svc.freebusy().query(body=body).execute()
 
     result = await asyncio.to_thread(_query)
-    busy = (
-        result.get("calendars", {})
-        .get(settings.google_calendar_id, {})
-        .get("busy", [])
-    )
+    busy = result.get("calendars", {}).get(cal_id, {}).get("busy", [])
 
     available = []
     for slot_start, slot_end in all_slots:
         overlap = any(
-            slot_start < datetime.fromisoformat(b["end"]).astimezone(TIMEZONE)
-            and slot_end > datetime.fromisoformat(b["start"]).astimezone(TIMEZONE)
+            slot_start < datetime.fromisoformat(b["end"]).astimezone(tz)
+            and slot_end > datetime.fromisoformat(b["start"]).astimezone(tz)
             for b in busy
         )
         if not overlap:
@@ -139,24 +148,31 @@ async def book_appointment(
     customer_phone: str,
     notes: str = "",
     address: str = "",
+    config: dict | None = None,
 ) -> dict:
-    date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=TIMEZONE)
+    tz = _timezone(config)
+    cal_id = _calendar_id(config)
+    biz_name = (config or {}).get("name", "the business")
+
+    date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=tz)
     h, m = map(int, start_time_24h.split(":"))
     start = date.replace(hour=h, minute=m, second=0, microsecond=0)
     end = start + timedelta(hours=SLOT_HOURS)
 
     def _create():
-        svc = _get_service()
+        svc = _get_service(config)
         event = {
             "summary": f"{service} – {customer_name}",
-            "description": f"Phone: {customer_phone}\nService: {service}" + (f"\nAddress: {address}" if address else "") + (f"\nIssue: {notes}" if notes else ""),
+            "description": (
+                f"Phone: {customer_phone}\nService: {service}"
+                + (f"\nAddress: {address}" if address else "")
+                + (f"\nIssue: {notes}" if notes else "")
+            ),
             "location": address or "",
-            "start": {"dateTime": start.isoformat(), "timeZone": "America/Chicago"},
-            "end": {"dateTime": end.isoformat(), "timeZone": "America/Chicago"},
+            "start": {"dateTime": start.isoformat(), "timeZone": str(tz)},
+            "end": {"dateTime": end.isoformat(), "timeZone": str(tz)},
         }
-        return svc.events().insert(
-            calendarId=settings.google_calendar_id, body=event
-        ).execute()
+        return svc.events().insert(calendarId=cal_id, body=event).execute()
 
     await asyncio.to_thread(_create)
 
@@ -165,7 +181,7 @@ async def book_appointment(
 
     if customer_phone:
         from app.services.sms_service import send_confirmation_sms
-        await send_confirmation_sms(customer_phone, customer_name, date_display, window, service)
+        await send_confirmation_sms(customer_phone, customer_name, date_display, window, service, biz_name)
 
     return {
         "success": True,
