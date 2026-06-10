@@ -12,12 +12,10 @@ from app.api.analytics import router as analytics_router
 from app.api.auth import is_valid_session, router as auth_router
 from app.api.admin import router as admin_router
 from app.api.billing import router as billing_router
-from app.api.appointments import router as appointments_router
 from app.api.business import router as business_router
 from app.api.call import router as call_router
 from app.api.calls import router as calls_router
 from app.api.stream import router as stream_router
-from app.api.conversation import router as conversation_router
 from app.api.customers import router as customers_router
 from app.api.documents import router as documents_router
 from app.api.health import router as health_router
@@ -76,8 +74,6 @@ app.include_router(auth_router)
 app.include_router(analytics_router)
 app.include_router(business_router)
 app.include_router(documents_router)
-app.include_router(conversation_router)
-app.include_router(appointments_router)
 app.include_router(customers_router)
 app.include_router(call_router)
 app.include_router(calls_router)

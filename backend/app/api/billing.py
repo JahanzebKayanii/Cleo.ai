@@ -14,6 +14,8 @@ router = APIRouter(prefix="/billing", tags=["billing"])
 
 
 def _stripe():
+    if not settings.stripe_secret_key:
+        raise HTTPException(status_code=503, detail="Stripe not configured. Set STRIPE_SECRET_KEY in .env")
     try:
         import stripe
         stripe.api_key = settings.stripe_secret_key

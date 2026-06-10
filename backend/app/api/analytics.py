@@ -76,23 +76,16 @@ async def overview(business_id: int = 1, db: AsyncSession = Depends(get_db)):
     hour_map = {int(r.hour): r.count for r in hourly_rows}
     calls_by_hour = [{"hour": h, "count": hour_map.get(h, 0)} for h in range(8, 19)]
 
-    # Service breakdown from summaries (keyword-based, generic)
-    all_summaries_res = await db.execute(
-        _filter(select(Call.summary).where(Call.summary.isnot(None)))
+    # Service breakdown from call intent field
+    all_intents_res = await db.execute(
+        _filter(select(Call.intent).where(Call.intent.isnot(None)))
     )
-    summaries = [r[0].lower() for r in all_summaries_res.all()]
     service_counts: dict[str, int] = {}
-    for s in summaries:
-        if any(kw in s for kw in ["hvac", "ac ", "heat", "air condition", "furnace", "cooling"]):
-            service_counts["HVAC"] = service_counts.get("HVAC", 0) + 1
-        elif any(kw in s for kw in ["plumb", "pipe", "leak", "drain", "water heater"]):
-            service_counts["Plumbing"] = service_counts.get("Plumbing", 0) + 1
-        elif any(kw in s for kw in ["electric", "outlet", "breaker", "wiring"]):
-            service_counts["Electrical"] = service_counts.get("Electrical", 0) + 1
-        elif any(kw in s for kw in ["dental", "teeth", "cavity", "cleaning", "appointment"]):
-            service_counts["Dental"] = service_counts.get("Dental", 0) + 1
-        else:
-            service_counts["Other"] = service_counts.get("Other", 0) + 1
+    for (intent,) in all_intents_res.all():
+        key = (intent or "other").title()
+        service_counts[key] = service_counts.get(key, 0) + 1
+    if not service_counts:
+        service_counts = {"No data": 0}
 
     # Unique callers
     unique_res = await db.execute(

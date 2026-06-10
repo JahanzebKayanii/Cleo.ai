@@ -35,8 +35,6 @@ class Business(Base):
     jobber_refresh_token: Mapped[str | None] = mapped_column(Text)
     hubspot_token: Mapped[str | None] = mapped_column(Text)
     housecall_pro_api_key: Mapped[str | None] = mapped_column(Text)
-    quickbooks_token: Mapped[str | None] = mapped_column(Text)
-    servicetitan_token: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

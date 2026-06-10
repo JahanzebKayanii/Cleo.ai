@@ -90,10 +90,6 @@ async def push_to_integrations(
         from app.services.integrations import housecall_pro
         tasks.append(_safe_push("HousecallPro", housecall_pro.push(call_data, config["housecall_pro_api_key"])))
 
-    if config.get("quickbooks_token"):
-        from app.services.integrations import quickbooks
-        tasks.append(_safe_push("QuickBooks", quickbooks.push(call_data, config["quickbooks_token"])))
-
     if tasks:
         await asyncio.gather(*tasks)
         print(f"[Integrations] {len(tasks)} integration(s) pushed for {customer_phone}", flush=True)

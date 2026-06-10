@@ -62,7 +62,7 @@ async def test_push(payload: TestPushPayload, business_id: int = 1, db: AsyncSes
         summary=payload.summary,
         config=config,
     )
-    return {"ok": True, "pushed_to": [k for k in ["hubspot_token", "jobber_api_key", "housecall_pro_api_key", "quickbooks_token"] if config.get(k)]}
+    return {"ok": True, "pushed_to": [k for k in ["hubspot_token", "jobber_api_key", "housecall_pro_api_key"] if config.get(k)]}
 
 _twilio: TwilioClient | None = None
 

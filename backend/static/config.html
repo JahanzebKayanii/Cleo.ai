@@ -202,28 +202,6 @@
                 <button type="button" onclick="clearKey('housecall_pro_api_key')" class="text-xs text-[#444] hover:text-red-400 transition">clear</button>
               </div>
             </div>
-            <div class="flex items-center gap-4 p-4 bg-[#f9f9fb] rounded-lg border border-[#e8e8f0]">
-              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#0d948822;color:#0d9488">QB</div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#111]">QuickBooks <span id="quickbooks_token_status" class="hidden ml-2 text-xs text-green-500 font-normal">● connected</span></p>
-                <p class="text-xs text-[#444] mt-0.5">Accounting — auto-generate invoices after completed jobs</p>
-              </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <input id="quickbooks_token" type="password" placeholder="API key" class="w-40 border rounded-lg px-3 py-2 text-xs transition" />
-                <button type="button" onclick="clearKey('quickbooks_token')" class="text-xs text-[#444] hover:text-red-400 transition">clear</button>
-              </div>
-            </div>
-            <div class="flex items-center gap-4 p-4 bg-[#f9f9fb] rounded-lg border border-[#e8e8f0]">
-              <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#10b98122;color:#10b981">ST</div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#111]">ServiceTitan <span id="servicetitan_token_status" class="hidden ml-2 text-xs text-green-500 font-normal">● connected</span></p>
-                <p class="text-xs text-[#444] mt-0.5">Enterprise field service — requires partner access</p>
-              </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <input id="servicetitan_token" type="password" placeholder="API key" class="w-40 border rounded-lg px-3 py-2 text-xs transition" />
-                <button type="button" onclick="clearKey('servicetitan_token')" class="text-xs text-[#444] hover:text-red-400 transition">clear</button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -259,7 +237,7 @@
       setTimeout(() => t.classList.add('hidden'), 3000);
     }
 
-    const KEY_FIELDS = ['hubspot_token','housecall_pro_api_key','quickbooks_token','servicetitan_token'];
+    const KEY_FIELDS = ['hubspot_token','housecall_pro_api_key'];
 
 
     async function initTenantSwitcher() {

@@ -39,8 +39,6 @@ def _to_dict(b: Business, mask_keys: bool = True) -> dict:
         "jobber_refresh_token": "" if mask_keys else (b.jobber_refresh_token or ""),
         "hubspot_token": _mask(b.hubspot_token) if mask_keys else (b.hubspot_token or ""),
         "housecall_pro_api_key": _mask(b.housecall_pro_api_key) if mask_keys else (b.housecall_pro_api_key or ""),
-        "quickbooks_token": _mask(b.quickbooks_token) if mask_keys else (b.quickbooks_token or ""),
-        "servicetitan_token": _mask(b.servicetitan_token) if mask_keys else (b.servicetitan_token or ""),
     }
 
 
@@ -165,8 +163,7 @@ async def update_business(db: AsyncSession, data: dict, business_id: int = 1) ->
         business.is_active = bool(data["is_active"])
 
     # Only update integration keys if a non-empty value is provided
-    secret_fields = ["jobber_api_key", "hubspot_token", "housecall_pro_api_key",
-                     "quickbooks_token", "servicetitan_token", "google_service_account_b64"]
+    secret_fields = ["jobber_api_key", "hubspot_token", "housecall_pro_api_key", "google_service_account_b64"]
     for field in secret_fields:
         if data.get(field) and data[field] not in ("saved", "__clear__"):
             setattr(business, field, data[field])

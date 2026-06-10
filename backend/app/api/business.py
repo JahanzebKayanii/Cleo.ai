@@ -61,7 +61,7 @@ async def test_integrations(
             appointment_time=body.appointment_time,
         )
 
-    triggered = [k for k in ["hubspot_token", "jobber_api_key", "housecall_pro_api_key", "quickbooks_token", "servicetitan_token"] if config.get(k)]
+    triggered = [k for k in ["hubspot_token", "jobber_api_key", "housecall_pro_api_key"] if config.get(k)]
     if config.get("owner_email"):
         triggered.append("email")
     return {"status": "done", "integrations_triggered": triggered}
