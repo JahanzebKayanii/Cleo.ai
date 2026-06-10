@@ -69,6 +69,11 @@
   <main class="flex-1 overflow-y-auto">
     <div class="px-8 py-8 max-w-3xl">
 
+      <div id="tenant-switcher" class="hidden flex items-center gap-2 mb-6 p-3 bg-white border border-[#e8e8f0] rounded-xl">
+        <span class="text-xs text-[#888] font-medium">Viewing:</span>
+        <select id="tenant-select" onchange="switchTenant(this.value)" class="flex-1 text-sm border border-[#e5e7eb] rounded-lg px-3 py-1.5 bg-white text-[#111] focus:outline-none focus:border-emerald-500"></select>
+        <span class="text-xs text-emerald-600 font-medium">Admin</span>
+      </div>
       <div class="mb-8">
         <h1 class="text-xl font-semibold text-[#111]">Configuration</h1>
         <p class="text-sm text-[#555] mt-0.5">Manage business info and integration API keys</p>
@@ -242,6 +247,7 @@
       if (p.has('bid')) { _bid = +p.get('bid'); return _bid; }
       const s = await fetch(`${API}/auth/session`).then(r => r.json()).catch(() => ({}));
       _bid = s.business_id || 1;
+      await initTenantSwitcher();
       return _bid;
     }
 
@@ -254,6 +260,32 @@
     }
 
     const KEY_FIELDS = ['hubspot_token','housecall_pro_api_key','quickbooks_token','servicetitan_token'];
+
+
+    async function initTenantSwitcher() {
+      const s = await fetch(API + '/auth/session').then(r => r.json()).catch(() => ({}));
+      if (s.role !== 'admin') return;
+      const tenants = await fetch(API + '/admin/tenants').then(r => r.json()).catch(() => []);
+      if (tenants.length < 2) return;
+      const p = new URLSearchParams(window.location.search);
+      const currentBid = p.has('bid') ? +p.get('bid') : (_bid || 1);
+      const select = document.getElementById('tenant-select');
+      tenants.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.name + (t.is_active ? '' : ' (paused)');
+        opt.selected = t.id === currentBid;
+        select.appendChild(opt);
+      });
+      document.getElementById('tenant-switcher').classList.remove('hidden');
+      document.getElementById('tenant-switcher').classList.add('flex');
+    }
+
+    function switchTenant(bid) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('bid', bid);
+      window.location.href = url.toString();
+    }
 
     async function load() {
       const bid = await getBid();
