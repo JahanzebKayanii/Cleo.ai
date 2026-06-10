@@ -29,6 +29,7 @@ async def ensure_collection() -> None:
 
 
 async def ensure_tenant_collection(collection_name: str) -> None:
+    from qdrant_client.models import PayloadSchemaType
     client = get_qdrant()
     exists = await client.collection_exists(collection_name)
     if not exists:
@@ -36,3 +37,12 @@ async def ensure_tenant_collection(collection_name: str) -> None:
             collection_name=collection_name,
             vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )
+    # Ensure payload index exists (safe to call even if already indexed)
+    try:
+        await client.create_payload_index(
+            collection_name=collection_name,
+            field_name="document_id",
+            field_schema=PayloadSchemaType.INTEGER,
+        )
+    except Exception:
+        pass
