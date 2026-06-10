@@ -86,15 +86,15 @@ async def ingest_document(document_id: int, filename: str, text: str, collection
     return len(chunks)
 
 
-async def delete_document_vectors(document_id: int, collection: str | None = None) -> None:
-    from qdrant_client.models import Filter, FieldCondition, MatchValue
+async def delete_document_vectors(document_id: int, collection: str | None = None, chunk_count: int = 500) -> None:
+    from qdrant_client.models import PointIdsList
     collection = collection or settings.qdrant_collection
     qdrant = get_qdrant()
+    # Point IDs are stored as document_id * 10_000 + chunk_index
+    point_ids = list(range(document_id * 10_000, document_id * 10_000 + chunk_count))
     await qdrant.delete(
         collection_name=collection,
-        points_selector=Filter(
-            must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))]
-        ),
+        points_selector=PointIdsList(points=point_ids),
     )
 
 

@@ -37,7 +37,7 @@ async def delete_document(doc_id: int, business_id: int = 1, db: AsyncSession = 
         raise HTTPException(status_code=404, detail="Document not found")
     config = await get_business(db, business_id)
     collection = config.get("qdrant_collection")
-    await delete_document_vectors(doc_id, collection)
+    await delete_document_vectors(doc_id, collection, chunk_count=doc.chunk_count or 500)
     await db.delete(doc)
     await db.commit()
     return {"ok": True}
