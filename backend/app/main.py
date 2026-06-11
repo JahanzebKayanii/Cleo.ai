@@ -79,7 +79,13 @@ async def dashboard_auth(request: Request, call_next):
         token = request.cookies.get("cleo_session")
         if not is_valid_session(token):
             return RedirectResponse("/dashboard/login.html")
-    return await call_next(request)
+    response = await call_next(request)
+    # Prevent the browser from caching HTML so deployed UI updates are picked up immediately
+    if path.startswith("/dashboard/") and (path.endswith(".html") or path.endswith("/")):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
 
 
 app.include_router(health_router, tags=["health"])
