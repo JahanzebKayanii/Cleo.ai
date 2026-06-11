@@ -120,15 +120,17 @@
     const API = window.location.origin;
 
     let _bid = null;
+    let _sessionRole = null;
     async function getBid() {
       if (_bid !== null) return _bid;
-      const p = new URLSearchParams(window.location.search);
-      if (p.has('bid')) { _bid = +p.get('bid'); return _bid; }
       const sr = await fetch(`${API}/auth/session`);
       if (sr.status === 401) { window.location.href = '/dashboard/login.html'; return 1; }
       const s = await sr.json().catch(() => ({}));
       if (!s.authenticated) { window.location.href = '/dashboard/login.html'; return 1; }
-      _bid = s.business_id || 1;
+      _sessionRole = s.role;
+      // URL ?bid= overrides session business_id (only meaningful for admins; tenants get 403 from API anyway)
+      const p = new URLSearchParams(window.location.search);
+      _bid = p.has('bid') ? +p.get('bid') : (s.business_id || 1);
       // Reveal admin link + carry bid through all sidebar nav links
       if (s.role === 'admin') {
         const al = document.getElementById('admin-link');
