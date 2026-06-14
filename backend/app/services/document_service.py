@@ -7,8 +7,8 @@ from qdrant_client.models import PointStruct
 from app.core.config import settings
 from app.core.qdrant import get_qdrant
 
-CHUNK_SIZE = 500
-CHUNK_OVERLAP_WORDS = 5
+CHUNK_SIZE = 1200
+CHUNK_OVERLAP_WORDS = 15
 
 _voyage_client: voyageai.Client | None = None
 
@@ -120,4 +120,5 @@ async def search_documents(query: str, limit: int = 5, collection: str | None = 
             "score": round(hit.score, 4),
         }
         for hit in hits
+        if hit.score >= 0.7
     ]
