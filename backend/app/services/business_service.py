@@ -52,6 +52,7 @@ def _to_dict(b: Business, mask_keys: bool = True) -> dict:
         "jobber_refresh_token": "" if mask_keys else (b.jobber_refresh_token or ""),
         "hubspot_token": _mask(b.hubspot_token) if mask_keys else (b.hubspot_token or ""),
         "housecall_pro_api_key": _mask(b.housecall_pro_api_key) if mask_keys else (b.housecall_pro_api_key or ""),
+        "custom_instructions": b.custom_instructions or "",
     }
 
 
@@ -152,6 +153,7 @@ async def create_business(db: AsyncSession, data: dict) -> dict:
         dashboard_password=data.get("dashboard_password") or None,
         industry=data.get("industry", "hvac"),
         google_calendar_id=data.get("google_calendar_id") or None,
+        custom_instructions=data.get("custom_instructions") or None,
         is_active=True,
     )
     db.add(business)
@@ -172,7 +174,7 @@ async def update_business(db: AsyncSession, data: dict, business_id: int = 1) ->
 
     str_fields = ["name", "description", "timezone", "service_area", "owner_email",
                   "transfer_phone", "twilio_phone_number", "slug", "dashboard_password",
-                  "industry", "google_calendar_id"]
+                  "industry", "google_calendar_id", "custom_instructions"]
     for field in str_fields:
         if field in data:
             setattr(business, field, data[field] or None if field not in ("name", "timezone") else data[field])

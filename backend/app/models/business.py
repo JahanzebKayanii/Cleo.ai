@@ -30,6 +30,7 @@ class Business(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     stripe_customer_id: Mapped[str | None] = mapped_column(String(100))
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(100))
+    custom_instructions: Mapped[str | None] = mapped_column(Text)
     # Integration API keys / OAuth tokens
     jobber_api_key: Mapped[str | None] = mapped_column(Text)
     jobber_refresh_token: Mapped[str | None] = mapped_column(Text)

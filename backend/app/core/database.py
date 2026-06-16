@@ -80,6 +80,7 @@ async def create_tables() -> None:
             # Add the composite unique constraint (safe to run repeatedly)
             "ALTER TABLE customers DROP CONSTRAINT IF EXISTS uq_customer_business_phone",
             "ALTER TABLE customers ADD CONSTRAINT uq_customer_business_phone UNIQUE (business_id, phone)",
+            "ALTER TABLE business ADD COLUMN IF NOT EXISTS custom_instructions TEXT",
         ]
         for sql in migrations:
             await conn.execute(text(sql))

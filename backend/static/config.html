@@ -136,6 +136,13 @@
           </div>
         </div>
 
+        <!-- Custom Instructions -->
+        <div class="card rounded-xl p-6">
+          <h2 class="text-sm font-semibold text-[#111] mb-1">Custom Instructions</h2>
+          <p class="text-xs text-[#444] mb-4">Tell Cleo anything specific about this business — rules, policies, things to always say or never say. These get injected directly into Cleo's prompt on every call.</p>
+          <textarea id="custom_instructions" rows="5" placeholder="e.g. Always mention our 10% senior discount. Never promise same-day service for full replacements. For emergency tarping, quote $299 flat fee." class="w-full border border-[#e5e7eb] rounded-lg px-3 py-2.5 text-sm text-[#111] bg-white resize-y focus:outline-none focus:border-emerald-500" style="min-height:100px"></textarea>
+        </div>
+
         <!-- Hours -->
         <div class="card rounded-xl p-6">
           <h2 class="text-sm font-semibold text-[#111] mb-5">Business Hours <span class="text-[#888] font-normal">— Monday to Friday</span></h2>
@@ -296,6 +303,7 @@
       document.getElementById('transfer_phone').value = c.transfer_phone || '';
       document.getElementById('service_area').value = c.service_area || '';
       document.getElementById('twilio_phone_number').value = c.twilio_phone_number || '';
+      document.getElementById('custom_instructions').value = c.custom_instructions || '';
       if (c.name) document.getElementById('sidebar-biz').textContent = c.name;
 
       // Jobber OAuth state
@@ -339,6 +347,7 @@
         transfer_phone: document.getElementById('transfer_phone').value,
         service_area: document.getElementById('service_area').value,
         twilio_phone_number: document.getElementById('twilio_phone_number').value || null,
+        custom_instructions: document.getElementById('custom_instructions').value || null,
       };
       const pw = document.getElementById('dashboard_password').value;
       if (pw) payload.dashboard_password = pw;

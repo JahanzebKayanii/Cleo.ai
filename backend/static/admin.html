@@ -174,6 +174,10 @@
           <label class="block text-xs text-[#555] mb-1.5">Google Calendar ID</label>
           <input id="f-calendar" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" />
         </div>
+        <div>
+          <label class="block text-xs text-[#555] mb-1.5">Custom Instructions <span class="text-[#aaa]">— injected into Cleo's prompt on every call</span></label>
+          <textarea id="f-custom-instructions" rows="4" placeholder="e.g. Always mention the 10% senior discount. Never promise same-day service." class="w-full border border-[#e5e7eb] rounded-lg px-3 py-2 text-sm resize-y"></textarea>
+        </div>
         <div class="flex justify-end gap-3 pt-2">
           <button type="button" onclick="closeModal()" class="text-sm text-[#555] hover:text-[#111] px-4 py-2 rounded-lg transition">Cancel</button>
           <button type="submit" id="modal-save-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-5 py-2 rounded-lg transition">Save</button>
@@ -265,6 +269,7 @@
       document.getElementById('f-services').value = (t.services || []).join(', ');
       document.getElementById('f-area').value = t.service_area || '';
       document.getElementById('f-calendar').value = t.google_calendar_id || '';
+      document.getElementById('f-custom-instructions').value = t.custom_instructions || '';
       document.getElementById('f-password').value = '';
       document.getElementById('modal').classList.remove('hidden');
     }
@@ -293,6 +298,7 @@
         services: document.getElementById('f-services').value.split(',').map(s => s.trim()).filter(Boolean),
         service_area: document.getElementById('f-area').value || null,
         google_calendar_id: document.getElementById('f-calendar').value || null,
+        custom_instructions: document.getElementById('f-custom-instructions').value || null,
       };
       const pw = document.getElementById('f-password').value;
       if (pw) payload.dashboard_password = pw;

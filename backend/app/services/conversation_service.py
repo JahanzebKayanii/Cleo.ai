@@ -120,6 +120,9 @@ def _system_prompt(caller_info: dict | None = None, config: dict | None = None) 
         template = _SYSTEM_PROMPT_TEMPLATE.replace("{biz_name_placeholder}", "Apex Home Services")
 
     prompt = template.format(today=today, current_time=current_time, service_area=service_area)
+    custom_instructions = (config or {}).get("custom_instructions", "")
+    if custom_instructions:
+        prompt += f"\n\nAdditional instructions for this business:\n{custom_instructions}"
     if caller_info and caller_info.get("name"):
         name = caller_info["name"]
         summaries = caller_info.get("summaries", [])
