@@ -376,33 +376,27 @@ export default function Home() {
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section style={{
         margin: "0 12px 12px", borderRadius: 24,
-        background: "#0d0f14", padding: "96px 48px",
+        background: "#f0ede6", padding: "96px 48px",
         textAlign: "center", position: "relative", overflow: "hidden",
       }}>
-        <div style={{
-          position: "absolute", top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 600, height: 600, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }} />
+        <div className="grain-overlay" style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.5 }} />
         <div style={{ position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto" }}>
           <span style={{
             display: "inline-block", fontSize: 11, fontWeight: 700,
             letterSpacing: "0.12em", textTransform: "uppercase",
-            color: "#10b981", marginBottom: 20,
+            color: "#059669", marginBottom: 20,
           }}>
             Get started
           </span>
           <h2 style={{
             fontSize: "clamp(34px, 4vw, 54px)", fontWeight: 700,
             letterSpacing: "-0.04em", lineHeight: 1.05,
-            color: "white", margin: "0 0 20px",
+            color: "#111", margin: "0 0 20px",
           }}>
             Stop missing calls.<br />Start booking more jobs.
           </h2>
           <p style={{
-            fontSize: 17, color: "rgba(255,255,255,0.55)",
+            fontSize: 17, color: "#666",
             lineHeight: 1.65, marginBottom: 36,
           }}>
             See Cleo handle a real call in a 15-minute live walkthrough. No slides, no pitch decks — just the product.
@@ -410,13 +404,13 @@ export default function Home() {
           <a href="/demo" style={{
             display: "inline-flex", alignItems: "center",
             padding: "16px 36px", borderRadius: 999,
-            background: "#10b981", color: "white",
+            background: "#111", color: "white",
             fontWeight: 700, fontSize: 16,
             letterSpacing: "-0.02em", textDecoration: "none",
           }}>
             Request a Demo →
           </a>
-          <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.3)", marginTop: 16 }}>
+          <p style={{ fontSize: 12.5, color: "rgba(0,0,0,0.35)", marginTop: 16 }}>
             No setup fee · No contract · Response within a few hours
           </p>
         </div>
@@ -425,19 +419,17 @@ export default function Home() {
       {/* ── FOOTER ───────────────────────────────────────────── */}
       <footer style={{
         margin: "0 12px 12px", borderRadius: 24,
-        background: "#f0ede6", padding: "44px 48px",
-        position: "relative", overflow: "hidden",
+        background: "#111", padding: "44px 48px",
       }}>
-        <div className="grain-overlay" style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.5 }} />
         <div className="r-footer" style={{
-          maxWidth: 960, margin: "0 auto", position: "relative", zIndex: 1,
+          maxWidth: 960, margin: "0 auto",
           display: "flex", alignItems: "center", justifyContent: "space-between",
           flexWrap: "wrap", gap: 20,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <CleoLogo />
             <div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: "#111", letterSpacing: "-0.03em" }}>CleoVoice</div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: "white", letterSpacing: "-0.03em" }}>CleoVoice</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: 24 }}>
@@ -446,10 +438,10 @@ export default function Home() {
               { label: "Pricing",      href: "#pricing" },
               { label: "Request a Demo", href: "/demo" },
             ].map((link) => (
-              <a key={link.label} href={link.href} className="footer-link-cream">{link.label}</a>
+              <a key={link.label} href={link.href} className="footer-link">{link.label}</a>
             ))}
           </div>
-          <div style={{ fontSize: 12, color: "rgba(0,0,0,0.35)", letterSpacing: "-0.01em" }}>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", letterSpacing: "-0.01em" }}>
             © 2026 CleoVoice. All rights reserved.
           </div>
         </div>

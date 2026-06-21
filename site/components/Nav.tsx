@@ -74,14 +74,6 @@ export default function Nav() {
           >
             About
           </Link>
-          <a
-            href={`${p}#how`}
-            style={navLinkStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#555")}
-          >
-            How it works
-          </a>
           <Link
             href="/integrations"
             style={{
