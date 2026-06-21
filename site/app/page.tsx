@@ -5,7 +5,6 @@ import VerticalSwitcher from "@/components/VerticalSwitcher";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import HeroBackground from "@/components/HeroBackground";
-import HowItWorks from "@/components/HowItWorks";
 import WhyCleo from "@/components/WhyCleo";
 
 function CleoLogo() {
@@ -286,11 +285,6 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </Reveal>
-
-      {/* ── HOW IT WORKS ─────────────────────────────────────── */}
-      <Reveal>
-        <HowItWorks />
       </Reveal>
 
       {/* ── VERTICAL SWITCHER ───────────────────────────────── */}
