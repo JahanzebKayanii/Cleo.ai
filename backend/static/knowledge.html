@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHJ4PSIxMCIgZmlsbD0iIzBkMGYxNCIgLz4KICA8cmVjdCB4PSIxMSIgeT0iMTQiIHdpZHRoPSI0LjUiIGhlaWdodD0iMTIiIHJ4PSIyLjI1IiBmaWxsPSIjMTBiOTgxIiAvPgogIDxyZWN0IHg9IjE3Ljc1IiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjIyIiByeD0iMi4yNSIgZmlsbD0iIzEwYjk4MSIgLz4KICA8cmVjdCB4PSIyNC41IiB5PSIxNCIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIxMiIgcng9IjIuMjUiIGZpbGw9IiMxMGI5ODEiIC8+Cjwvc3ZnPgo=" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cleo — Knowledge Base</title>
+  <title>Cleo â€” Knowledge Base</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -200,7 +200,7 @@
       const docs = await res.json();
       const el = document.getElementById('docs-list');
       if (!docs.length) {
-        el.innerHTML = `<div class="px-6 py-10 text-center text-[#888] text-sm">No documents yet — upload one above</div>`;
+        el.innerHTML = `<div class="px-6 py-10 text-center text-[#888] text-sm">No documents yet â€” upload one above</div>`;
         return;
       }
       el.innerHTML = docs.map(d => `
@@ -210,7 +210,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-[#111] truncate">${d.filename}</p>
-            <p class="text-xs text-[#888] mt-0.5">${d.chunk_count} chunks · ${timeAgo(d.created_at)}</p>
+            <p class="text-xs text-[#888] mt-0.5">${d.chunk_count} chunks Â· ${timeAgo(d.created_at)}</p>
           </div>
           <span class="text-xs px-2 py-0.5 rounded font-medium ${d.status === 'ready' ? 'text-emerald-700 bg-emerald-100' : 'text-yellow-700 bg-yellow-100'}">${d.status}</span>
           <button onclick="deleteDoc(${d.id}, '${d.filename}')" class="text-xs text-[#aaa] hover:text-red-500 transition ml-2">Delete</button>
@@ -251,7 +251,7 @@
           const data = await res.json();
           bar.style.width = '100%';
           label.textContent = 'Done';
-          toast(`Uploaded — ${data.chunks} chunks indexed`);
+          toast(`Uploaded â€” ${data.chunks} chunks indexed`);
           setTimeout(() => { progress.classList.add('hidden'); bar.style.width = '0%'; }, 1000);
           loadDocs();
         } else {

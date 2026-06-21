@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHJ4PSIxMCIgZmlsbD0iIzBkMGYxNCIgLz4KICA8cmVjdCB4PSIxMSIgeT0iMTQiIHdpZHRoPSI0LjUiIGhlaWdodD0iMTIiIHJ4PSIyLjI1IiBmaWxsPSIjMTBiOTgxIiAvPgogIDxyZWN0IHg9IjE3Ljc1IiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjIyIiByeD0iMi4yNSIgZmlsbD0iIzEwYjk4MSIgLz4KICA8cmVjdCB4PSIyNC41IiB5PSIxNCIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIxMiIgcng9IjIuMjUiIGZpbGw9IiMxMGI5ODEiIC8+Cjwvc3ZnPgo=" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cleo — Calls</title>
+  <title>Cleo â€” Calls</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -86,7 +86,7 @@
           </div>
           <div class="flex items-center gap-3">
             <button id="tp-push-btn" onclick="pushIntegrations()" class="text-xs text-emerald-600 border border-emerald-200 hover:bg-emerald-50 px-3 py-1 rounded-lg transition">Push to integrations</button>
-            <button onclick="closePanel()" class="text-[#888] hover:text-red-500 text-xs transition">✕ Close</button>
+            <button onclick="closePanel()" class="text-[#888] hover:text-red-500 text-xs transition">âœ• Close</button>
           </div>
         </div>
         <div id="tp-summary" class="text-sm text-[#444] mb-4 p-4 bg-[#f5f5f9] rounded-lg border border-[#e8e8f0]"></div>
@@ -172,7 +172,7 @@
       btn.textContent = 'Pushing...';
       btn.disabled = true;
       const res = await fetch(`${API}/calls/${currentCallId}/push-integrations`, { method: 'POST' });
-      btn.textContent = res.ok ? 'Done ✓' : 'Failed ✗';
+      btn.textContent = res.ok ? 'Done âœ“' : 'Failed âœ—';
       btn.disabled = false;
     }
 
@@ -181,7 +181,7 @@
       const res = await fetch(`${API}/calls/${id}`);
       const c = await res.json();
       document.getElementById('tp-name').textContent = c.customer_name || c.phone || 'Unknown';
-      document.getElementById('tp-meta').textContent = `#${id} · ${c.phone || ''} · ${timeAgo(c.started_at)}`;
+      document.getElementById('tp-meta').textContent = `#${id} Â· ${c.phone || ''} Â· ${timeAgo(c.started_at)}`;
       document.getElementById('tp-push-btn').textContent = 'Push to integrations';
       document.getElementById('tp-push-btn').disabled = false;
       document.getElementById('tp-summary').textContent = c.summary || 'No summary yet.';
@@ -241,11 +241,11 @@
       }
       tbody.innerHTML = calls.map(c => `
         <tr class="table-row border-t border-[#e8e8f0] cursor-pointer" onclick="openCall(${c.id})">
-          <td class="px-6 py-3.5 text-[#111] font-medium">${c.customer_name || '—'}</td>
-          <td class="px-6 py-3.5 text-[#666] font-mono text-xs">${c.customer_phone || '—'}</td>
+          <td class="px-6 py-3.5 text-[#111] font-medium">${c.customer_name || 'â€”'}</td>
+          <td class="px-6 py-3.5 text-[#666] font-mono text-xs">${c.customer_phone || 'â€”'}</td>
           <td class="px-6 py-3.5">${badge(c.status)}</td>
           <td class="px-6 py-3.5 text-[#555] text-xs">${timeAgo(c.started_at)}</td>
-          <td class="px-6 py-3.5 text-[#555] text-xs max-w-xs truncate">${c.summary || '—'}</td>
+          <td class="px-6 py-3.5 text-[#555] text-xs max-w-xs truncate">${c.summary || 'â€”'}</td>
         </tr>`).join('');
     }
 

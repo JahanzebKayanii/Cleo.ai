@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHJ4PSIxMCIgZmlsbD0iIzBkMGYxNCIgLz4KICA8cmVjdCB4PSIxMSIgeT0iMTQiIHdpZHRoPSI0LjUiIGhlaWdodD0iMTIiIHJ4PSIyLjI1IiBmaWxsPSIjMTBiOTgxIiAvPgogIDxyZWN0IHg9IjE3Ljc1IiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjIyIiByeD0iMi4yNSIgZmlsbD0iIzEwYjk4MSIgLz4KICA8cmVjdCB4PSIyNC41IiB5PSIxNCIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIxMiIgcng9IjIuMjUiIGZpbGw9IiMxMGI5ODEiIC8+Cjwvc3ZnPgo=" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cleo — Admin</title>
+  <title>Cleo â€” Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -84,7 +84,7 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div class="px-6 py-5 border-b border-[#e8e8f0] flex items-center justify-between">
         <h2 id="modal-title" class="text-base font-semibold text-[#111]">New Tenant</h2>
-        <button onclick="closeModal()" class="text-[#888] hover:text-red-400 text-sm">✕</button>
+        <button onclick="closeModal()" class="text-[#888] hover:text-red-400 text-sm">âœ•</button>
       </div>
       <form id="modal-form" class="px-6 py-5 space-y-4">
         <input type="hidden" id="edit-id" value="" />
@@ -106,7 +106,7 @@
           </div>
         </div>
         <div>
-          <label class="block text-xs text-[#555] mb-1.5">Description <span class="text-[#aaa]">— used in Cleo's introduction</span></label>
+          <label class="block text-xs text-[#555] mb-1.5">Description <span class="text-[#aaa]">â€” used in Cleo's introduction</span></label>
           <input id="f-description" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" />
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -115,7 +115,7 @@
             <input id="f-twilio" type="text" placeholder="+15551234567" class="w-full border rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label class="block text-xs text-[#555] mb-1.5">Slug <span class="text-[#aaa]">— URL identifier</span></label>
+            <label class="block text-xs text-[#555] mb-1.5">Slug <span class="text-[#aaa]">â€” URL identifier</span></label>
             <input id="f-slug" type="text" placeholder="apex-hvac" class="w-full border rounded-lg px-3 py-2 text-sm" />
           </div>
         </div>
@@ -176,7 +176,7 @@
           <input id="f-calendar" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="block text-xs text-[#555] mb-1.5">Custom Instructions <span class="text-[#aaa]">— injected into Cleo's prompt on every call</span></label>
+          <label class="block text-xs text-[#555] mb-1.5">Custom Instructions <span class="text-[#aaa]">â€” injected into Cleo's prompt on every call</span></label>
           <textarea id="f-custom-instructions" rows="4" placeholder="e.g. Always mention the 10% senior discount. Never promise same-day service." class="w-full border border-[#e5e7eb] rounded-lg px-3 py-2 text-sm resize-y"></textarea>
         </div>
         <div class="flex justify-end gap-3 pt-2">
@@ -229,7 +229,7 @@
               <span class="text-xs px-2 py-0.5 rounded-full ${t.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">${t.is_active ? 'Active' : 'Inactive'}</span>
               ${t.stripe_subscription_id ? '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Subscribed</span>' : ''}
             </div>
-            <p class="text-xs text-[#666] mt-0.5">${t.twilio_phone_number || 'No phone set'} · ${t.industry} · ID ${t.id}</p>
+            <p class="text-xs text-[#666] mt-0.5">${t.twilio_phone_number || 'No phone set'} Â· ${t.industry} Â· ID ${t.id}</p>
             ${t.owner_email ? `<p class="text-xs text-[#888]">${t.owner_email}</p>` : ''}
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">

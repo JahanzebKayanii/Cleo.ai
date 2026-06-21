@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHJ4PSIxMCIgZmlsbD0iIzBkMGYxNCIgLz4KICA8cmVjdCB4PSIxMSIgeT0iMTQiIHdpZHRoPSI0LjUiIGhlaWdodD0iMTIiIHJ4PSIyLjI1IiBmaWxsPSIjMTBiOTgxIiAvPgogIDxyZWN0IHg9IjE3Ljc1IiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjIyIiByeD0iMi4yNSIgZmlsbD0iIzEwYjk4MSIgLz4KICA8cmVjdCB4PSIyNC41IiB5PSIxNCIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIxMiIgcng9IjIuMjUiIGZpbGw9IiMxMGI5ODEiIC8+Cjwvc3ZnPgo=" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cleo — Config</title>
+  <title>Cleo â€” Config</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -93,29 +93,29 @@
               <input id="name" type="text" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
             <div>
-              <label class="block text-xs text-[#555] mb-1.5">Description <span class="text-[#aaa]">— used in Cleo's introduction</span></label>
+              <label class="block text-xs text-[#555] mb-1.5">Description <span class="text-[#aaa]">â€” used in Cleo's introduction</span></label>
               <input id="description" type="text" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
             <div>
-              <label class="block text-xs text-[#555] mb-1.5">Owner Email <span class="text-[#aaa]">— receives call summary after every call</span></label>
+              <label class="block text-xs text-[#555] mb-1.5">Owner Email <span class="text-[#aaa]">â€” receives call summary after every call</span></label>
               <input id="owner_email" type="email" placeholder="you@example.com" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
             <div>
-              <label class="block text-xs text-[#555] mb-1.5">Transfer Phone <span class="text-[#aaa]">— Cleo dials this when caller asks for a human</span></label>
+              <label class="block text-xs text-[#555] mb-1.5">Transfer Phone <span class="text-[#aaa]">â€” Cleo dials this when caller asks for a human</span></label>
               <input id="transfer_phone" type="text" placeholder="+15551234567" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs text-[#555] mb-1.5">Twilio Number <span class="text-[#aaa]">— calls to this number route here</span></label>
+                <label class="block text-xs text-[#555] mb-1.5">Twilio Number <span class="text-[#aaa]">â€” calls to this number route here</span></label>
                 <input id="twilio_phone_number" type="text" placeholder="+15559876543" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
               </div>
               <div>
-                <label class="block text-xs text-[#555] mb-1.5">Dashboard Password <span class="text-[#aaa]">— leave blank to keep existing</span></label>
+                <label class="block text-xs text-[#555] mb-1.5">Dashboard Password <span class="text-[#aaa]">â€” leave blank to keep existing</span></label>
                 <input id="dashboard_password" type="password" placeholder="new password" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
               </div>
             </div>
             <div>
-              <label class="block text-xs text-[#555] mb-1.5">Service Area <span class="text-[#aaa]">— Cleo will decline bookings outside this area</span></label>
+              <label class="block text-xs text-[#555] mb-1.5">Service Area <span class="text-[#aaa]">â€” Cleo will decline bookings outside this area</span></label>
               <input id="service_area" type="text" placeholder="Austin, TX and surrounding areas within 30 miles" class="w-full border rounded-lg px-3 py-2.5 text-sm transition" />
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -140,13 +140,13 @@
         <!-- Custom Instructions -->
         <div class="card rounded-xl p-6">
           <h2 class="text-sm font-semibold text-[#111] mb-1">Custom Instructions</h2>
-          <p class="text-xs text-[#444] mb-4">Tell Cleo anything specific about this business — rules, policies, things to always say or never say. These get injected directly into Cleo's prompt on every call.</p>
+          <p class="text-xs text-[#444] mb-4">Tell Cleo anything specific about this business â€” rules, policies, things to always say or never say. These get injected directly into Cleo's prompt on every call.</p>
           <textarea id="custom_instructions" rows="5" placeholder="e.g. Always mention our 10% senior discount. Never promise same-day service for full replacements. For emergency tarping, quote $299 flat fee." class="w-full border border-[#e5e7eb] rounded-lg px-3 py-2.5 text-sm text-[#111] bg-white resize-y focus:outline-none focus:border-emerald-500" style="min-height:100px"></textarea>
         </div>
 
         <!-- Hours -->
         <div class="card rounded-xl p-6">
-          <h2 class="text-sm font-semibold text-[#111] mb-5">Business Hours <span class="text-[#888] font-normal">— Monday to Friday</span></h2>
+          <h2 class="text-sm font-semibold text-[#111] mb-5">Business Hours <span class="text-[#888] font-normal">â€” Monday to Friday</span></h2>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs text-[#555] mb-1.5">Opens</label>
@@ -175,8 +175,8 @@
             <div class="flex items-center gap-4 p-4 bg-[#f9f9fb] rounded-lg border border-[#e8e8f0]">
               <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#16a34a22;color:#16a34a">J</div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#111]">Jobber <span id="jobber_connected_badge" class="hidden ml-2 text-xs text-green-500 font-normal">● connected</span></p>
-                <p class="text-xs text-[#444] mt-0.5">Field service management — auto-create clients &amp; requests after calls</p>
+                <p class="text-sm font-medium text-[#111]">Jobber <span id="jobber_connected_badge" class="hidden ml-2 text-xs text-green-500 font-normal">â— connected</span></p>
+                <p class="text-xs text-[#444] mt-0.5">Field service management â€” auto-create clients &amp; requests after calls</p>
               </div>
               <div id="jobber_disconnected" class="flex-shrink-0">
                 <a href="/auth/jobber/connect" class="text-xs bg-[#16a34a] text-white px-3 py-1.5 rounded-lg hover:bg-[#15803d] transition">Connect Jobber</a>
@@ -191,8 +191,8 @@
             <div class="flex items-center gap-4 p-4 bg-[#f9f9fb] rounded-lg border border-[#e8e8f0]">
               <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#ea580c22;color:#ea580c">HS</div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#111]">HubSpot <span id="hubspot_token_status" class="hidden ml-2 text-xs text-green-500 font-normal">● connected</span></p>
-                <p class="text-xs text-[#444] mt-0.5">CRM — auto-create contacts and deals after each call</p>
+                <p class="text-sm font-medium text-[#111]">HubSpot <span id="hubspot_token_status" class="hidden ml-2 text-xs text-green-500 font-normal">â— connected</span></p>
+                <p class="text-xs text-[#444] mt-0.5">CRM â€” auto-create contacts and deals after each call</p>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0">
                 <input id="hubspot_token" type="password" placeholder="API key" class="w-40 border rounded-lg px-3 py-2 text-xs transition" />
@@ -202,8 +202,8 @@
             <div class="flex items-center gap-4 p-4 bg-[#f9f9fb] rounded-lg border border-[#e8e8f0]">
               <div class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:#2563eb22;color:#2563eb">HP</div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#111]">Housecall Pro <span id="housecall_pro_api_key_status" class="hidden ml-2 text-xs text-green-500 font-normal">● connected</span></p>
-                <p class="text-xs text-[#444] mt-0.5">Field service management — alternative to Jobber</p>
+                <p class="text-sm font-medium text-[#111]">Housecall Pro <span id="housecall_pro_api_key_status" class="hidden ml-2 text-xs text-green-500 font-normal">â— connected</span></p>
+                <p class="text-xs text-[#444] mt-0.5">Field service management â€” alternative to Jobber</p>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0">
                 <input id="housecall_pro_api_key" type="password" placeholder="API key" class="w-40 border rounded-lg px-3 py-2 text-xs transition" />
@@ -323,7 +323,7 @@
         const input = document.getElementById(field);
         const indicator = document.getElementById(field + '_status');
         if (c[field]) {
-          input.placeholder = '••••••••  (saved)';
+          input.placeholder = 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢  (saved)';
           if (indicator) indicator.classList.remove('hidden');
         } else {
           input.placeholder = 'API key';
@@ -385,7 +385,7 @@
     // Show toast if redirected back from Jobber OAuth
     const params = new URLSearchParams(window.location.search);
     if (params.get('jobber') === 'connected') toast('Jobber connected successfully');
-    if (params.get('jobber') === 'error') toast('Jobber connection failed — check your app settings', false);
+    if (params.get('jobber') === 'error') toast('Jobber connection failed â€” check your app settings', false);
   </script>
 </body>
 </html>
