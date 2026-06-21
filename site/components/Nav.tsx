@@ -102,6 +102,18 @@ export default function Nav() {
           >
             Pricing
           </a>
+          <Link
+            href="/demo"
+            style={{
+              ...navLinkStyle,
+              color: pathname === "/demo" ? "#10b981" : "#555",
+              fontWeight: pathname === "/demo" ? 700 : 600,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = pathname === "/demo" ? "#10b981" : "#555")}
+          >
+            Demo
+          </Link>
           <a
             href="https://api.cleovoice.com/dashboard/"
             target="_blank"
