@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.analytics import router as analytics_router
@@ -101,5 +101,10 @@ app.include_router(admin_router)
 app.include_router(billing_router)
 
 _static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+
+@app.get("/favicon.svg", include_in_schema=False)
+async def favicon():
+    return FileResponse(os.path.join(_static_dir, "favicon.svg"), media_type="image/svg+xml")
+
 if os.path.isdir(_static_dir):
     app.mount("/dashboard", StaticFiles(directory=_static_dir, html=True), name="dashboard")
