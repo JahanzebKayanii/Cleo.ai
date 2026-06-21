@@ -103,6 +103,20 @@ export default function Nav() {
             Pricing
           </a>
           <a
+            href="https://api.cleovoice.com/dashboard/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              ...navLinkStyle,
+              color: "#555",
+              marginLeft: 4,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#555")}
+          >
+            Login
+          </a>
+          <a
             href={`${p}#demo`}
             style={{
               fontSize: 14,
