@@ -4,7 +4,7 @@
   <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHJ4PSIxMCIgZmlsbD0iIzBkMGYxNCIgLz4KICA8cmVjdCB4PSIxMSIgeT0iMTQiIHdpZHRoPSI0LjUiIGhlaWdodD0iMTIiIHJ4PSIyLjI1IiBmaWxsPSIjMTBiOTgxIiAvPgogIDxyZWN0IHg9IjE3Ljc1IiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjIyIiByeD0iMi4yNSIgZmlsbD0iIzEwYjk4MSIgLz4KICA8cmVjdCB4PSIyNC41IiB5PSIxNCIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIxMiIgcng9IjIuMjUiIGZpbGw9IiMxMGI5ODEiIC8+Cjwvc3ZnPgo=" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cleo â€” Config</title>
+  <title>Cleo — Config</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -18,6 +18,19 @@
     .nav-item { color: #888; transition: all 0.15s; }
     .nav-item:hover, .nav-item.active { color: #10b981; background: #ecfdf5; }
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f5f5f9; } ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+    @media (max-width: 768px) {
+      body { flex-direction: column !important; height: auto !important; overflow-y: auto !important; overflow-x: hidden !important; }
+      main { flex: none !important; overflow: visible !important; }
+      main > div { padding-left: 16px !important; padding-right: 16px !important; max-width: 100% !important; }
+      .sidebar { border-right: none !important; border-bottom: 1px solid #e8e8f0; }
+      aside { width: 100% !important; height: auto !important; flex-direction: column !important; }
+      aside nav { flex-direction: row !important; overflow-x: auto !important; padding: 8px !important; }
+      aside nav > * { margin-top: 0 !important; flex-shrink: 0 !important; white-space: nowrap !important; }
+      aside > div:last-child { display: none !important; }
+      .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .grid-cols-5 { grid-template-columns: 1fr !important; }
+      .col-span-3, .col-span-2 { grid-column: span 1 !important; }
+    }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden">
