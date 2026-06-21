@@ -4,7 +4,6 @@ import AudioDemoSection from "@/components/AudioDemoSection";
 import VerticalSwitcher from "@/components/VerticalSwitcher";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
-import DemoForm from "@/components/DemoForm";
 import HeroBackground from "@/components/HeroBackground";
 import HowItWorks from "@/components/HowItWorks";
 import WhyCleo from "@/components/WhyCleo";
@@ -68,7 +67,7 @@ export default function Home() {
           </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 32 }}>
-            <a href="#demo" style={{
+            <a href="/demo" style={{
               display: "inline-flex", alignItems: "center",
               padding: "14px 28px", borderRadius: 999,
               background: "#0a0a0a", color: "white",
@@ -380,8 +379,54 @@ export default function Home() {
       {/* ── FAQ ──────────────────────────────────────────────── */}
       <FAQSection />
 
-      {/* ── DEMO FORM ────────────────────────────────────────── */}
-      <DemoForm />
+      {/* ── CTA ──────────────────────────────────────────────── */}
+      <section style={{
+        margin: "0 12px 12px", borderRadius: 24,
+        background: "#0d0f14", padding: "96px 48px",
+        textAlign: "center", position: "relative", overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 600, height: 600, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto" }}>
+          <span style={{
+            display: "inline-block", fontSize: 11, fontWeight: 700,
+            letterSpacing: "0.12em", textTransform: "uppercase",
+            color: "#10b981", marginBottom: 20,
+          }}>
+            Get started
+          </span>
+          <h2 style={{
+            fontSize: "clamp(34px, 4vw, 54px)", fontWeight: 700,
+            letterSpacing: "-0.04em", lineHeight: 1.05,
+            color: "white", margin: "0 0 20px",
+          }}>
+            Stop missing calls.<br />Start booking more jobs.
+          </h2>
+          <p style={{
+            fontSize: 17, color: "rgba(255,255,255,0.55)",
+            lineHeight: 1.65, marginBottom: 36,
+          }}>
+            See Cleo handle a real call in a 15-minute live walkthrough. No slides, no pitch decks — just the product.
+          </p>
+          <a href="/demo" style={{
+            display: "inline-flex", alignItems: "center",
+            padding: "16px 36px", borderRadius: 999,
+            background: "#10b981", color: "white",
+            fontWeight: 700, fontSize: 16,
+            letterSpacing: "-0.02em", textDecoration: "none",
+          }}>
+            Request a Demo →
+          </a>
+          <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.3)", marginTop: 16 }}>
+            No setup fee · No contract · Response within a few hours
+          </p>
+        </div>
+      </section>
 
       {/* ── FOOTER ───────────────────────────────────────────── */}
       <footer style={{
@@ -403,7 +448,7 @@ export default function Home() {
             {[
               { label: "Integrations", href: "/integrations" },
               { label: "Pricing",      href: "#pricing" },
-              { label: "Get a Demo",   href: "#demo" },
+              { label: "Request a Demo", href: "/demo" },
             ].map((link) => (
               <a key={link.label} href={link.href} className="footer-link">{link.label}</a>
             ))}
