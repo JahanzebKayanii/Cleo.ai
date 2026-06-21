@@ -446,13 +446,7 @@ export default function Home() {
               { label: "Pricing",      href: "#pricing" },
               { label: "Request a Demo", href: "/demo" },
             ].map((link) => (
-              <a key={link.label} href={link.href} style={{
-                fontSize: 13, fontWeight: 600, color: "rgba(0,0,0,0.45)",
-                textDecoration: "none", letterSpacing: "-0.01em", transition: "color 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(0,0,0,0.45)")}
-              >{link.label}</a>
+              <a key={link.label} href={link.href} className="footer-link-cream">{link.label}</a>
             ))}
           </div>
           <div style={{ fontSize: 12, color: "rgba(0,0,0,0.35)", letterSpacing: "-0.01em" }}>
