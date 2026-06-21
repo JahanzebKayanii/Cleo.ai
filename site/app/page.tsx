@@ -431,17 +431,19 @@ export default function Home() {
       {/* ── FOOTER ───────────────────────────────────────────── */}
       <footer style={{
         margin: "0 12px 12px", borderRadius: 24,
-        background: "#111", padding: "44px 48px",
+        background: "#f0ede6", padding: "44px 48px",
+        position: "relative", overflow: "hidden",
       }}>
+        <div className="grain-overlay" style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.5 }} />
         <div className="r-footer" style={{
-          maxWidth: 960, margin: "0 auto",
+          maxWidth: 960, margin: "0 auto", position: "relative", zIndex: 1,
           display: "flex", alignItems: "center", justifyContent: "space-between",
           flexWrap: "wrap", gap: 20,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <CleoLogo />
             <div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: "white", letterSpacing: "-0.03em" }}>CleoVoice</div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: "#111", letterSpacing: "-0.03em" }}>CleoVoice</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: 24 }}>
@@ -450,10 +452,16 @@ export default function Home() {
               { label: "Pricing",      href: "#pricing" },
               { label: "Request a Demo", href: "/demo" },
             ].map((link) => (
-              <a key={link.label} href={link.href} className="footer-link">{link.label}</a>
+              <a key={link.label} href={link.href} style={{
+                fontSize: 13, fontWeight: 600, color: "rgba(0,0,0,0.45)",
+                textDecoration: "none", letterSpacing: "-0.01em", transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(0,0,0,0.45)")}
+              >{link.label}</a>
             ))}
           </div>
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", letterSpacing: "-0.01em" }}>
+          <div style={{ fontSize: 12, color: "rgba(0,0,0,0.35)", letterSpacing: "-0.01em" }}>
             © 2026 CleoVoice. All rights reserved.
           </div>
         </div>
