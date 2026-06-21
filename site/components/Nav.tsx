@@ -107,18 +107,6 @@ export default function Nav() {
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              ...navLinkStyle,
-              color: "#555",
-              marginLeft: 4,
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#555")}
-          >
-            Login
-          </a>
-          <a
-            href={`${p}#demo`}
-            style={{
               fontSize: 14,
               fontWeight: 700,
               color: "white",
@@ -139,7 +127,7 @@ export default function Nav() {
               e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            Request a Demo
+            Login
           </a>
         </div>
       </div>
