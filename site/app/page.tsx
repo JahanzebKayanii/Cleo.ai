@@ -374,7 +374,7 @@ export default function Home() {
       <FAQSection />
 
       {/* ── CTA ──────────────────────────────────────────────── */}
-      <section style={{
+      <section className="r-cta" style={{
         margin: "0 12px 12px", borderRadius: 24,
         background: "#f0ede6", padding: "96px 48px",
         textAlign: "center", position: "relative", overflow: "hidden",
@@ -417,7 +417,7 @@ export default function Home() {
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────────── */}
-      <footer style={{
+      <footer className="r-footer-section" style={{
         margin: "0 12px 12px", borderRadius: 24,
         background: "#111", padding: "44px 48px",
       }}>

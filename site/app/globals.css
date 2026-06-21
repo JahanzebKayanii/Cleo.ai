@@ -222,4 +222,22 @@ body {
     align-items: flex-start !important;
     gap: 20px !important;
   }
+
+  /* Hamburger button */
+  .r-hamburger { display: flex !important; align-items: center; justify-content: center; }
+
+  /* Mobile nav dropdown */
+  .r-mobile-menu { display: flex !important; }
+
+  /* CTA + footer section padding on mobile */
+  .r-cta {
+    padding: 60px 24px !important;
+    margin: 0 8px 8px !important;
+    border-radius: 20px !important;
+  }
+  .r-footer-section {
+    padding: 36px 24px !important;
+    margin: 0 8px 8px !important;
+    border-radius: 20px !important;
+  }
 }
