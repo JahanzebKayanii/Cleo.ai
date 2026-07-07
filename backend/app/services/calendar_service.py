@@ -140,6 +140,64 @@ async def get_available_slots(date_str: str, config: dict | None = None) -> list
     return available
 
 
+async def find_upcoming_appointments(caller_phone: str, config: dict | None = None) -> list[dict]:
+    tz = _timezone(config)
+    cal_id = _calendar_id(config)
+    now = datetime.now(tz)
+    time_min = now.isoformat()
+    time_max = (now + timedelta(days=60)).isoformat()
+
+    def _search():
+        svc = _get_service(config)
+        return (
+            svc.events()
+            .list(
+                calendarId=cal_id,
+                timeMin=time_min,
+                timeMax=time_max,
+                q=caller_phone,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
+
+    result = await asyncio.to_thread(_search)
+    appointments = []
+    for event in result.get("items", []):
+        if caller_phone not in event.get("description", ""):
+            continue
+        start_str = event.get("start", {}).get("dateTime", "")
+        end_str = event.get("end", {}).get("dateTime", "")
+        if not start_str:
+            continue
+        start_dt = datetime.fromisoformat(start_str).astimezone(tz)
+        end_dt = datetime.fromisoformat(end_str).astimezone(tz)
+        summary = event.get("summary", "")
+        service = summary.split("–", 1)[0].strip() if "–" in summary else summary
+        appointments.append({
+            "event_id": event["id"],
+            "date": start_dt.strftime("%A, %B %-d"),
+            "window": _slot_display(start_dt, end_dt),
+            "service": service,
+        })
+    return appointments
+
+
+async def cancel_appointment(event_id: str, config: dict | None = None) -> dict:
+    cal_id = _calendar_id(config)
+
+    def _delete():
+        svc = _get_service(config)
+        svc.events().delete(calendarId=cal_id, eventId=event_id).execute()
+
+    try:
+        await asyncio.to_thread(_delete)
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
 async def book_appointment(
     date_str: str,
     start_time_24h: str,

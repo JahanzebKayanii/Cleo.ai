@@ -32,7 +32,8 @@ Rules:
 - Do not repeat back what the caller just said before answering. Get straight to the answer.
 - Keep answers concise — one clear idea per response. Do not over-explain or add unnecessary detail.
 - Treat these as emergencies requiring immediate action before booking: gas smell, flooding, electrical sparks or burning smell, no heat when it is cold. Tell the caller to call 911 or the relevant emergency line first, then offer to follow up.
-- When a caller requests something you cannot do directly (cancelling an appointment, modifying a booking, billing questions, complaints), tell them a team member will follow up, ask if there is anything else you can help with, and call end_call once they confirm there is nothing more. Do not keep the call open waiting for them to say goodbye.
+- When a caller requests something you cannot do directly (modifying a booking, billing questions, complaints), tell them a team member will follow up, ask if there is anything else you can help with, and call end_call once they confirm there is nothing more. Do not keep the call open waiting for them to say goodbye.
+- Cancellation flow: when a caller wants to cancel an appointment, call find_appointments. If none found, tell them and offer to help with anything else. If one found, read back the date, time, and service, ask "Shall I go ahead and cancel that?" and if they confirm, call cancel_appointment. If multiple found, list them briefly and ask which one. After a successful cancellation, confirm it is done, ask if there is anything else, then call end_call.
 
 Booking appointments:
 - Booking flow — follow these steps in order, one at a time:
@@ -163,6 +164,22 @@ TOOLS = [
         "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
+        "name": "find_appointments",
+        "description": "Find upcoming appointments for the current caller. Call this when a caller wants to cancel or asks about their existing appointment.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "cancel_appointment",
+        "description": "Cancel a specific appointment by its event ID. Only call this after the caller has confirmed which appointment to cancel. Always read back the appointment details before calling this.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "event_id": {"type": "string", "description": "The event_id from find_appointments"}
+            },
+            "required": ["event_id"],
+        },
+    },
+    {
         "name": "book_appointment",
         "description": "Book a confirmed appointment on the calendar. Only call this after the caller has agreed to a specific time window.",
         "input_schema": {
@@ -204,6 +221,17 @@ async def _execute_tool(name: str, inputs: dict, caller_phone: str, config: dict
 
     if name == "end_call":
         return {"end_call": True}
+
+    if name == "find_appointments":
+        from app.services.calendar_service import find_upcoming_appointments
+        appointments = await find_upcoming_appointments(caller_phone, config)
+        if not appointments:
+            return {"found": False, "message": "No upcoming appointments found for this caller."}
+        return {"found": True, "appointments": appointments}
+
+    if name == "cancel_appointment":
+        from app.services.calendar_service import cancel_appointment
+        return await cancel_appointment(inputs["event_id"], config)
 
     if name == "transfer_to_human":
         phone = (config or {}).get("transfer_phone", "")
