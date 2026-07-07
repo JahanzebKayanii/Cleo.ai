@@ -186,6 +186,7 @@ async def continue_response(CallSid: str = Form(...)):
         call_hangup_set.discard(CallSid)
         pending_first.pop(CallSid, None)
         pending_rest.pop(CallSid, None)
+        pending_audio.pop(CallSid, None)
         body = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
@@ -200,6 +201,7 @@ async def continue_response(CallSid: str = Form(...)):
         transfer_phone = call_transfer_map.pop(CallSid)
         pending_first.pop(CallSid, None)
         pending_rest.pop(CallSid, None)
+        pending_audio.pop(CallSid, None)
         body = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
@@ -270,4 +272,7 @@ async def call_status(
     call_config.pop(CallSid, None)
     call_transfer_map.pop(CallSid, None)
     call_started_at.pop(CallSid, None)
+    pending_first.pop(CallSid, None)
+    pending_rest.pop(CallSid, None)
+    pending_audio.pop(CallSid, None)
     return Response(status_code=204)
