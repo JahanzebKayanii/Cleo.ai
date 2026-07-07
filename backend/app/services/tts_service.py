@@ -24,14 +24,14 @@ async def text_to_speech(text: str) -> str:
     }
     payload = {
         "text": text,
-        "model_id": "eleven_turbo_v2_5",
+        "model_id": "eleven_flash_v2_5",
         "voice_settings": {
             "stability": 0.45,
             "similarity_boost": 0.80,
             "style": 0.0,
             "use_speaker_boost": True,
         },
-        "output_format": "mp3_44100_128",
+        "output_format": "mp3_22050_32",
     }
 
     async with httpx.AsyncClient(timeout=15) as client:
