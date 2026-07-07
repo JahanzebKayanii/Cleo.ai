@@ -302,7 +302,7 @@ async def stream_response_parts(
     first_sentence = ""
 
     async with client.messages.stream(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         max_tokens=500,
         system=_system_prompt(caller_info, config),
         messages=history_with_user,
@@ -370,7 +370,7 @@ async def stream_response_parts(
         # Second streaming call — Claude sees the tool results and responds
         second_text = ""
         async with client.messages.stream(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             max_tokens=300,
             system=_system_prompt(caller_info, config),
             messages=msgs_with_tools,
@@ -434,7 +434,7 @@ async def get_response(
 
     client = _get_client()
     response = await client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         max_tokens=500,
         system=_system_prompt(caller_info, config),
         messages=history_with_user,
@@ -463,7 +463,7 @@ async def get_response(
             {"role": "user", "content": tool_results},
         ]
         response2 = await client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             max_tokens=300,
             system=_system_prompt(caller_info, config),
             messages=msgs_with_tools,

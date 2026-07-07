@@ -97,7 +97,7 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
     biz_name = config.get("name", "the business")
     client = _get_anthropic()
     response = await client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         max_tokens=150,
         messages=[
             {

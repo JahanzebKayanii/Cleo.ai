@@ -37,7 +37,7 @@ Return JSON with exactly these fields:
 }}"""
 
     response = await _get_client().messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         max_tokens=256,
         messages=[{"role": "user", "content": prompt}],
     )
