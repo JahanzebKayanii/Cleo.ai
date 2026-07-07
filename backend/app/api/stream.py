@@ -106,7 +106,7 @@ async def media_stream(websocket: WebSocket):
         encoding="mulaw",
         sample_rate=8000,
         channels=1,
-        endpointing=300,
+        endpointing=500,
         interim_results=True,
         smart_format=True,
         numerals=True,
@@ -167,5 +167,8 @@ async def media_stream(websocket: WebSocket):
     except Exception as e:
         print(f"[STREAM] ERROR in stream loop: {e}", flush=True)
     finally:
-        await dg.finish()
+        try:
+            await dg.finish()
+        except Exception:
+            pass
         print("[STREAM] Deepgram session closed", flush=True)
