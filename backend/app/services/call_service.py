@@ -19,6 +19,17 @@ def _get_anthropic() -> AsyncAnthropic:
     return _anthropic
 
 
+def _classify_intent(text: str) -> str:
+    t = text.lower()
+    if any(w in t for w in ["hvac", "ac", "air condition", "heat", "furnace", "thermostat", "duct", "cool", "warm"]):
+        return "hvac"
+    if any(w in t for w in ["plumb", "pipe", "leak", "drain", "toilet", "faucet", "water heater", "sewer"]):
+        return "plumbing"
+    if any(w in t for w in ["electric", "outlet", "breaker", "wiring", "panel", "light", "switch", "power"]):
+        return "electrical"
+    return "other"
+
+
 async def start_call(
     db: AsyncSession, twilio_sid: str, from_phone: str, business_id: int = 1
 ) -> tuple[Call, int]:
@@ -100,6 +111,7 @@ async def generate_and_save_summary(db: AsyncSession, twilio_sid: str) -> None:
         ],
     )
     call.summary = response.content[0].text.strip()
+    call.intent = _classify_intent(call.transcript)
 
     # Send email summary to business owner
     from app.services.email_service import send_call_summary
