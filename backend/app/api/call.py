@@ -7,11 +7,12 @@ from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_started_at, call_transfer_map, pending_first, pending_rest
+from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_started_at, call_transfer_map, pending_audio, pending_first, pending_rest
 from app.services.business_service import get_business, get_business_by_phone
 from app.services.call_service import end_call, start_call
 from app.services.conversation_service import _is_business_hours, clear_session
 from app.services.customer_service import get_caller_context
+from app.services.tts_service import text_to_speech
 
 router = APIRouter(prefix="/call", tags=["call"])
 
@@ -50,16 +51,28 @@ def _stream_url() -> str:
     return settings.base_url.replace("https://", "wss://") + "/call/stream"
 
 
-def twiml_greet_stream(say_text: str) -> Response:
-    safe = html.escape(say_text)
+async def twiml_greet_stream(say_text: str) -> Response:
     stream_url = _stream_url()
-    body = (
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        "<Response>"
-        f'<Say voice="alice">{safe}</Say>'
-        f'<Connect><Stream url="{stream_url}"/></Connect>'
-        "</Response>"
-    )
+    try:
+        filename = await text_to_speech(say_text)
+        audio_url = f"{settings.base_url}/audio/{filename}"
+        body = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            "<Response>"
+            f'<Play>{audio_url}</Play>'
+            f'<Connect><Stream url="{stream_url}"/></Connect>'
+            "</Response>"
+        )
+    except Exception as e:
+        print(f"[TTS] Greeting TTS failed, falling back to <Say>: {e}", flush=True)
+        safe = html.escape(say_text)
+        body = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            "<Response>"
+            f'<Say voice="alice">{safe}</Say>'
+            f'<Connect><Stream url="{stream_url}"/></Connect>'
+            "</Response>"
+        )
     return Response(content=body, media_type="application/xml")
 
 
@@ -105,40 +118,55 @@ async def pending_response(CallSid: str = Form(...)):
     stream_url = _stream_url()
     continue_url = settings.base_url + "/call/continue"
 
-    # Poll until first sentence is ready (max 8 seconds)
+    # Poll until first sentence AND its pre-generated audio are both ready (max 8 seconds)
     for _ in range(80):
         first = pending_first.get(CallSid)
         if first is not None:
-            rest = pending_rest.get(CallSid)
-            if rest is not None:
-                # Full response already done — say everything and reconnect stream
-                pending_first.pop(CallSid, None)
-                pending_rest.pop(CallSid, None)
-                full = (first + " " + rest).strip() if rest else first
-                safe = html.escape(full)
-                body = (
-                    '<?xml version="1.0" encoding="UTF-8"?>'
-                    "<Response>"
-                    f'<Say voice="alice">{safe}</Say>'
-                    f'<Connect><Stream url="{stream_url}"/></Connect>'
-                    "</Response>"
-                )
-            else:
-                # Rest still generating — say first sentence, then redirect to continue
-                safe = html.escape(first)
-                body = (
-                    '<?xml version="1.0" encoding="UTF-8"?>'
-                    "<Response>"
-                    f'<Say voice="alice">{safe}</Say>'
-                    f"<Redirect>{continue_url}</Redirect>"
-                    "</Response>"
-                )
-            return Response(content=body, media_type="application/xml")
+            audio_filename = pending_audio.get(CallSid)
+            if audio_filename is not None:  # not None means TTS attempt is done (success or fail)
+                rest = pending_rest.get(CallSid)
+
+                def _play_or_say(text: str, filename: str) -> str:
+                    if filename:
+                        return f'<Play>{settings.base_url}/audio/{filename}</Play>'
+                    return f'<Say voice="alice">{html.escape(text)}</Say>'
+
+                if rest is not None:
+                    # Full response ready — play first then rest (generate rest audio inline)
+                    pending_first.pop(CallSid, None)
+                    pending_rest.pop(CallSid, None)
+                    pending_audio.pop(CallSid, None)
+                    speech = _play_or_say(first, audio_filename)
+                    if rest:
+                        try:
+                            rest_filename = await text_to_speech(rest)
+                            speech += f'<Play>{settings.base_url}/audio/{rest_filename}</Play>'
+                        except Exception:
+                            speech += f'<Say voice="alice">{html.escape(rest)}</Say>'
+                    body = (
+                        '<?xml version="1.0" encoding="UTF-8"?>'
+                        "<Response>"
+                        f'{speech}'
+                        f'<Connect><Stream url="{stream_url}"/></Connect>'
+                        "</Response>"
+                    )
+                else:
+                    # Rest still generating — play first, redirect to continue
+                    speech = _play_or_say(first, audio_filename)
+                    body = (
+                        '<?xml version="1.0" encoding="UTF-8"?>'
+                        "<Response>"
+                        f'{speech}'
+                        f"<Redirect>{continue_url}</Redirect>"
+                        "</Response>"
+                    )
+                return Response(content=body, media_type="application/xml")
         await asyncio.sleep(0.1)
 
     # Timeout fallback
     pending_first.pop(CallSid, None)
     pending_rest.pop(CallSid, None)
+    pending_audio.pop(CallSid, None)
     body = (
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
@@ -187,12 +215,17 @@ async def continue_response(CallSid: str = Form(...)):
         if rest is not None:
             pending_first.pop(CallSid, None)
             pending_rest.pop(CallSid, None)
+            pending_audio.pop(CallSid, None)
             if rest:
-                safe = html.escape(rest)
+                try:
+                    rest_filename = await text_to_speech(rest)
+                    speech = f'<Play>{settings.base_url}/audio/{rest_filename}</Play>'
+                except Exception:
+                    speech = f'<Say voice="alice">{html.escape(rest)}</Say>'
                 body = (
                     '<?xml version="1.0" encoding="UTF-8"?>'
                     "<Response>"
-                    f'<Say voice="alice">{safe}</Say>'
+                    f'{speech}'
                     f'<Connect><Stream url="{stream_url}"/></Connect>'
                     "</Response>"
                 )

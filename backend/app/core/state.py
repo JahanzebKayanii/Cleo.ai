@@ -6,6 +6,7 @@ pending_responses: dict[str, str | None] = {}  # legacy, kept for safety
 # Streaming TTS state: set incrementally as Claude streams
 pending_first: dict[str, str | None] = {}  # first sentence, None = not yet ready
 pending_rest: dict[str, str | None] = {}   # remainder, None = still generating
+pending_audio: dict[str, str | None] = {}  # ElevenLabs filename, None = generating, "" = failed
 
 # Phone number lookup so the call handler can pass it to booking tools
 call_phone_map: dict[str, str] = {}  # call_sid -> caller E.164 phone number
@@ -34,6 +35,6 @@ def purge_stale_calls() -> None:
     stale = [sid for sid, ts in call_started_at.items() if now - ts > _MAX_CALL_AGE]
     for sid in stale:
         for d in (call_phone_map, call_caller_info, call_config, call_transfer_map,
-                  pending_first, pending_rest, call_started_at):
+                  pending_first, pending_rest, pending_audio, call_started_at):
             d.pop(sid, None)
         call_hangup_set.discard(sid)

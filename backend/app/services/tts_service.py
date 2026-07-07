@@ -1,4 +1,3 @@
-import asyncio
 import hashlib
 from pathlib import Path
 
@@ -11,6 +10,7 @@ AUDIO_DIR.mkdir(exist_ok=True)
 
 
 async def text_to_speech(text: str) -> str:
+    """Generate speech via ElevenLabs turbo. Returns cached MP3 filename."""
     filename = hashlib.md5(text.encode()).hexdigest() + ".mp3"
     filepath = AUDIO_DIR / filename
 
@@ -24,11 +24,17 @@ async def text_to_speech(text: str) -> str:
     }
     payload = {
         "text": text,
-        "model_id": "eleven_monolingual_v1",
-        "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
+        "model_id": "eleven_turbo_v2_5",
+        "voice_settings": {
+            "stability": 0.45,
+            "similarity_boost": 0.80,
+            "style": 0.0,
+            "use_speaker_boost": True,
+        },
+        "output_format": "mp3_44100_128",
     }
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=15) as client:
         response = await client.post(url, headers=headers, json=payload)
         response.raise_for_status()
         filepath.write_bytes(response.content)

@@ -10,7 +10,7 @@ from twilio.rest import Client as TwilioClient
 
 from app.core.config import settings
 from app.core.database import get_db_context
-from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_transfer_map, pending_first, pending_rest
+from app.core.state import call_caller_info, call_config, call_hangup_set, call_phone_map, call_transfer_map, pending_audio, pending_first, pending_rest
 from app.services.call_service import append_transcript
 from app.services.conversation_service import stream_response_parts
 
@@ -37,6 +37,17 @@ async def _update_twilio_call(call_sid: str, twiml: str) -> None:
     await asyncio.to_thread(client.calls(call_sid).update, twiml=twiml)
 
 
+async def _pregenerate_audio(call_sid: str, text: str) -> None:
+    try:
+        from app.services.tts_service import text_to_speech
+        filename = await text_to_speech(text)
+        pending_audio[call_sid] = filename
+        print(f"[TTS] Pre-generated audio for {call_sid}", flush=True)
+    except Exception as e:
+        pending_audio[call_sid] = ""  # empty = failed, call.py falls back to <Say>
+        print(f"[TTS] Pre-generation failed for {call_sid}: {e}", flush=True)
+
+
 async def _generate_and_store(call_sid: str, transcript: str) -> None:
     full_reply = ""
     phone = call_phone_map.get(call_sid, "")
@@ -56,6 +67,8 @@ async def _generate_and_store(call_sid: str, transcript: str) -> None:
         elif part == "first":
             pending_first[call_sid] = text
             full_reply = text
+            # Pre-generate ElevenLabs audio in parallel while Claude finishes the rest
+            asyncio.create_task(_pregenerate_audio(call_sid, text))
             print(f"[LLM] First sentence for {call_sid}: {text}", flush=True)
         elif part == "rest":
             pending_rest[call_sid] = text

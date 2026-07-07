@@ -106,5 +106,19 @@ _static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
 async def favicon():
     return FileResponse(os.path.join(_static_dir, "favicon.svg"), media_type="image/svg+xml")
 
+
+@app.get("/audio/{filename}", include_in_schema=False)
+async def serve_audio(filename: str):
+    import re
+    from fastapi import HTTPException
+    from pathlib import Path
+    if not re.match(r"^[a-f0-9]{32}\.mp3$", filename):
+        raise HTTPException(status_code=404)
+    filepath = Path("/tmp/cleo_audio") / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(str(filepath), media_type="audio/mpeg")
+
+
 if os.path.isdir(_static_dir):
     app.mount("/dashboard", StaticFiles(directory=_static_dir, html=True), name="dashboard")
