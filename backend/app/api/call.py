@@ -110,7 +110,7 @@ async def incoming_call(
     else:
         greeting = f"{biz_name}, this is Cleo, your virtual receptionist. How can I help you?"
 
-    return twiml_greet_stream(greeting)
+    return await twiml_greet_stream(greeting)
 
 
 @router.post("/response")
