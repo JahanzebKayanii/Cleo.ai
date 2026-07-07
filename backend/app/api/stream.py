@@ -106,7 +106,7 @@ async def media_stream(websocket: WebSocket):
         encoding="mulaw",
         sample_rate=8000,
         channels=1,
-        endpointing=500,
+        endpointing=300,
         interim_results=True,
         smart_format=True,
         numerals=True,

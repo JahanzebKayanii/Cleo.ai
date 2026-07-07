@@ -119,7 +119,7 @@ async def pending_response(CallSid: str = Form(...)):
     continue_url = settings.base_url + "/call/continue"
 
     # Poll until first sentence AND its pre-generated audio are both ready (max 8 seconds)
-    for _ in range(80):
+    for _ in range(400):
         first = pending_first.get(CallSid)
         if first is not None:
             audio_filename = pending_audio.get(CallSid)
@@ -161,7 +161,7 @@ async def pending_response(CallSid: str = Form(...)):
                         "</Response>"
                     )
                 return Response(content=body, media_type="application/xml")
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.02)
 
     # Timeout fallback
     pending_first.pop(CallSid, None)
@@ -212,7 +212,7 @@ async def continue_response(CallSid: str = Form(...)):
         return Response(content=body, media_type="application/xml")
 
     # Poll until rest of response is ready (max 6 seconds — should already be done)
-    for _ in range(60):
+    for _ in range(300):
         rest = pending_rest.get(CallSid)
         if rest is not None:
             pending_first.pop(CallSid, None)
@@ -240,7 +240,7 @@ async def continue_response(CallSid: str = Form(...)):
                     "</Response>"
                 )
             return Response(content=body, media_type="application/xml")
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.02)
 
     # Timeout fallback
     pending_first.pop(CallSid, None)
