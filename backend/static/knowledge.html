@@ -223,7 +223,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-[#111] truncate">${d.filename}</p>
-            <p class="text-xs text-[#888] mt-0.5">${d.chunk_count} chunks Â· ${timeAgo(d.created_at)}</p>
+            <p class="text-xs text-[#888] mt-0.5">${d.chunk_count} chunks · ${timeAgo(d.created_at)}</p>
           </div>
           <span class="text-xs px-2 py-0.5 rounded font-medium ${d.status === 'ready' ? 'text-emerald-700 bg-emerald-100' : 'text-yellow-700 bg-yellow-100'}">${d.status}</span>
           <button onclick="deleteDoc(${d.id}, '${d.filename}')" class="text-xs text-[#aaa] hover:text-red-500 transition ml-2">Delete</button>

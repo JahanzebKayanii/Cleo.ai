@@ -242,7 +242,7 @@
               <span class="text-xs px-2 py-0.5 rounded-full ${t.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">${t.is_active ? 'Active' : 'Inactive'}</span>
               ${t.stripe_subscription_id ? '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Subscribed</span>' : ''}
             </div>
-            <p class="text-xs text-[#666] mt-0.5">${t.twilio_phone_number || 'No phone set'} Â· ${t.industry} Â· ID ${t.id}</p>
+            <p class="text-xs text-[#666] mt-0.5">${t.twilio_phone_number || 'No phone set'} · ${t.industry} · ID ${t.id}</p>
             ${t.owner_email ? `<p class="text-xs text-[#888]">${t.owner_email}</p>` : ''}
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">

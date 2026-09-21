@@ -194,7 +194,7 @@
       const res = await fetch(`${API}/calls/${id}`);
       const c = await res.json();
       document.getElementById('tp-name').textContent = c.customer_name || c.phone || 'Unknown';
-      document.getElementById('tp-meta').textContent = `#${id} Â· ${c.phone || ''} Â· ${timeAgo(c.started_at)}`;
+      document.getElementById('tp-meta').textContent = `#${id} · ${c.phone || ''} · ${timeAgo(c.started_at)}`;
       document.getElementById('tp-push-btn').textContent = 'Push to integrations';
       document.getElementById('tp-push-btn').disabled = false;
       document.getElementById('tp-summary').textContent = c.summary || 'No summary yet.';

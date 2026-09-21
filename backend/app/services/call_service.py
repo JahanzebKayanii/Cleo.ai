@@ -67,6 +67,11 @@ async def end_call(db: AsyncSession, twilio_sid: str) -> None:
         return
     call.status = "completed"
     call.ended_at = datetime.now(timezone.utc)
+    if call.started_at:
+        started_at = call.started_at
+        if started_at.tzinfo is None:
+            started_at = started_at.replace(tzinfo=timezone.utc)
+        call.duration_seconds = int((call.ended_at - started_at).total_seconds())
 
 
 async def get_call_for_integrations(db: AsyncSession, twilio_sid: str) -> dict | None:

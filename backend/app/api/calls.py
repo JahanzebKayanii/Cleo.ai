@@ -95,6 +95,7 @@ async def list_calls(request: Request, business_id: int = 1, db: AsyncSession = 
             "summary": c.summary,
             "started_at": c.started_at,
             "ended_at": c.ended_at,
+            "duration_seconds": c.duration_seconds,
         }
         for c in calls
     ]
@@ -115,6 +116,7 @@ async def get_call(call_id: int, request: Request, db: AsyncSession = Depends(ge
         "transcript": call.transcript,
         "started_at": call.started_at,
         "ended_at": call.ended_at,
+        "duration_seconds": call.duration_seconds,
     }
 
 
