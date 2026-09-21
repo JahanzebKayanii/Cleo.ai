@@ -120,5 +120,5 @@ async def search_documents(query: str, limit: int = 5, collection: str | None = 
             "score": round(hit.score, 4),
         }
         for hit in hits
-        if hit.score >= 0.7
+        if hit.score >= 0.5
     ]
